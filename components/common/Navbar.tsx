@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { currentUser, navLinks } from "@/data/mockProperties";
+import { currentUser, navLinks } from "@/data/mockData";
 
 interface NavbarProps {
   activeTab?: string;
@@ -41,11 +41,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={link.label}
                   onClick={() => onTabChange?.(link.label)}
-                  className={`${
-                    isActive
+                  className={`${isActive
                       ? "text-mosque font-medium text-sm border-b-2 border-mosque px-1 py-1"
                       : "text-nordic-dark/70 hover:text-nordic-dark font-medium text-sm hover:border-b-2 hover:border-nordic-dark/20 px-1 py-1 transition-all"
-                  }`}
+                    }`}
                 >
                   {link.label}
                 </button>
@@ -100,9 +99,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Menu Dropdown */}
       <div
-        className={`md:hidden border-t border-nordic-dark/5 bg-background-light overflow-hidden transition-all duration-300 ${
-          mobileMenuOpen ? "max-h-64 py-2" : "max-h-0 py-0"
-        }`}
+        className={`md:hidden border-t border-nordic-dark/5 bg-background-light overflow-hidden transition-all duration-300 ${mobileMenuOpen ? "max-h-64 py-2" : "max-h-0 py-0"
+          }`}
       >
         <div className="px-4 space-y-1">
           {navLinks.map((link) => {
@@ -114,11 +112,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onTabChange?.(link.label);
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full text-left block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive
+                className={`w-full text-left block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive
                     ? "text-mosque bg-mosque/10"
                     : "text-nordic-dark hover:bg-black/5"
-                }`}
+                  }`}
               >
                 {link.label}
               </button>

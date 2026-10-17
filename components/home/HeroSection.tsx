@@ -2,7 +2,7 @@
 
 import React from "react";
 import { PropertyCategory } from "@/types/property";
-import { categoryFilters } from "@/data/mockProperties";
+import { categoryFilters } from "@/data/mockData";
 
 interface HeroSectionProps {
   searchQuery: string;
@@ -73,11 +73,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 key={category}
                 type="button"
                 onClick={() => onSelectCategory(category)}
-                className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                  isSelected
+                className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-all ${isSelected
                     ? "bg-nordic-dark text-white shadow-lg shadow-nordic-dark/10 -translate-y-0.5"
                     : "bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 hover:bg-mosque/5"
-                }`}
+                  }`}
               >
                 {category}
               </button>

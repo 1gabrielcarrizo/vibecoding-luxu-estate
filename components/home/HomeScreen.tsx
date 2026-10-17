@@ -9,7 +9,7 @@ import {
   featuredProperties,
   initialMarketProperties,
   additionalMarketProperties,
-} from "@/data/mockProperties";
+} from "@/data/mockData";
 import { PropertyCategory, MarketFilterTab, Property } from "@/types/property";
 
 export const HomeScreen: React.FC = () => {
