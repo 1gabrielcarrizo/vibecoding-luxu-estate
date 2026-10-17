@@ -53,6 +53,33 @@ export async function getFeaturedProperties(): Promise<Property[]> {
 }
 
 /**
+ * Updates the 'is_featured' flag for a property in Supabase
+ */
+export async function setPropertyFeaturedStatus(
+  id: string,
+  isFeatured: boolean
+): Promise<Property | null> {
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .update({ is_featured: isFeatured })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      console.error(`Error setting featured status for property ${id}:`, error);
+      return null;
+    }
+
+    return mapRowToProperty(data);
+  } catch (err) {
+    console.error(`Unexpected error updating is_featured for ${id}:`, err);
+    return null;
+  }
+}
+
+/**
  * Server-side paginated properties query with filters
  */
 export async function getPaginatedProperties(
