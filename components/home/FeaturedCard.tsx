@@ -24,6 +24,12 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
     setIsFavorite(!isFavorite);
   };
 
+  const primaryImage =
+    (property.images && property.images.length > 0
+      ? property.images[0]
+      : property.imageUrl) ||
+    "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80";
+
   return (
     <Link
       href={`/propiedades/${property.slug}`}
@@ -39,7 +45,7 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
       <div className="aspect-[4/3] w-full overflow-hidden relative bg-slate-100">
         <Image
           alt={property.imageAlt || property.title}
-          src={property.imageUrl}
+          src={primaryImage}
           fill
           sizes="(max-width: 1024px) 100vw, 50vw"
           priority={priority}

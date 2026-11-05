@@ -45,6 +45,10 @@ export async function generateMetadata({
   const title = `${property.title} — ${property.formattedPrice} | LuxeEstate`;
   const description = `${property.title} in ${property.location}. Featuring ${property.beds} bedrooms, ${property.baths} bathrooms, ${property.sqm} m². Available now for ${property.formattedPrice}.`;
 
+  const primaryImage =
+    property.images?.[0] ||
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
+
   return {
     title,
     description,
@@ -53,7 +57,7 @@ export async function generateMetadata({
       description,
       images: [
         {
-          url: property.imageUrl,
+          url: primaryImage,
           width: 1200,
           height: 800,
           alt: property.imageAlt || property.title,
@@ -65,7 +69,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [property.imageUrl],
+      images: [primaryImage],
     },
   };
 }
@@ -84,7 +88,9 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
   const allImages =
     property.images && property.images.length > 0
       ? property.images
-      : [property.imageUrl];
+      : [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+        ];
 
   const badges =
     property.badges && property.badges.length > 0

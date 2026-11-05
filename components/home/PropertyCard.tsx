@@ -29,6 +29,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const badgeBg =
     property.type === "rent" ? "bg-mosque/90" : "bg-nordic/90";
 
+  const primaryImage =
+    (property.images && property.images.length > 0
+      ? property.images[0]
+      : property.imageUrl) ||
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
+
   return (
     <Link
       href={`/propiedades/${property.slug}`}
@@ -44,7 +50,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
         <Image
           alt={property.imageAlt || property.title}
-          src={property.imageUrl}
+          src={primaryImage}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           priority={priority}

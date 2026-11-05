@@ -43,8 +43,8 @@ export interface Property {
   baths: number;
   sqm: number;
   garage?: number;
-  imageUrl: string;
   images: string[];
+  imageUrl?: string;
   imageAlt: string;
   badge?: string;
   badges?: string[];

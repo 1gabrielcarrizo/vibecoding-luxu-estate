@@ -16,16 +16,34 @@ const allFallbackProperties = [
   ...additionalMarketProperties,
 ];
 
+const extraFallbackImages = [
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+];
+
 export function mapRowToProperty(row: PropertyRow): Property {
   // Check if we have richer mock data for this property id
   const matchingFallback = allFallbackProperties.find((p) => p.id === row.id);
 
-  const images =
-    row.images && row.images.length > 0
+  const rawImages =
+    row.images && Array.isArray(row.images) && row.images.length > 0
       ? row.images
       : matchingFallback?.images && matchingFallback.images.length > 0
       ? matchingFallback.images
-      : [row.image_url];
+      : row.image_url
+      ? [row.image_url]
+      : [extraFallbackImages[0]];
+
+  // Ensure each property has at least 4 images (1 main + 3 additional)
+  const images =
+    rawImages.length >= 4
+      ? rawImages
+      : [
+          ...rawImages,
+          ...extraFallbackImages.filter((img) => !rawImages.includes(img)),
+        ].slice(0, 5);
 
   const slug =
     row.slug ||
@@ -48,8 +66,8 @@ export function mapRowToProperty(row: PropertyRow): Property {
     baths: Number(row.baths),
     sqm: Number(row.sqm),
     garage: matchingFallback?.garage ?? 2,
-    imageUrl: row.image_url,
     images,
+    imageUrl: images[0],
     imageAlt: row.image_alt,
     badge: row.badge ?? undefined,
     badges: matchingFallback?.badges ?? (row.badge ? [row.badge] : []),
