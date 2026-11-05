@@ -1,16 +1,42 @@
 import { supabase } from "./client";
-import { Property, PropertyCategory } from "@/types/property";
+import { Property, PropertyCategory, slugify } from "@/types/property";
 import { PropertyRow } from "@/types/database.types";
 import { PaginationResult, PropertyFilterParams } from "@/types/pagination";
 import {
   featuredProperties as fallbackFeatured,
   initialMarketProperties,
   additionalMarketProperties,
+  defaultAgent,
+  defaultAmenities,
 } from "@/data/mockData";
 
+const allFallbackProperties = [
+  ...fallbackFeatured,
+  ...initialMarketProperties,
+  ...additionalMarketProperties,
+];
+
 export function mapRowToProperty(row: PropertyRow): Property {
+  // Check if we have richer mock data for this property id
+  const matchingFallback = allFallbackProperties.find((p) => p.id === row.id);
+
+  const images =
+    row.images && row.images.length > 0
+      ? row.images
+      : matchingFallback?.images && matchingFallback.images.length > 0
+      ? matchingFallback.images
+      : [row.image_url];
+
+  const slug =
+    row.slug ||
+    matchingFallback?.slug ||
+    slugify(row.title || `property-${row.id}`);
+
+  const monthlyEst = Math.round(Number(row.price) * 0.0043);
+
   return {
     id: row.id,
+    slug,
     title: row.title,
     location: row.location,
     price: Number(row.price),
@@ -21,11 +47,29 @@ export function mapRowToProperty(row: PropertyRow): Property {
     beds: Number(row.beds),
     baths: Number(row.baths),
     sqm: Number(row.sqm),
+    garage: matchingFallback?.garage ?? 2,
     imageUrl: row.image_url,
+    images,
     imageAlt: row.image_alt,
     badge: row.badge ?? undefined,
+    badges: matchingFallback?.badges ?? (row.badge ? [row.badge] : []),
     isFeatured: row.is_featured ?? false,
     hideOnBreakpoint: row.hide_on_breakpoint ?? undefined,
+    description: matchingFallback?.description ?? [
+      `Experience exceptional luxury living at ${row.title}, situated in ${row.location}. Crafted with meticulous attention to detail, this residence provides expansive open spaces and modern comfort.`,
+      `Featuring ${row.beds} spacious bedrooms, ${row.baths} pristine bathrooms, and high-end finishes throughout. Contact our dedicated advisory team for a private viewing.`,
+    ],
+    amenities: matchingFallback?.amenities ?? defaultAmenities,
+    agent: matchingFallback?.agent ?? defaultAgent,
+    coordinates: matchingFallback?.coordinates ?? {
+      lat: 37.7749,
+      lng: -122.4194,
+    },
+    estimatedPayment: matchingFallback?.estimatedPayment ?? {
+      monthly: monthlyEst,
+      formattedMonthly: `$${monthlyEst.toLocaleString()}/mo`,
+      downPaymentPercent: 20,
+    },
   };
 }
 
@@ -163,6 +207,66 @@ export async function getPaginatedProperties(
       query: rawQuery,
     });
   }
+}
+
+/**
+ * Fetches a single property by slug (with fallback to ID or local dataset)
+ */
+export async function getPropertyBySlug(slug: string): Promise<Property | null> {
+  const cleanSlug = decodeURIComponent(slug).toLowerCase().trim();
+
+  // 1. Try querying Supabase
+  try {
+    // Check if property matches slug directly
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("slug", cleanSlug)
+      .maybeSingle();
+
+    if (data && !error) {
+      return mapRowToProperty(data);
+    }
+
+    // If no direct slug match in DB, try matching by ID
+    const { data: dataById } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("id", cleanSlug)
+      .maybeSingle();
+
+    if (dataById) {
+      return mapRowToProperty(dataById);
+    }
+  } catch {
+    // Continue to fallback check
+  }
+
+  // 2. Check local fallback datasets
+  const fallback = allFallbackProperties.find(
+    (p) =>
+      p.slug.toLowerCase() === cleanSlug ||
+      p.id.toLowerCase() === cleanSlug ||
+      slugify(p.title) === cleanSlug
+  );
+
+  return fallback || null;
+}
+
+/**
+ * Returns all property slugs for static optimization / pre-rendering
+ */
+export async function getAllPropertySlugs(): Promise<string[]> {
+  try {
+    const { data } = await supabase.from("properties").select("id, title, slug");
+    if (data && data.length > 0) {
+      return data.map((d) => d.slug || slugify(d.title || d.id));
+    }
+  } catch {
+    // Continue to fallback
+  }
+
+  return allFallbackProperties.map((p) => p.slug);
 }
 
 /**

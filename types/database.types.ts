@@ -12,6 +12,7 @@ export type Database = {
       properties: {
         Row: {
           id: string;
+          slug?: string | null;
           title: string;
           location: string;
           price: number;
@@ -23,6 +24,7 @@ export type Database = {
           baths: number;
           sqm: number;
           image_url: string;
+          images?: string[] | null;
           image_alt: string;
           badge: string | null;
           is_featured: boolean | null;
@@ -31,6 +33,7 @@ export type Database = {
         };
         Insert: {
           id: string;
+          slug?: string | null;
           title: string;
           location: string;
           price: number;
@@ -42,6 +45,7 @@ export type Database = {
           baths: number;
           sqm: number;
           image_url: string;
+          images?: string[] | null;
           image_alt: string;
           badge?: string | null;
           is_featured?: boolean | null;
@@ -50,6 +54,7 @@ export type Database = {
         };
         Update: {
           id?: string;
+          slug?: string | null;
           title?: string;
           location?: string;
           price?: number;
@@ -61,6 +66,7 @@ export type Database = {
           baths?: number;
           sqm?: number;
           image_url?: string;
+          images?: string[] | null;
           image_alt?: string;
           badge?: string | null;
           is_featured?: boolean | null;

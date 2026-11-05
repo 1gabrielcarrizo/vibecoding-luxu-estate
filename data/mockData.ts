@@ -1,16 +1,41 @@
-import { Property, UserProfile, NavLink, PropertyCategory } from "@/types/property";
+import {
+  Property,
+  UserProfile,
+  NavLink,
+  PropertyCategory,
+  PropertyAgent,
+} from "@/types/property";
 
 export const currentUser: UserProfile = {
   name: "Alexander Vance",
   avatarUrl:
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuCAWhQZ663Bd08kmzjbOPmUk4UIxYooNONShMEFXLR-DtmVi6Oz-TiaY77SPwFk7g0OobkeZEOMvt6v29mSOD0Xm2g95WbBG3ZjWXmiABOUwGU0LOySRfVDo-JTXQ0-gtwjWxbmue0qDm91m-zEOEZwAW6iRFB1qC1bAU-wkjxm67Sbztq8w7srHkFT9bVEC86qG-FzhOBTomhAurNRmx9l8Yfqabk328NfdKuVLckgCdaPsNFE3yN65MeoRi05GA_gXIMwG4YDIeA",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBhLuM9qNltZNxgIWPtC3dVxQ_JLFKXYB9d_klGFux_2JVOGtRlbV4GvpvdT4wqpsueZnXFQhKJe9MGGvM6rXQX15iv80mbEKxjmy4X14AZRqvp573ZlKYDN9bAb0ka7B-g5mkOCP6nRuKC9QsO02JVq6gqZeAo3-7dUurVhhgPJGeuL0Gk2Cp3Wnu5mVlUtpajB2wtx8uMoytbh78i9RmHYtJg52ZELl9XdIC9f5Kix_lFMFoi6Ru61ARrEGIrvgvz4ViiKhufTns",
 };
 
+export const defaultAgent: PropertyAgent = {
+  name: "Sarah Jenkins",
+  role: "Top Rated Agent",
+  avatarUrl:
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuD4TxUmdQRb2VMjuaNxLEwLorv_dgHzoET2_wL5toSvew6nhtziaR3DX-U69DBN7J74yO6oKokpw8tqEFutJf13MeXghCy7FwZuAxnoJel6FYcKeCRUVinpZtrNnkZvXd-MY5_2MAtRD7JP5BieHixfCaeAPW04jm-y-nvF3HIrwcZ_HRDk_MrNP5WiPV3u9zNrEgM-SQoWGh4xLVSV444aZAbVl03mjjsW5WBpIeodCyqJxprTDp6Q157D06VxcdUSCf-l9UKQT-w",
+  phone: "+1 (555) 349-8201",
+  email: "sarah.jenkins@luxeestate.com",
+  rating: 4.9,
+};
+
+export const defaultAmenities: string[] = [
+  "Smart Home System",
+  "Swimming Pool",
+  "Central Heating & Cooling",
+  "Electric Vehicle Charging",
+  "Private Gym",
+  "Wine Cellar",
+];
+
 export const navLinks: NavLink[] = [
-  { label: "Buy", href: "#", isActive: true },
-  { label: "Rent", href: "#" },
-  { label: "Sell", href: "#" },
-  { label: "Saved Homes", href: "#" },
+  { label: "Buy", href: "/?tab=Buy", isActive: true },
+  { label: "Rent", href: "/?tab=Rent" },
+  { label: "Sell", href: "/?tab=Sell" },
+  { label: "Saved Homes", href: "/#saved" },
 ];
 
 export const categoryFilters: PropertyCategory[] = [
@@ -21,9 +46,11 @@ export const categoryFilters: PropertyCategory[] = [
   "Penthouse",
 ];
 
+// Featured Properties with rich collections of images and coordinates
 export const featuredProperties: Property[] = [
   {
     id: "featured-1",
+    slug: "the-glass-pavilion",
     title: "The Glass Pavilion",
     location: "Beverly Hills, California",
     price: 5250000,
@@ -31,16 +58,45 @@ export const featuredProperties: Property[] = [
     beds: 5,
     baths: 4.5,
     sqm: 4200,
+    garage: 3,
     badge: "Exclusive",
+    badges: ["Exclusive", "Featured"],
     type: "sale",
     category: "Villa",
     isFeatured: true,
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCra-FKp81t0_OM8bWD55m2o9OOSnR_v7D0UilyExMImxyIcr9tIMZ2Py3HcC0ra_MtSsBkduMcwxUNKI9_iSXFFr_YRON1SF9hNM3fcYy-uG7N7uusL0Z367WINi1V7_GwfNQx-gsbUqLtzVi4ivFyqFQGb4qBs79bALeSFb6i3_ZnJnI1VVrN-VeZYHjfYyQI5C6zy90N3uxWZpwzIBhNoUDKKQjQ8EOEYPoyPTzhnh6b6AS3dkkFJ8t4xSDC6qjhMrQUoUPnAeM",
+    images: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCra-FKp81t0_OM8bWD55m2o9OOSnR_v7D0UilyExMImxyIcr9tIMZ2Py3HcC0ra_MtSsBkduMcwxUNKI9_iSXFFr_YRON1SF9hNM3fcYy-uG7N7uusL0Z367WINi1V7_GwfNQx-gsbUqLtzVi4ivFyqFQGb4qBs79bALeSFb6i3_ZnJnI1VVrN-VeZYHjfYyQI5C6zy90N3uxWZpwzIBhNoUDKKQjQ8EOEYPoyPTzhnh6b6AS3dkkFJ8t4xSDC6qjhMrQUoUPnAeM",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Luxury modern villa exterior with pool",
+    coordinates: { lat: 34.0736, lng: -118.4004 },
+    agent: defaultAgent,
+    amenities: [
+      "Infinity Swimming Pool",
+      "Smart Home Automation",
+      "Private Wine Tasting Room",
+      "Home Cinema",
+      "Spa & Sauna",
+      "Tesla EV Superchargers",
+    ],
+    description: [
+      "Set amidst the rolling foothills of Beverly Hills, The Glass Pavilion is an architectural tour-de-force showcasing seamless glass curtain walls and bespoke architectural finishes.",
+      "The expansive grounds feature an infinity pool hovering above city skylines, private entertaining pavilions, and curated modern art courtyards. Experience absolute serenity in the master suite with custom walk-in dressing suites and radiant-heated marble baths.",
+    ],
+    estimatedPayment: {
+      monthly: 22800,
+      formattedMonthly: "$22,800/mo",
+      downPaymentPercent: 20,
+    },
   },
   {
     id: "featured-2",
+    slug: "azure-heights-penthouse",
     title: "Azure Heights Penthouse",
     location: "Downtown, Vancouver",
     price: 3800000,
@@ -48,19 +104,94 @@ export const featuredProperties: Property[] = [
     beds: 3,
     baths: 3,
     sqm: 2100,
+    garage: 2,
     badge: "New Arrival",
+    badges: ["New Arrival", "Penthouse"],
     type: "sale",
     category: "Penthouse",
     isFeatured: true,
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDurAGHzg_fpQxFal-obkFVy1Q3WLPdueAQpz0itcQiRV-WfvulnBEDJbNeV8J06q4mX7PTtXYVJjX4-mHVr_khZLZxQ_s8f6fruGqzeqALyMu8wEHRK1EsOs9f4_jPmS7FxcdzrDkR88Wz0GjaPLXkTZRoJQfur59rxYRLi-WYcW-VU_gKS39CPLOMlftvqGvW0IOk5tXgst5mJ4WQM-ICN4vkdel9ido9YFUQga0OI10i6NSe5W4owt33-2YRi_b_ltdZW2QZC5s",
+    images: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDurAGHzg_fpQxFal-obkFVy1Q3WLPdueAQpz0itcQiRV-WfvulnBEDJbNeV8J06q4mX7PTtXYVJjX4-mHVr_khZLZxQ_s8f6fruGqzeqALyMu8wEHRK1EsOs9f4_jPmS7FxcdzrDkR88Wz0GjaPLXkTZRoJQfur59rxYRLi-WYcW-VU_gKS39CPLOMlftvqGvW0IOk5tXgst5mJ4WQM-ICN4vkdel9ido9YFUQga0OI10i6NSe5W4owt33-2YRi_b_ltdZW2QZC5s",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1502005229762-ee1b2da97327?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Modern interior living room with view",
+    coordinates: { lat: 49.2827, lng: -123.1207 },
+    agent: {
+      name: "Marcus Sterling",
+      role: "Luxury Penthouse Specialist",
+      avatarUrl:
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+      phone: "+1 (604) 789-2210",
+      email: "marcus.sterling@luxeestate.com",
+      rating: 5.0,
+    },
+    amenities: [
+      "360° Panoramic Skyline Views",
+      "Private Rooftop Hot Tub",
+      "Direct Keycard Elevator Access",
+      "Concierge 24/7",
+      "Sub-Zero & Wolf Appliances",
+      "Wine Cellar",
+    ],
+    description: [
+      "Perched high above Vancouver's glittering waterfront, Azure Heights Penthouse redefines urban skyline living with panoramic views stretching from English Bay to the North Shore Mountains.",
+      "The open floor plan flows naturally into a 1,200 sq ft private wrap-around terrace equipped with outdoor heating, hot tub, and alfresco dining space.",
+    ],
+    estimatedPayment: {
+      monthly: 16500,
+      formattedMonthly: "$16,500/mo",
+      downPaymentPercent: 20,
+    },
   },
 ];
 
+// Reference property from code.html + all market properties
 export const initialMarketProperties: Property[] = [
   {
+    id: "serenity-lane",
+    slug: "serenity-lane-palo-alto",
+    title: "1234 Serenity Lane",
+    location: "1234 Serenity Lane, Palo Alto, CA",
+    price: 1250000,
+    formattedPrice: "$1,250,000",
+    beds: 4,
+    baths: 3,
+    sqm: 240,
+    garage: 2,
+    badge: "Premium",
+    badges: ["Premium", "New"],
+    type: "sale",
+    category: "House",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBjNDU9iE4zwPuWeg-CjIrLI-87GF24_LgOggcXT0vmUYfMx2q1dJAheiqWqVN-39uiwyLKEfP18FsG1vtUyAPX902OhGEfM4clcQiDsJW7MBbc_BoMtZXtqIeFKIfkHnkIPwmFbQg8Eaan6ULV99T8AUVUuKsro0HoTMrIaxw5pp1uSuQlF8X5Dait4US1W4vmyZnVioXbFnCoaOOZ0LPorb0rVGAIQd9reWcpqq27C0oO4ltnsCTHIcjIm0xp-2qVbRJSIZzWPv0",
+    images: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBjNDU9iE4zwPuWeg-CjIrLI-87GF24_LgOggcXT0vmUYfMx2q1dJAheiqWqVN-39uiwyLKEfP18FsG1vtUyAPX902OhGEfM4clcQiDsJW7MBbc_BoMtZXtqIeFKIfkHnkIPwmFbQg8Eaan6ULV99T8AUVUuKsro0HoTMrIaxw5pp1uSuQlF8X5Dait4US1W4vmyZnVioXbFnCoaOOZ0LPorb0rVGAIQd9reWcpqq27C0oO4ltnsCTHIcjIm0xp-2qVbRJSIZzWPv0",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCvpJBMaiXUL25hHYwLa_0R6dPhLLM1EuhEt-AVtOy8qSnEi9IcA_RzD5s5ThawY3XG2qw8h4kPqvfP18EY1E5vgA8fs6v7RefCMJ1gY8Gt4uyXGJ85-lcIvL18v8Nlc-U-VOwn1h54yjjg4-KXHt1N5DfuTkQUBdldSELRZeJ6zuZ087NCJ7dDIDaXKJpPgulmd6JC6zD1-Kq00Sb4VXIhVR3IQ1Hd8S6xZkd17QvMHSNqbtKG849PRqHZX3nKLHEWYWWPvbL5_Gs",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAbloTFAmeq6ugmfkwyqn3NMGn11PMk4FU0EIHRHvfYB8nw_-iH5TLps5ig3zipLPoKVZZKO8fOvEVJIwp3MQ9wrS4Dzhgw6ypUDhsycDc-YsboVBbRrXxKOYl-77zNHX9E4hynYyJfVVzXn7ldtURk3Ij3pHIMwqzfDdUxyhYaIJe5dRYa0JN5RpHbPNaV33TcM-IoYW11wNUCKkivtfgC3tk7hkKa3gue7ZTjLhR1ZOE_A1MvMZ3rgBxGDg-HFASH4YP6jI3rwMM",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDRCEooMTK0GZV_7SdAorgeIN1pNz3R9YsLv-2pv39FOje7BUWCWPnKOSA1f6rlYcw7IoJ8NxUp4OU-MAk5_ucnykEtps56-kR6DtQ9JgLlCNyiuazO87fy-xCtXVNROT9kquBZ2JUvUtNGRwWiBaK1DnXOHSxp3ELHbLK8MNS-Ht3Gw8dXgNbya4bZiHZ7C-YnCJfwPjX25zrrQypfbiJsS8jjxFq3--uC264Zbhxp8XCsqDid3BIaJ8RdNMRze6lVvpg49N7Z0tI",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBk_c2n3UBtDQJ-NNLPp9wHCUtPuJTKQi4jnndp2ZNKTRfxtmV85MELPvVecn7Ef74j23fC3l08ZwEbHr70k5C1eHlVG8Pj-K0GWve-DoShWQNa5VGFhBad_Vtlxlu_u22wpBT3475EVHpmhcfwY2FekfCxqUrc_fGSBlHLcKIZ8XsNyHpAPUqUD2n10H86tm9E1nexgYeFUXpLsgB-FRTtya2tTZZ8kTJ-i0Mv6kWLi-LJgvYuYsN2lB0jZi0Q7xxJe6O1M-vA9eg",
+    ],
+    imageAlt: "Modern luxury home exterior with pool in Palo Alto",
+    coordinates: { lat: 37.4419, lng: -122.143 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Experience modern luxury in this architecturally stunning home located in the heart of Palo Alto. Designed with an emphasis on indoor-outdoor living, the residence features floor-to-ceiling glass walls that flood the interiors with natural light.",
+      "The open-concept kitchen is equipped with top-of-the-line appliances and custom cabinetry, perfect for culinary enthusiasts. Retreat to the primary suite, a sanctuary of relaxation with a spa-inspired bath and private balcony.",
+    ],
+    estimatedPayment: {
+      monthly: 5430,
+      formattedMonthly: "$5,430/mo",
+      downPaymentPercent: 20,
+    },
+  },
+  {
     id: "market-1",
+    slug: "modern-family-home-seattle",
     title: "Modern Family Home",
     location: "123 Pine St, Seattle",
     price: 850000,
@@ -68,15 +199,35 @@ export const initialMarketProperties: Property[] = [
     beds: 3,
     baths: 2,
     sqm: 120,
+    garage: 1,
     badge: "FOR SALE",
+    badges: ["FOR SALE"],
     type: "sale",
     category: "House",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDuQ9M7U6euA6_cXmYuXnej-N5IuawAW8ds-4G1mzfqmiBc13qXsPhf9_j_zTB8gfEunrBHo8xMsxYwCw_pl8fsxbxRkmyvLR1N9Tiye5ZJG7fwlLn9MwyBanXYhE0emGwp59es1FEyQTRQbmXLUKO74Yj34ZHqrqIkOtMKhP8CmRFvfoHT5LAe10105vUhKNkxIBvtt530nfLigSUTemOOcJMVNmsgactntRJUwOBU_TZzND7BYtDklr8uZcNYlQOK5U74-ufIf-E",
+    images: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDuQ9M7U6euA6_cXmYuXnej-N5IuawAW8ds-4G1mzfqmiBc13qXsPhf9_j_zTB8gfEunrBHo8xMsxYwCw_pl8fsxbxRkmyvLR1N9Tiye5ZJG7fwlLn9MwyBanXYhE0emGwp59es1FEyQTRQbmXLUKO74Yj34ZHqrqIkOtMKhP8CmRFvfoHT5LAe10105vUhKNkxIBvtt530nfLigSUTemOOcJMVNmsgactntRJUwOBU_TZzND7BYtDklr8uZcNYlQOK5U74-ufIf-E",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Modern white house facade",
+    coordinates: { lat: 47.6062, lng: -122.3321 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Nestled on a serene tree-lined street in Seattle, this meticulously renovated family residence blends Northwest craft with contemporary energy efficiency.",
+      "Features include open plan living, radiant floor heating, a landscaped private courtyard, and a detached insulated garage.",
+    ],
+    estimatedPayment: {
+      monthly: 3700,
+      formattedMonthly: "$3,700/mo",
+      downPaymentPercent: 20,
+    },
   },
   {
     id: "market-2",
+    slug: "urban-loft-portland",
     title: "Urban Loft",
     location: "456 Elm Ave, Portland",
     price: 3200,
@@ -85,15 +236,39 @@ export const initialMarketProperties: Property[] = [
     beds: 1,
     baths: 1,
     sqm: 85,
+    garage: 1,
     badge: "FOR RENT",
+    badges: ["FOR RENT"],
     type: "rent",
     category: "Apartment",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuB4zNatD3vePhIZAi6OHHJKmamYSgeBNSKjEt32tvkkf4s6aBXCF8R4LNfDfPa9leA0t6N1OKOcP358WwZrnosbCBxSM7EaY2_P7qkx3MinRgmHQn7RvleNTwy8cLigMoR3iv0u83chBVbZYI6BcNMcqv80W-l1pIUgIWZcDIXEqtUatrsojSGfM0lTNDZpkBntBUkRY6NB4ZUymYNYvTHXKbO8NZ6N6uoyuuHqcaRWKzHCNXkOR3p-_EVFAHR8QwijIY_m1mefPZ4",
+    images: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuB4zNatD3vePhIZAi6OHHJKmamYSgeBNSKjEt32tvkkf4s6aBXCF8R4LNfDfPa9leA0t6N1OKOcP358WwZrnosbCBxSM7EaY2_P7qkx3MinRgmHQn7RvleNTwy8cLigMoR3iv0u83chBVbZYI6BcNMcqv80W-l1pIUgIWZcDIXEqtUatrsojSGfM0lTNDZpkBntBUkRY6NB4ZUymYNYvTHXKbO8NZ6N6uoyuuHqcaRWKzHCNXkOR3p-_EVFAHR8QwijIY_m1mefPZ4",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Stylish apartment living room",
+    coordinates: { lat: 45.5152, lng: -122.6784 },
+    agent: defaultAgent,
+    amenities: [
+      "Industrial Concrete Ceilings",
+      "Oversized Factory Windows",
+      "Fitness Studio",
+      "Rooftop BBQ Lounge",
+      "Bicycle Storage Room",
+    ],
+    description: [
+      "An authentic Pearl District industrial loft featuring 14-foot exposed concrete ceilings, polished timber accents, and sweeping city views.",
+    ],
+    estimatedPayment: {
+      monthly: 3200,
+      formattedMonthly: "$3,200/mo",
+      downPaymentPercent: 0,
+    },
   },
   {
     id: "market-3",
+    slug: "highland-retreat-bend",
     title: "Highland Retreat",
     location: "789 Mountain Rd, Bend",
     price: 620000,
@@ -101,15 +276,38 @@ export const initialMarketProperties: Property[] = [
     beds: 2,
     baths: 2,
     sqm: 98,
+    garage: 1,
     badge: "FOR SALE",
+    badges: ["FOR SALE"],
     type: "sale",
     category: "House",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuARQWC19e7mleUpjb8CWLztEv_svJeRFOaC2i-9r9GctFuX5Barzhfai9wNM1WW8bcGlqdFM32d3KPf7SItom5ijdHOz5rGGQPeT7PlWs8-y9LkfcsHLQqsLxalhxP94XJo76_mAMp7T2dVj3hPKHNzTDLLiS6ujSdSsyo3onxQthp4ZkVE8op92gyTLUUucaGaxO8vJvyhH3HuWB07EPqT1WsW0lr9Of5lUPonjG9eiqE1XiJXTqzXUZQt5JorfPwCO1MioZA_Zro",
+    images: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuARQWC19e7mleUpjb8CWLztEv_svJeRFOaC2i-9r9GctFuX5Barzhfai9wNM1WW8bcGlqdFM32d3KPf7SItom5ijdHOz5rGGQPeT7PlWs8-y9LkfcsHLQqsLxalhxP94XJo76_mAMp7T2dVj3hPKHNzTDLLiS6ujSdSsyo3onxQthp4ZkVE8op92gyTLUUucaGaxO8vJvyhH3HuWB07EPqT1WsW0lr9Of5lUPonjG9eiqE1XiJXTqzXUZQt5JorfPwCO1MioZA_Zro",
+      "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Cabin in the woods",
+    coordinates: { lat: 44.0582, lng: -121.3153 },
+    agent: defaultAgent,
+    amenities: [
+      "Cedar Wood Fireplace",
+      "Panoramic Pine Forest Views",
+      "Heated Ski Locker",
+      "Private Deck with Hot Tub",
+    ],
+    description: [
+      "A mountain getaway nestled in the ponderosa pines of Central Oregon. Designed for ski weekends at Mount Bachelor and sunny summer trail runs.",
+    ],
+    estimatedPayment: {
+      monthly: 2690,
+      formattedMonthly: "$2,690/mo",
+      downPaymentPercent: 20,
+    },
   },
   {
     id: "market-4",
+    slug: "sea-view-penthouse-miami",
     title: "Sea View Penthouse",
     location: "321 Ocean Dr, Miami",
     price: 4500,
@@ -118,15 +316,33 @@ export const initialMarketProperties: Property[] = [
     beds: 3,
     baths: 3,
     sqm: 180,
+    garage: 2,
     badge: "FOR RENT",
+    badges: ["FOR RENT"],
     type: "rent",
     category: "Penthouse",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBGq4Phm0uDzCnjHAsnWpYTBVpOds_M6iOsJuRQQA5eUZHkztGgtc7eh_OE6wBeyW1-iZh7yyhROnvvmqkAZ9tyAWFGXk0FG52zU4kZ_EDLA0U0cRszy7byNXTeWe0_hS53SYmtCTEV8Y1AM-WxiIC38UMa15QwFDjXtCGQOxoh35K0Ol_70vfsxm0VqDbaWkr8tcEbLTLy0NXH_GcpGK4lAXizgxYOIlFWGyau-4OIfPZRpjCBDbz_qu3VlN201UUJGiuM9ajVd-U",
+    images: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBGq4Phm0uDzCnjHAsnWpYTBVpOds_M6iOsJuRQQA5eUZHkztGgtc7eh_OE6wBeyW1-iZh7yyhROnvvmqkAZ9tyAWFGXk0FG52zU4kZ_EDLA0U0cRszy7byNXTeWe0_hS53SYmtCTEV8Y1AM-WxiIC38UMa15QwFDjXtCGQOxoh35K0Ol_70vfsxm0VqDbaWkr8tcEbLTLy0NXH_GcpGK4lAXizgxYOIlFWGyau-4OIfPZRpjCBDbz_qu3VlN201UUJGiuM9ajVd-U",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Bright bedroom with large window",
+    coordinates: { lat: 25.7617, lng: -80.1918 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Wake up to turquoise Atlantic Ocean vistas every morning. This Miami Beach penthouse features expansive floor-to-ceiling glass and private beach cabana privileges.",
+    ],
+    estimatedPayment: {
+      monthly: 4500,
+      formattedMonthly: "$4,500/mo",
+      downPaymentPercent: 0,
+    },
   },
   {
     id: "market-5",
+    slug: "central-studio-chicago",
     title: "Central Studio",
     location: "555 Main St, Chicago",
     price: 550000,
@@ -134,15 +350,37 @@ export const initialMarketProperties: Property[] = [
     beds: 1,
     baths: 1,
     sqm: 50,
+    garage: 1,
     badge: "FOR SALE",
+    badges: ["FOR SALE"],
     type: "sale",
     category: "Apartment",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuA1w-Hb1289NqZKon3VK8bpmMiCDYYiAMT5egzTINo9m9wSZRHv-k-1IGTVoL1NT8YeZXJHa87JPNDIPrtrbP7jChHq0ypXF90uByhC6VA9O788_B4FY8JVg4chbWN9bcrn9-9FvVvfZX8Aj60Iqg_C8CsCA9DEnJqi2rJvzmK5UP5z-9XRTRjBneAPCa8iGgGWBD9yYKsziN6vn0ePBDGo3inieQtmbr46W31p6UfQ649XRxTm7ygOY2J-jxW1r0qWs8i97KGpkTE",
+    images: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuA1w-Hb1289NqZKon3VK8bpmMiCDYYiAMT5egzTINo9m9wSZRHv-k-1IGTVoL1NT8YeZXJHa87JPNDIPrtrbP7jChHq0ypXF90uByhC6VA9O788_B4FY8JVg4chbWN9bcrn9-9FvVvfZX8Aj60Iqg_C8CsCA9DEnJqi2rJvzmK5UP5z-9XRTRjBneAPCa8iGgGWBD9yYKsziN6vn0ePBDGo3inieQtmbr46W31p6UfQ649XRxTm7ygOY2J-jxW1r0qWs8i97KGpkTE",
+    ],
     imageAlt: "Cozy apartment interior",
+    coordinates: { lat: 41.8781, lng: -87.6298 },
+    agent: defaultAgent,
+    amenities: [
+      "24h Doorman",
+      "Resident Lounge",
+      "Gym & Yoga Studio",
+      "Covered Heated Garage",
+    ],
+    description: [
+      "A stylish pied-à-terre in the heart of downtown Chicago, steps from Michigan Avenue and Millennium Park.",
+    ],
+    estimatedPayment: {
+      monthly: 2390,
+      formattedMonthly: "$2,390/mo",
+      downPaymentPercent: 20,
+    },
   },
   {
     id: "market-6",
+    slug: "garden-villa-austin",
     title: "Garden Villa",
     location: "999 Oak Ln, Austin",
     price: 2800,
@@ -151,15 +389,32 @@ export const initialMarketProperties: Property[] = [
     beds: 2,
     baths: 2,
     sqm: 110,
+    garage: 1,
     badge: "FOR RENT",
+    badges: ["FOR RENT"],
     type: "rent",
     category: "Villa",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCfGXdY0g51ojSg0GMeTW9ndLY3mpKK3oMtWxo2nwd_dwi1pgn1Boi_ovaDGIFhUA7nwu3WdBch8ZuHxoHu3QfgM5ceAsp8pglRVyCROWNcy9zeDNP2wqLoevyKGcaEyFYHYpIx2KK46nLWthnHiHugmkKw48kJsL8IjMO1bL3T1Zwt8bvQDTTUHTgB3GqZ2RU2asRzF1jVg0rLw3LWXXTq0YF1CsbhlWpYOuCEpH5bB8zkBlbKXR4At_M46AL8rJqn5c6BrPD5PP8",
+    images: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCfGXdY0g51ojSg0GMeTW9ndLY3mpKK3oMtWxo2nwd_dwi1pgn1Boi_ovaDGIFhUA7nwu3WdBch8ZuHxoHu3QfgM5ceAsp8pglRVyCROWNcy9zeDNP2wqLoevyKGcaEyFYHYpIx2KK46nLWthnHiHugmkKw48kJsL8IjMO1bL3T1Zwt8bvQDTTUHTgB3GqZ2RU2asRzF1jVg0rLw3LWXXTq0YF1CsbhlWpYOuCEpH5bB8zkBlbKXR4At_M46AL8rJqn5c6BrPD5PP8",
+    ],
     imageAlt: "Modern minimalist home exterior",
+    coordinates: { lat: 30.2672, lng: -97.7431 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Contemporary single-story design framed by native Texas landscaping, private lap pool, and breezy outdoor dining patio.",
+    ],
+    estimatedPayment: {
+      monthly: 2800,
+      formattedMonthly: "$2,800/mo",
+      downPaymentPercent: 0,
+    },
   },
   {
     id: "market-7",
+    slug: "the-aurora-villa-malibu",
     title: "The Aurora Villa",
     location: "204 Ocean Way, Malibu",
     price: 3450000,
@@ -167,15 +422,36 @@ export const initialMarketProperties: Property[] = [
     beds: 4,
     baths: 4.5,
     sqm: 380,
+    garage: 3,
     badge: "NEW LISTING",
+    badges: ["NEW LISTING"],
     type: "sale",
     category: "Villa",
     imageUrl:
       "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Luxury modern villa exterior with swimming pool",
+    coordinates: { lat: 34.0259, lng: -118.7798 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Perched in the prestigious Malibu bluffs, The Aurora Villa boasts sweeping Pacific ocean views, zero-edge pool, and private pathway to the sand.",
+    ],
+    estimatedPayment: {
+      monthly: 14900,
+      formattedMonthly: "$14,900/mo",
+      downPaymentPercent: 20,
+    },
   },
+];
+
+export const additionalMarketProperties: Property[] = [
   {
     id: "market-8",
+    slug: "the-highline-residence-ny",
     title: "The Highline Residence",
     location: "520 W 28th St, Chelsea, NY",
     price: 4800,
@@ -184,15 +460,32 @@ export const initialMarketProperties: Property[] = [
     beds: 2,
     baths: 2,
     sqm: 115,
+    garage: 1,
     badge: "FOR RENT",
+    badges: ["FOR RENT"],
     type: "rent",
     category: "Apartment",
     imageUrl:
       "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Contemporary luxury apartment building",
+    coordinates: { lat: 40.7512, lng: -74.0031 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Direct High Line park views from architect-designed curved glass bays in Chelsea.",
+    ],
+    estimatedPayment: {
+      monthly: 4800,
+      formattedMonthly: "$4,800/mo",
+      downPaymentPercent: 0,
+    },
   },
   {
     id: "market-9",
+    slug: "bellavista-manor-lake-como",
     title: "Bellavista Manor",
     location: "Via Regina 42, Lake Como",
     price: 4900000,
@@ -200,15 +493,32 @@ export const initialMarketProperties: Property[] = [
     beds: 6,
     baths: 6,
     sqm: 540,
+    garage: 4,
     badge: "EXCLUSIVE",
+    badges: ["EXCLUSIVE"],
     type: "sale",
     category: "Villa",
     imageUrl:
       "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Classic luxury villa with green lawn and terrace",
+    coordinates: { lat: 45.9897, lng: 9.2573 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Historic luxury estate on the shores of Lake Como with private dock, botanical gardens, and frescoed ceilings.",
+    ],
+    estimatedPayment: {
+      monthly: 21200,
+      formattedMonthly: "$21,200/mo",
+      downPaymentPercent: 20,
+    },
   },
   {
     id: "market-10",
+    slug: "komorebi-zen-house-kyoto",
     title: "Komorebi Zen House",
     location: "Higashiyama, Kyoto",
     price: 1650000,
@@ -216,15 +526,32 @@ export const initialMarketProperties: Property[] = [
     beds: 3,
     baths: 2.5,
     sqm: 195,
+    garage: 1,
     badge: "FOR SALE",
+    badges: ["FOR SALE"],
     type: "sale",
     category: "House",
     imageUrl:
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Warm contemporary architecture home with glass facade",
+    coordinates: { lat: 34.9961, lng: 135.7779 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Harmonious Japanese contemporary residence featuring hinoki wood bath, rock garden, and traditional tearoom.",
+    ],
+    estimatedPayment: {
+      monthly: 7100,
+      formattedMonthly: "$7,100/mo",
+      downPaymentPercent: 20,
+    },
   },
   {
     id: "market-11",
+    slug: "crown-sky-penthouse-miami",
     title: "Crown Sky Penthouse",
     location: "1420 Brickell Ave, Miami",
     price: 2850000,
@@ -232,15 +559,32 @@ export const initialMarketProperties: Property[] = [
     beds: 3,
     baths: 3.5,
     sqm: 260,
+    garage: 2,
     badge: "TOP FLOOR",
+    badges: ["TOP FLOOR"],
     type: "sale",
     category: "Penthouse",
     imageUrl:
       "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Ultra luxury penthouse exterior with outdoor patio",
+    coordinates: { lat: 25.7594, lng: -80.1918 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Soaring above Brickell Financial District with private rooftop pool, Italian marble flooring, and sunset lounge.",
+    ],
+    estimatedPayment: {
+      monthly: 12300,
+      formattedMonthly: "$12,300/mo",
+      downPaymentPercent: 20,
+    },
   },
   {
     id: "market-12",
+    slug: "canal-view-atelier-amsterdam",
     title: "Canal View Atelier",
     location: "384 Herengracht, Amsterdam",
     price: 3900,
@@ -249,15 +593,32 @@ export const initialMarketProperties: Property[] = [
     beds: 2,
     baths: 1.5,
     sqm: 95,
+    garage: 0,
     badge: "FOR RENT",
+    badges: ["FOR RENT"],
     type: "rent",
     category: "Apartment",
     imageUrl:
       "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Interior designer apartment with wooden floors",
+    coordinates: { lat: 52.3676, lng: 4.8875 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Restored 17th-century canal house apartment on the UNESCO-protected Herengracht canal.",
+    ],
+    estimatedPayment: {
+      monthly: 3900,
+      formattedMonthly: "$3,900/mo",
+      downPaymentPercent: 0,
+    },
   },
   {
     id: "market-13",
+    slug: "the-pinecrest-haven-aspen",
     title: "The Pinecrest Haven",
     location: "710 Red Mountain Rd, Aspen",
     price: 3200000,
@@ -265,15 +626,32 @@ export const initialMarketProperties: Property[] = [
     beds: 4,
     baths: 4,
     sqm: 320,
+    garage: 2,
     badge: "ALPINE",
+    badges: ["ALPINE"],
     type: "sale",
     category: "House",
     imageUrl:
       "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Alpine modern mountain house surrounded by pines",
+    coordinates: { lat: 39.1911, lng: -106.8175 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Exclusive Aspen alpine sanctuary with direct ski-in/ski-out trail access and breathtaking mountain views.",
+    ],
+    estimatedPayment: {
+      monthly: 13800,
+      formattedMonthly: "$13,800/mo",
+      downPaymentPercent: 20,
+    },
   },
   {
     id: "market-14",
+    slug: "solarium-penthouse-vancouver",
     title: "Solarium Penthouse",
     location: "2201 Cornwall Ave, Vancouver",
     price: 5400,
@@ -282,15 +660,32 @@ export const initialMarketProperties: Property[] = [
     beds: 3,
     baths: 2.5,
     sqm: 210,
+    garage: 2,
     badge: "FOR RENT",
+    badges: ["FOR RENT"],
     type: "rent",
     category: "Penthouse",
     imageUrl:
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Bright modern penthouse living space with panoramic light",
+    coordinates: { lat: 49.2734, lng: -123.1539 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Kitsilano beachfront penthouse overlooking English Bay and Stanley Park.",
+    ],
+    estimatedPayment: {
+      monthly: 5400,
+      formattedMonthly: "$5,400/mo",
+      downPaymentPercent: 0,
+    },
   },
   {
     id: "market-15",
+    slug: "nordic-dune-villa-skagen",
     title: "Nordic Dune Villa",
     location: "Strandvejen 88, Skagen",
     price: 2150000,
@@ -298,15 +693,32 @@ export const initialMarketProperties: Property[] = [
     beds: 4,
     baths: 3,
     sqm: 275,
+    garage: 2,
     badge: "MINIMALIST",
+    badges: ["MINIMALIST"],
     type: "sale",
     category: "Villa",
     imageUrl:
       "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Scandinavian architecture villa with pool and modern terrace",
+    coordinates: { lat: 57.7209, lng: 10.5841 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Minimalist Danish coastal architecture blending seamlessly with sand dunes and wild coastal grasses.",
+    ],
+    estimatedPayment: {
+      monthly: 9300,
+      formattedMonthly: "$9,300/mo",
+      downPaymentPercent: 20,
+    },
   },
   {
     id: "market-16",
+    slug: "metropolis-loft-london",
     title: "Metropolis Loft",
     location: "14 Dean St, SoHo, London",
     price: 3600,
@@ -315,80 +727,27 @@ export const initialMarketProperties: Property[] = [
     beds: 1,
     baths: 1.5,
     sqm: 78,
+    garage: 0,
     badge: "FOR RENT",
+    badges: ["FOR RENT"],
     type: "rent",
     category: "Apartment",
     imageUrl:
       "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+    ],
     imageAlt: "Chic luxury urban loft living room",
-  },
-];
-
-export const additionalMarketProperties: Property[] = [
-  {
-    id: "market-17",
-    title: "Silverstone Estate",
-    location: "880 Bel Air Rd, Los Angeles",
-    price: 1250000,
-    formattedPrice: "$1,250,000",
-    beds: 4,
-    baths: 3.5,
-    sqm: 290,
-    badge: "FOR SALE",
-    type: "sale",
-    category: "House",
-    imageUrl:
-      "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Silverstone Estate modern exterior",
-  },
-  {
-    id: "market-18",
-    title: "Skyline Panorama",
-    location: "740 Park Ave, New York",
-    price: 6800,
-    formattedPrice: "$6,800",
-    priceSuffix: "/mo",
-    beds: 2,
-    baths: 2,
-    sqm: 140,
-    badge: "FOR RENT",
-    type: "rent",
-    category: "Penthouse",
-    imageUrl:
-      "https://images.unsplash.com/photo-1502005229762-ee1b2da97327?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Skyline Panorama view",
-  },
-  {
-    id: "market-19",
-    title: "Desert Horizon Villa",
-    location: "9100 E Pinnacle Peak Rd, Scottsdale",
-    price: 1980000,
-    formattedPrice: "$1,980,000",
-    beds: 4,
-    baths: 4,
-    sqm: 340,
-    badge: "FOR SALE",
-    type: "sale",
-    category: "Villa",
-    imageUrl:
-      "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Contemporary desert villa with infinity pool",
-  },
-  {
-    id: "market-20",
-    title: "Harbour View Suite",
-    location: "15 Macquarie St, Sydney",
-    price: 4200,
-    formattedPrice: "$4,200",
-    priceSuffix: "/mo",
-    beds: 2,
-    baths: 2,
-    sqm: 125,
-    badge: "FOR RENT",
-    type: "rent",
-    category: "Apartment",
-    imageUrl:
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Luxurious modern apartment overlooking harbour",
+    coordinates: { lat: 51.5136, lng: -0.1332 },
+    agent: defaultAgent,
+    amenities: defaultAmenities,
+    description: [
+      "Ultra-chic SoHo loft apartment offering secluded designer living in central London's vibrant theatre district.",
+    ],
+    estimatedPayment: {
+      monthly: 3600,
+      formattedMonthly: "$3,600/mo",
+      downPaymentPercent: 0,
+    },
   },
 ];

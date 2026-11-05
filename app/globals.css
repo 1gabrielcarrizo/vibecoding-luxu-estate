@@ -1,5 +1,6 @@
 @import url("https://fonts.cdnfonts.com/css/sf-pro-display");
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -7,6 +8,8 @@
   --color-nordic-dark: #19322f;
   --color-nordic-muted: #5c706d;
   --color-mosque: #006655;
+  --color-primary-hover: #005544;
+  --color-primary-light: #e6f0ee;
   --color-hint-of-green: #d9ecc8;
   --color-clear-day: #eef6f6;
   --color-background-light: #eef6f6;
@@ -23,6 +26,9 @@
   color-scheme: light;
   --background: #eef6f6;
   --foreground: #19322f;
+  --nordic: #19322f;
+  --mosque: #006655;
+  --clear-day: #eef6f6;
 }
 
 body {
@@ -32,11 +38,27 @@ body {
 }
 
 /* Scrollbar utilities */
-.hide-scroll::-webkit-scrollbar {
+.hide-scroll::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
-.hide-scroll {
+.hide-scroll,
+.scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Leaflet map styles */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+  z-index: 10;
+  font-family: inherit;
+}
+
+.custom-leaflet-pin {
+  background: transparent !important;
+  border: none !important;
 }
