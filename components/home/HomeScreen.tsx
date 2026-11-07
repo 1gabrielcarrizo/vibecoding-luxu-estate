@@ -186,10 +186,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   const handleCategorySelect = (category: PropertyCategory) => {
-    setSelectedCategory(category);
+    // Toggle back to "All" if user clicks the currently active specific category
+    const nextCategory =
+      category === selectedCategory && category !== "All" ? "All" : category;
+    setSelectedCategory(nextCategory);
     updateData(
       1,
-      category,
+      nextCategory,
       marketTab,
       searchQuery,
       minPrice,
@@ -197,7 +200,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       beds,
       baths,
       amenities,
-      true
+      false
     );
   };
 
@@ -213,7 +216,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       beds,
       baths,
       amenities,
-      true
+      false
     );
   };
 
@@ -228,7 +231,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       beds,
       baths,
       amenities,
-      true
+      false
     );
   };
 
@@ -253,7 +256,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       filters.beds,
       filters.baths,
       filters.amenities,
-      true
+      false
     );
   };
 
@@ -269,23 +272,43 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     updateData(1, "All", "All", "", undefined, undefined, 0, 0, [], true);
   };
 
-  // Filter featured properties locally for search/category match
-  const filteredFeaturedProperties = useMemo(() => {
-    return initialFeaturedProperties.filter((prop) => {
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matches =
-          prop.title.toLowerCase().includes(q) ||
-          prop.location.toLowerCase().includes(q) ||
-          prop.category.toLowerCase().includes(q);
-        if (!matches) return false;
-      }
-      if (selectedCategory !== "All" && prop.category !== selectedCategory) {
-        return false;
-      }
-      return true;
-    });
-  }, [initialFeaturedProperties, searchQuery, selectedCategory]);
+  // Determine if any search or filter is currently active
+  const isFilterActive = useMemo(() => {
+    const hasCategory = selectedCategory !== "All";
+    const hasQuery = searchQuery.trim().length > 0;
+    const hasTab = marketTab !== "All";
+    const hasMinPrice = minPrice !== undefined && minPrice > 0;
+    const hasMaxPrice = maxPrice !== undefined && maxPrice < 20000000;
+    const hasBeds = beds > 0;
+    const hasBaths = baths > 0;
+    const hasAmenities = amenities && amenities.length > 0;
+
+    return (
+      hasCategory ||
+      hasQuery ||
+      hasTab ||
+      hasMinPrice ||
+      hasMaxPrice ||
+      hasBeds ||
+      hasBaths ||
+      hasAmenities
+    );
+  }, [
+    selectedCategory,
+    searchQuery,
+    marketTab,
+    minPrice,
+    maxPrice,
+    beds,
+    baths,
+    amenities,
+  ]);
+
+  // Strictly at most 2 featured properties, and ONLY when no filters/searches are applied
+  const featuredPropertiesToDisplay = useMemo(() => {
+    if (isFilterActive) return [];
+    return initialFeaturedProperties.slice(0, 2);
+  }, [isFilterActive, initialFeaturedProperties]);
 
   return (
     <div className="min-h-screen bg-background-light text-nordic-dark font-display antialiased selection:bg-mosque selection:text-white">
@@ -318,10 +341,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           activeFilterCount={activeFilterCount}
         />
 
-        {/* Featured Collections Section */}
-        {filteredFeaturedProperties.length > 0 && (
+        {/* Featured Collections Section: Only shown when no search filters are applied, and strictly max 2 properties */}
+        {!isFilterActive && featuredPropertiesToDisplay.length > 0 && (
           <FeaturedCollections
-            properties={filteredFeaturedProperties}
+            properties={featuredPropertiesToDisplay}
             onViewAll={handleViewAllFeatured}
           />
         )}

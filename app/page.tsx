@@ -53,7 +53,7 @@ async function HomeContent({ searchParams }: PageProps) {
 
   return (
     <HomeScreen
-      initialFeaturedProperties={featuredProperties}
+      initialFeaturedProperties={featuredProperties.slice(0, 2)}
       initialPagination={paginationResult}
       initialPage={page}
       initialCategory={category}

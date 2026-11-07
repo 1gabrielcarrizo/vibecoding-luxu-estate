@@ -92,7 +92,7 @@ export function mapRowToProperty(row: PropertyRow): Property {
 }
 
 /**
- * Fetches featured properties from Supabase
+ * Fetches featured properties from Supabase (strictly limited to 2)
  */
 export async function getFeaturedProperties(): Promise<Property[]> {
   try {
@@ -100,17 +100,18 @@ export async function getFeaturedProperties(): Promise<Property[]> {
       .from("properties")
       .select("*")
       .eq("is_featured", true)
-      .order("id", { ascending: true });
+      .order("id", { ascending: true })
+      .limit(2);
 
     if (error || !data || data.length === 0) {
       console.warn("Using fallback featured properties:", error?.message);
-      return fallbackFeatured;
+      return fallbackFeatured.slice(0, 2);
     }
 
-    return data.map(mapRowToProperty);
+    return data.slice(0, 2).map(mapRowToProperty);
   } catch (err) {
     console.error("Error fetching featured properties:", err);
-    return fallbackFeatured;
+    return fallbackFeatured.slice(0, 2);
   }
 }
 
