@@ -9,6 +9,7 @@ import { MarketSection } from "@/components/home/MarketSection";
 import { PropertyCategory, MarketFilterTab, Property } from "@/types/property";
 import { PaginationResult } from "@/types/pagination";
 import { fetchPropertiesAction } from "@/app/actions/properties";
+import { SearchFiltersModal, FilterState } from "@/components/home/SearchFiltersModal";
 
 interface HomeScreenProps {
   initialFeaturedProperties: Property[];
@@ -17,6 +18,11 @@ interface HomeScreenProps {
   initialCategory?: PropertyCategory;
   initialMarketTab?: MarketFilterTab;
   initialQuery?: string;
+  initialMinPrice?: number;
+  initialMaxPrice?: number;
+  initialBeds?: number;
+  initialBaths?: number;
+  initialAmenities?: string[];
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -26,6 +32,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   initialCategory = "All",
   initialMarketTab = "All",
   initialQuery = "",
+  initialMinPrice,
+  initialMaxPrice,
+  initialBeds,
+  initialBaths,
+  initialAmenities,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,6 +54,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [marketTab, setMarketTab] =
     useState<MarketFilterTab>(initialMarketTab);
 
+  // Advanced Filters State
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [minPrice, setMinPrice] = useState<number | undefined>(initialMinPrice);
+  const [maxPrice, setMaxPrice] = useState<number | undefined>(initialMaxPrice);
+  const [beds, setBeds] = useState<number>(initialBeds || 0);
+  const [baths, setBaths] = useState<number>(initialBaths || 0);
+  const [amenities, setAmenities] = useState<string[]>(
+    initialAmenities || []
+  );
+
   // Pagination state from server
   const [pagination, setPagination] =
     useState<PaginationResult>(initialPagination);
@@ -54,7 +75,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     setSelectedCategory(initialCategory);
     setMarketTab(initialMarketTab);
     setSearchQuery(initialQuery);
-  }, [initialPagination, initialCategory, initialMarketTab, initialQuery]);
+    setMinPrice(initialMinPrice);
+    setMaxPrice(initialMaxPrice);
+    setBeds(initialBeds || 0);
+    setBaths(initialBaths || 0);
+    setAmenities(initialAmenities || []);
+  }, [
+    initialPagination,
+    initialCategory,
+    initialMarketTab,
+    initialQuery,
+    initialMinPrice,
+    initialMaxPrice,
+    initialBeds,
+    initialBaths,
+    initialAmenities,
+  ]);
+
+  // Count active advanced filters
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (minPrice !== undefined && minPrice > 0) count++;
+    if (maxPrice !== undefined && maxPrice < 20000000) count++;
+    if (beds > 0) count++;
+    if (baths > 0) count++;
+    if (amenities && amenities.length > 0) count++;
+    return count;
+  }, [minPrice, maxPrice, beds, baths, amenities]);
 
   // Synchronize URL and fetch new page data using Next.js Server Action
   const updateData = (
@@ -62,6 +109,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     newCategory: PropertyCategory,
     newTab: MarketFilterTab,
     newQuery: string,
+    newMinPrice?: number,
+    newMaxPrice?: number,
+    newBeds?: number,
+    newBaths?: number,
+    newAmenities?: string[],
     scrollToMarket = false
   ) => {
     setIsLoading(true);
@@ -73,6 +125,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       if (newCategory !== "All") params.set("category", newCategory);
       if (newTab !== "All") params.set("tab", newTab);
       if (newQuery.trim()) params.set("q", newQuery.trim());
+      if (newMinPrice !== undefined && newMinPrice > 0)
+        params.set("minPrice", newMinPrice.toString());
+      if (newMaxPrice !== undefined && newMaxPrice < 20000000)
+        params.set("maxPrice", newMaxPrice.toString());
+      if (newBeds !== undefined && newBeds > 0)
+        params.set("beds", newBeds.toString());
+      if (newBaths !== undefined && newBaths > 0)
+        params.set("baths", newBaths.toString());
+      if (newAmenities && newAmenities.length > 0)
+        params.set("amenities", newAmenities.join(","));
 
       const queryString = params.toString();
       router.push(queryString ? `/?${queryString}` : "/", { scroll: false });
@@ -85,6 +147,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           category: newCategory,
           type: newTab,
           query: newQuery.trim(),
+          minPrice: newMinPrice,
+          maxPrice: newMaxPrice,
+          beds: newBeds,
+          baths: newBaths,
+          amenities: newAmenities,
         });
         setPagination(result);
       } catch (err) {
@@ -104,28 +171,102 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Handlers
   const handlePageChange = (newPage: number) => {
-    updateData(newPage, selectedCategory, marketTab, searchQuery, true);
+    updateData(
+      newPage,
+      selectedCategory,
+      marketTab,
+      searchQuery,
+      minPrice,
+      maxPrice,
+      beds,
+      baths,
+      amenities,
+      true
+    );
   };
 
   const handleCategorySelect = (category: PropertyCategory) => {
     setSelectedCategory(category);
-    updateData(1, category, marketTab, searchQuery, true);
+    updateData(
+      1,
+      category,
+      marketTab,
+      searchQuery,
+      minPrice,
+      maxPrice,
+      beds,
+      baths,
+      amenities,
+      true
+    );
   };
 
   const handleMarketTabChange = (tab: MarketFilterTab) => {
     setMarketTab(tab);
-    updateData(1, selectedCategory, tab, searchQuery, true);
+    updateData(
+      1,
+      selectedCategory,
+      tab,
+      searchQuery,
+      minPrice,
+      maxPrice,
+      beds,
+      baths,
+      amenities,
+      true
+    );
   };
 
   const handleSearchSubmit = () => {
-    updateData(1, selectedCategory, marketTab, searchQuery, true);
+    updateData(
+      1,
+      selectedCategory,
+      marketTab,
+      searchQuery,
+      minPrice,
+      maxPrice,
+      beds,
+      baths,
+      amenities,
+      true
+    );
+  };
+
+  const handleApplyFilters = (filters: FilterState) => {
+    const nextCategory =
+      filters.propertyType === "Any Type" ? "All" : filters.propertyType;
+    setSelectedCategory(nextCategory);
+    setSearchQuery(filters.location);
+    setMinPrice(filters.minPrice);
+    setMaxPrice(filters.maxPrice);
+    setBeds(filters.beds);
+    setBaths(filters.baths);
+    setAmenities(filters.amenities);
+
+    updateData(
+      1,
+      nextCategory,
+      marketTab,
+      filters.location,
+      filters.minPrice,
+      filters.maxPrice,
+      filters.beds,
+      filters.baths,
+      filters.amenities,
+      true
+    );
   };
 
   const handleViewAllFeatured = () => {
     setSelectedCategory("All");
     setMarketTab("All");
     setSearchQuery("");
-    updateData(1, "All", "All", "", true);
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    setBeds(0);
+    setBaths(0);
+    setAmenities([]);
+    updateData(1, "All", "All", "", undefined, undefined, 0, 0, [], true);
   };
 
   // Filter featured properties locally for search/category match
@@ -173,11 +314,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           onSearchSubmit={handleSearchSubmit}
           selectedCategory={selectedCategory}
           onSelectCategory={handleCategorySelect}
-          onToggleFilters={() => {
-            handleCategorySelect(
-              selectedCategory === "All" ? "Villa" : "All"
-            );
-          }}
+          onToggleFilters={() => setIsFilterModalOpen(true)}
+          activeFilterCount={activeFilterCount}
         />
 
         {/* Featured Collections Section */}
@@ -203,6 +341,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           />
         </div>
       </main>
+
+      {/* Search Filters Modal matching search_filters_screen/code.html */}
+      <SearchFiltersModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        initialFilters={{
+          location: searchQuery,
+          minPrice: minPrice !== undefined ? minPrice : 1200000,
+          maxPrice: maxPrice !== undefined ? maxPrice : 4500000,
+          propertyType:
+            selectedCategory === "All" ? "Any Type" : selectedCategory,
+          beds,
+          baths,
+          amenities,
+        }}
+        onApply={handleApplyFilters}
+        totalMatchingHomes={pagination.totalCount}
+      />
     </div>
   );
 };

@@ -12,6 +12,11 @@ interface PageProps {
     category?: string;
     tab?: string;
     q?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    beds?: string;
+    baths?: string;
+    amenities?: string;
   }>;
 }
 
@@ -21,6 +26,13 @@ async function HomeContent({ searchParams }: PageProps) {
   const category = (params.category || "All") as PropertyCategory;
   const marketTab = (params.tab || "All") as MarketFilterTab;
   const query = params.q || "";
+  const minPrice = params.minPrice ? parseInt(params.minPrice, 10) : undefined;
+  const maxPrice = params.maxPrice ? parseInt(params.maxPrice, 10) : undefined;
+  const beds = params.beds ? parseInt(params.beds, 10) : undefined;
+  const baths = params.baths ? parseInt(params.baths, 10) : undefined;
+  const amenities = params.amenities
+    ? params.amenities.split(",").map((a) => a.trim()).filter(Boolean)
+    : undefined;
 
   // Server-side fetching from Supabase using Next.js async Server Functions
   const [featuredProperties, paginationResult] = await Promise.all([
@@ -31,6 +43,11 @@ async function HomeContent({ searchParams }: PageProps) {
       category,
       type: marketTab,
       query,
+      minPrice,
+      maxPrice,
+      beds,
+      baths,
+      amenities,
     }),
   ]);
 
@@ -42,6 +59,11 @@ async function HomeContent({ searchParams }: PageProps) {
       initialCategory={category}
       initialMarketTab={marketTab}
       initialQuery={query}
+      initialMinPrice={minPrice}
+      initialMaxPrice={maxPrice}
+      initialBeds={beds}
+      initialBaths={baths}
+      initialAmenities={amenities}
     />
   );
 }

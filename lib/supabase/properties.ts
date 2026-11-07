@@ -142,6 +142,32 @@ export async function setPropertyFeaturedStatus(
 }
 
 /**
+ * Retrieves all market properties, merging Supabase database entries with rich mock additions
+ */
+export async function getAllMarketProperties(): Promise<Property[]> {
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("is_featured", false);
+
+    if (data && data.length > 0 && !error) {
+      const dbProps = data.map(mapRowToProperty);
+      const existingIds = new Set(dbProps.map((p) => p.id));
+      const extraProps = [
+        ...initialMarketProperties.filter((p) => !existingIds.has(p.id)),
+        ...additionalMarketProperties.filter((p) => !existingIds.has(p.id)),
+      ];
+      return [...dbProps, ...extraProps];
+    }
+  } catch (err) {
+    console.warn("Using fallback market properties:", err);
+  }
+
+  return [...initialMarketProperties, ...additionalMarketProperties];
+}
+
+/**
  * Server-side paginated properties query with filters
  */
 export async function getPaginatedProperties(
@@ -152,79 +178,88 @@ export async function getPaginatedProperties(
   const category = params.category;
   const type = params.type;
   const rawQuery = params.query?.trim();
+  const minPrice = params.minPrice;
+  const maxPrice = params.maxPrice;
+  const beds = params.beds;
+  const baths = params.baths;
+  const amenities = params.amenities;
 
-  try {
-    let queryBuilder = supabase
-      .from("properties")
-      .select("*", { count: "exact" })
-      .eq("is_featured", false);
+  const allProps = await getAllMarketProperties();
 
-    // Filter by Category
-    if (category && category !== "All") {
-      queryBuilder = queryBuilder.eq(
-        "category",
-        category as "House" | "Apartment" | "Villa" | "Penthouse"
+  let filtered = allProps;
+
+  // Filter by Search Query
+  if (rawQuery) {
+    const q = rawQuery.toLowerCase();
+    filtered = filtered.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.location.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
+    );
+  }
+
+  // Filter by Category
+  if (category && category !== "All" && category !== "Any Type") {
+    filtered = filtered.filter(
+      (p) => p.category.toLowerCase() === category.toLowerCase()
+    );
+  }
+
+  // Filter by Market tab / Type
+  if (type === "Buy" || type === "sale") {
+    filtered = filtered.filter((p) => p.type === "sale");
+  } else if (type === "Rent" || type === "rent") {
+    filtered = filtered.filter((p) => p.type === "rent");
+  }
+
+  // Filter by Min Price
+  if (typeof minPrice === "number" && !isNaN(minPrice) && minPrice > 0) {
+    filtered = filtered.filter((p) => p.price >= minPrice);
+  }
+
+  // Filter by Max Price
+  if (typeof maxPrice === "number" && !isNaN(maxPrice) && maxPrice > 0) {
+    filtered = filtered.filter((p) => p.price <= maxPrice);
+  }
+
+  // Filter by Bedrooms
+  if (typeof beds === "number" && !isNaN(beds) && beds > 0) {
+    filtered = filtered.filter((p) => p.beds >= beds);
+  }
+
+  // Filter by Bathrooms
+  if (typeof baths === "number" && !isNaN(baths) && baths > 0) {
+    filtered = filtered.filter((p) => p.baths >= baths);
+  }
+
+  // Filter by Amenities
+  if (amenities && Array.isArray(amenities) && amenities.length > 0) {
+    filtered = filtered.filter((p) => {
+      if (!p.amenities || p.amenities.length === 0) return false;
+      const propAmenitiesLower = p.amenities.map((a) => a.toLowerCase());
+      return amenities.every((req) =>
+        propAmenitiesLower.some(
+          (a) => a.includes(req.toLowerCase()) || req.toLowerCase().includes(a)
+        )
       );
-    }
-
-    // Filter by Market tab / Type
-    if (type === "Buy" || type === "sale") {
-      queryBuilder = queryBuilder.eq("type", "sale");
-    } else if (type === "Rent" || type === "rent") {
-      queryBuilder = queryBuilder.eq("type", "rent");
-    }
-
-    // Filter by Search Query
-    if (rawQuery) {
-      // Escape special characters for ilike
-      const cleanQuery = rawQuery.replace(/[%_]/g, "\\$&");
-      queryBuilder = queryBuilder.or(
-        `title.ilike.%${cleanQuery}%,location.ilike.%${cleanQuery}%,category.ilike.%${cleanQuery}%`
-      );
-    }
-
-    // Pagination range
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
-
-    const { data, error, count } = await queryBuilder
-      .order("id", { ascending: true })
-      .range(from, to);
-
-    if (error || !data) {
-      console.warn("Using fallback paginated properties:", error?.message);
-      return getFallbackPaginatedProperties({
-        page,
-        pageSize,
-        category,
-        type,
-        query: rawQuery,
-      });
-    }
-
-    const totalCount = count ?? data.length;
-    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-    const properties = data.map(mapRowToProperty);
-
-    return {
-      properties,
-      totalCount,
-      totalPages,
-      currentPage: page,
-      pageSize,
-      hasNextPage: page < totalPages,
-      hasPrevPage: page > 1,
-    };
-  } catch (err) {
-    console.error("Error fetching paginated properties from Supabase:", err);
-    return getFallbackPaginatedProperties({
-      page,
-      pageSize,
-      category,
-      type,
-      query: rawQuery,
     });
   }
+
+  const totalCount = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const from = (page - 1) * pageSize;
+  const properties = filtered.slice(from, from + pageSize);
+
+  return {
+    properties,
+    totalCount,
+    totalPages,
+    currentPage: page,
+    pageSize,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  };
 }
 
 /**
@@ -309,14 +344,42 @@ function getFallbackPaginatedProperties(
     );
   }
 
-  if (params.category && params.category !== "All") {
-    filtered = filtered.filter((p) => p.category === params.category);
+  if (params.category && params.category !== "All" && params.category !== "Any Type") {
+    filtered = filtered.filter((p) => p.category.toLowerCase() === params.category!.toLowerCase());
   }
 
   if (params.type === "Buy" || params.type === "sale") {
     filtered = filtered.filter((p) => p.type === "sale");
   } else if (params.type === "Rent" || params.type === "rent") {
     filtered = filtered.filter((p) => p.type === "rent");
+  }
+
+  if (typeof params.minPrice === "number" && !isNaN(params.minPrice) && params.minPrice > 0) {
+    filtered = filtered.filter((p) => p.price >= params.minPrice!);
+  }
+
+  if (typeof params.maxPrice === "number" && !isNaN(params.maxPrice) && params.maxPrice > 0) {
+    filtered = filtered.filter((p) => p.price <= params.maxPrice!);
+  }
+
+  if (typeof params.beds === "number" && !isNaN(params.beds) && params.beds > 0) {
+    filtered = filtered.filter((p) => p.beds >= params.beds!);
+  }
+
+  if (typeof params.baths === "number" && !isNaN(params.baths) && params.baths > 0) {
+    filtered = filtered.filter((p) => p.baths >= params.baths!);
+  }
+
+  if (params.amenities && Array.isArray(params.amenities) && params.amenities.length > 0) {
+    filtered = filtered.filter((p) => {
+      if (!p.amenities || p.amenities.length === 0) return false;
+      const propAmenitiesLower = p.amenities.map((a) => a.toLowerCase());
+      return params.amenities!.every((req) =>
+        propAmenitiesLower.some(
+          (a) => a.includes(req.toLowerCase()) || req.toLowerCase().includes(a)
+        )
+      );
+    });
   }
 
   const totalCount = filtered.length;

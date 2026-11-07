@@ -16,4 +16,9 @@ export interface PropertyFilterParams {
   category?: string;
   type?: string; // 'All' | 'Buy' | 'Rent' or 'sale' | 'rent'
   query?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  beds?: number;
+  baths?: number;
+  amenities?: string[];
 }

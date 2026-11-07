@@ -39,14 +39,68 @@ body {
 
 /* Scrollbar utilities */
 .hide-scroll::-webkit-scrollbar,
-.scrollbar-hide::-webkit-scrollbar {
+.scrollbar-hide::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
 .hide-scroll,
-.scrollbar-hide {
+.scrollbar-hide,
+.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Custom dual range slider styling */
+.range-slider-input {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.range-slider-input::-webkit-slider-thumb {
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
+  width: 24px;
+  border-radius: 9999px;
+  background: #ffffff;
+  cursor: pointer;
+  border: 2px solid #006655;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease;
+}
+
+.range-slider-input::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+}
+
+.range-slider-input::-moz-range-thumb {
+  pointer-events: auto;
+  height: 24px;
+  width: 24px;
+  border-radius: 9999px;
+  background: #ffffff;
+  cursor: pointer;
+  border: 2px solid #006655;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease;
+}
+
+.range-slider-input::-moz-range-thumb:hover {
+  transform: scale(1.12);
+}
+
+.range-slider-input::-webkit-slider-runnable-track {
+  background: transparent;
+  border: none;
+}
+
+.range-slider-input::-moz-range-track {
+  background: transparent;
+  border: none;
 }
 
 /* Leaflet map styles */

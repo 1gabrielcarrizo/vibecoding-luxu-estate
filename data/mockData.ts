@@ -924,4 +924,945 @@ export const initialMarketProperties: Property[] = [
   },
 ];
 
-export const additionalMarketProperties: Property[] = [];
+export const additionalMarketProperties: Property[] = [
+  {
+    "id": "market-21",
+    "slug": "the-aspen-sanctuary-aspen",
+    "title": "The Aspen Sanctuary",
+    "location": "740 Red Mountain Rd, Aspen, CO",
+    "price": 8900000,
+    "formattedPrice": "$8,900,000",
+    "beds": 5,
+    "baths": 6,
+    "sqm": 620,
+    "garage": 3,
+    "badge": "EXCLUSIVE",
+    "badges": [
+      "EXCLUSIVE",
+      "Mountain View"
+    ],
+    "type": "sale",
+    "category": "Villa",
+    "images": [
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "The Aspen Sanctuary exterior with heated infinity plunge pool",
+    "coordinates": {
+      "lat": 39.1911,
+      "lng": -106.8175
+    },
+    "agent": {
+      "name": "Sarah Jenkins",
+      "role": "Top Rated Agent",
+      "avatarUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuD4TxUmdQRb2VMjuaNxLEwLorv_dgHzoET2_wL5toSvew6nhtziaR3DX-U69DBN7J74yO6oKokpw8tqEFutJf13MeXghCy7FwZuAxnoJel6FYcKeCRUVinpZtrNnkZvXd-MY5_2MAtRD7JP5BieHixfCaeAPW04jm-y-nvF3HIrwcZ_HRDk_MrNP5WiPV3u9zNrEgM-SQoWGh4xLVSV444aZAbVl03mjjsW5WBpIeodCyqJxprTDp6Q157D06VxcdUSCf-l9UKQT-w",
+      "phone": "+1 (555) 349-8201",
+      "email": "sarah.jenkins@luxeestate.com",
+      "rating": 4.9
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace",
+      "Wine Cellar",
+      "Sauna & Steam Room"
+    ],
+    "description": [
+      "Nestled in the prestigious Red Mountain enclave of Aspen, this architectural sanctuary commands uninterrupted views of Aspen Mountain and the Roaring Fork Valley.",
+      "Crafted with reclaimed timber, Colorado flagstone, and expansive glass walls, the residence offers a heated infinity plunge pool, ski lounge with gear lockers, and heated stone terraces."
+    ],
+    "estimatedPayment": {
+      "monthly": 38200,
+      "formattedMonthly": "$38,200/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-22",
+    "slug": "tribeca-cast-iron-loft-new-york",
+    "title": "Tribeca Cast-Iron Loft",
+    "location": "68 Franklin St, Tribeca, New York, NY",
+    "price": 14500,
+    "formattedPrice": "$14,500",
+    "priceSuffix": "/mo",
+    "beds": 3,
+    "baths": 3,
+    "sqm": 280,
+    "garage": 1,
+    "badge": "FOR RENT",
+    "badges": [
+      "FOR RENT",
+      "Historic"
+    ],
+    "type": "rent",
+    "category": "Apartment",
+    "images": [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Tribeca Cast-Iron Loft living area with tall windows",
+    "coordinates": {
+      "lat": 40.7183,
+      "lng": -74.0049
+    },
+    "amenities": [
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Authentic cast-iron historic loft boasting 14-foot soaring ceilings, original fluted Corinthian columns, and museum-grade finishes throughout.",
+      "Direct keyed elevator opens into an expansive 40-foot living gallery with oversized south-facing windows and a custom Boffi kitchen with Gaggenau appliances."
+    ],
+    "estimatedPayment": {
+      "monthly": 14500,
+      "formattedMonthly": "$14,500/mo",
+      "downPaymentPercent": 0
+    }
+  },
+  {
+    "id": "market-23",
+    "slug": "biscayne-bay-waterfront-estate-miami",
+    "title": "Biscayne Bay Waterfront Estate",
+    "location": "4410 N Bay Rd, Miami Beach, FL",
+    "price": 12500000,
+    "formattedPrice": "$12,500,000",
+    "beds": 6,
+    "baths": 7,
+    "sqm": 780,
+    "garage": 4,
+    "badge": "NEW",
+    "badges": [
+      "NEW",
+      "Waterfront"
+    ],
+    "type": "sale",
+    "category": "Villa",
+    "images": [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Biscayne Bay Waterfront Estate pool and deck",
+    "coordinates": {
+      "lat": 25.8165,
+      "lng": -80.1378
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "A pristine waterfront masterpiece located on Miami Beach's premier residential avenue, with 100 feet of deep-water Biscayne Bay frontage and private yacht dockage.",
+      "Features zero-edge resort pool, lush tropical gardens designed by Raymond Jungles, summer kitchen pavilion, and glass-encased wine room."
+    ],
+    "estimatedPayment": {
+      "monthly": 53750,
+      "formattedMonthly": "$53,750/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-24",
+    "slug": "skyline-grand-penthouse-manhattan",
+    "title": "Skyline Grand Penthouse",
+    "location": "111 W 57th St, Midtown Manhattan, NY",
+    "price": 18500000,
+    "formattedPrice": "$18,500,000",
+    "beds": 4,
+    "baths": 5,
+    "sqm": 510,
+    "garage": 2,
+    "badge": "EXCLUSIVE",
+    "badges": [
+      "EXCLUSIVE",
+      "Central Park Views"
+    ],
+    "type": "sale",
+    "category": "Penthouse",
+    "images": [
+      "https://images.unsplash.com/photo-1502005229762-ee1b2da97327?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Skyline Grand Penthouse interior with Central Park views",
+    "coordinates": {
+      "lat": 40.7648,
+      "lng": -73.9777
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Perched on Billionaires' Row with breathtaking, unobstructed views over the entire expanse of Central Park to the north and the Manhattan skyline to the south.",
+      "Includes private elevator foyer, 14-foot ceiling heights, custom bronze hardware, radiant heated Fior di Bosco marble baths, and dedicated resident concierge."
+    ],
+    "estimatedPayment": {
+      "monthly": 79500,
+      "formattedMonthly": "$79,500/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-25",
+    "slug": "malibu-cliffside-modern-malibu",
+    "title": "Malibu Cliffside Modern",
+    "location": "31800 Broad Beach Rd, Malibu, CA",
+    "price": 9750000,
+    "formattedPrice": "$9,750,000",
+    "beds": 4,
+    "baths": 5,
+    "sqm": 450,
+    "garage": 3,
+    "badge": "FOR SALE",
+    "badges": [
+      "FOR SALE",
+      "Oceanfront"
+    ],
+    "type": "sale",
+    "category": "House",
+    "images": [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Malibu Cliffside Modern cantilevered deck over the ocean",
+    "coordinates": {
+      "lat": 34.0381,
+      "lng": -118.8687
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Sculptural modern marvel resting atop coastal bluffs with private stairs down to sandy Broad Beach in Malibu.",
+      "Motorized glass pocket doors open the main level to an expansive teak cantilevered deck with infinity pool, spa, and panoramic Pacific sunsets."
+    ],
+    "estimatedPayment": {
+      "monthly": 41900,
+      "formattedMonthly": "$41,900/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-26",
+    "slug": "mayfair-heritage-residence-london",
+    "title": "Mayfair Heritage Residence",
+    "location": "14 Grosvenor Square, Mayfair, London",
+    "price": 22000,
+    "formattedPrice": "$22,000",
+    "priceSuffix": "/mo",
+    "beds": 3,
+    "baths": 3.5,
+    "sqm": 310,
+    "garage": 1,
+    "badge": "FOR RENT",
+    "badges": [
+      "FOR RENT",
+      "Prime London"
+    ],
+    "type": "rent",
+    "category": "Apartment",
+    "images": [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Mayfair Heritage Residence classic high-ceiling reception room",
+    "coordinates": {
+      "lat": 51.5113,
+      "lng": -0.1511
+    },
+    "amenities": [
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Grand Georgian proportions meet ultra-contemporary interior design in London's premier garden square.",
+      "Direct lift access, chevron oak flooring, bespoke Poliform joinery, and private balconies overlooking landscaped private communal gardens."
+    ],
+    "estimatedPayment": {
+      "monthly": 22000,
+      "formattedMonthly": "$22,000/mo",
+      "downPaymentPercent": 0
+    }
+  },
+  {
+    "id": "market-27",
+    "slug": "lake-austin-hillside-retreat-austin",
+    "title": "Lake Austin Hillside Retreat",
+    "location": "2804 Westlake Dr, Austin, TX",
+    "price": 4650000,
+    "formattedPrice": "$4,650,000",
+    "beds": 4,
+    "baths": 4.5,
+    "sqm": 420,
+    "garage": 3,
+    "badge": "NEW",
+    "badges": [
+      "NEW",
+      "Waterfront"
+    ],
+    "type": "sale",
+    "category": "House",
+    "images": [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Lake Austin Hillside Retreat limestone facade and pool",
+    "coordinates": {
+      "lat": 30.3322,
+      "lng": -97.7915
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Tucked along the tranquil shores of Lake Austin, this modern organic compound combines natural Texas limestone with glass and blackened steel.",
+      "Features a private two-story boat dock with upper sundeck, negative-edge pool overlooking the lake, and detached guest casita."
+    ],
+    "estimatedPayment": {
+      "monthly": 20000,
+      "formattedMonthly": "$20,000/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-28",
+    "slug": "villa-bella-vista-lake-como",
+    "title": "Villa Bella Vista",
+    "location": "Via Bellagio 18, Lake Como, Italy",
+    "price": 6200000,
+    "formattedPrice": "$6,200,000",
+    "beds": 5,
+    "baths": 5,
+    "sqm": 540,
+    "garage": 2,
+    "badge": "EXCLUSIVE",
+    "badges": [
+      "EXCLUSIVE",
+      "Lakefront"
+    ],
+    "type": "sale",
+    "category": "Villa",
+    "images": [
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Villa Bella Vista overlooking Lake Como",
+    "coordinates": {
+      "lat": 45.9867,
+      "lng": 9.2625
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "An enchanting Lake Como estate with private waterfront gardens, century-old cypress trees, and panoramic views of the Bellagio peninsula.",
+      "Extensively restored with Italian Carrara marble, custom Venetian plaster, wine cellar, and private boat mooring."
+    ],
+    "estimatedPayment": {
+      "monthly": 26600,
+      "formattedMonthly": "$26,600/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-29",
+    "slug": "saint-germain-modern-atelier-paris",
+    "title": "Saint-Germain Modern Atelier",
+    "location": "24 Rue de Grenelle, 7th Arr., Paris",
+    "price": 8500,
+    "formattedPrice": "$8,500",
+    "priceSuffix": "/mo",
+    "beds": 2,
+    "baths": 2,
+    "sqm": 145,
+    "garage": 1,
+    "badge": "FOR RENT",
+    "badges": [
+      "FOR RENT",
+      "Rive Gauche"
+    ],
+    "type": "rent",
+    "category": "Apartment",
+    "images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Saint-Germain Modern Atelier chic Parisian salon",
+    "coordinates": {
+      "lat": 48.8532,
+      "lng": 2.3278
+    },
+    "amenities": [
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace",
+      "Gym"
+    ],
+    "description": [
+      "Refined Left Bank pied-à-terre located in a historic 18th-century hôtel particulier with landscaped courtyards.",
+      "Herringbone parquet, classic mouldings, functioning marble fireplaces, air conditioning, and a private terrace overlooking quiet private gardens."
+    ],
+    "estimatedPayment": {
+      "monthly": 8500,
+      "formattedMonthly": "$8,500/mo",
+      "downPaymentPercent": 0
+    }
+  },
+  {
+    "id": "market-30",
+    "slug": "the-pacific-heights-manor-san-francisco",
+    "title": "The Pacific Heights Manor",
+    "location": "2740 Pacific Ave, San Francisco, CA",
+    "price": 7800000,
+    "formattedPrice": "$7,800,000",
+    "beds": 5,
+    "baths": 5.5,
+    "sqm": 560,
+    "garage": 2,
+    "badge": "FOR SALE",
+    "badges": [
+      "FOR SALE",
+      "Golden Gate Views"
+    ],
+    "type": "sale",
+    "category": "House",
+    "images": [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "The Pacific Heights Manor classic facade",
+    "coordinates": {
+      "lat": 37.7925,
+      "lng": -122.4382
+    },
+    "amenities": [
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Timeless San Francisco luxury in top-tier Pacific Heights with sweeping vistas of the Golden Gate Bridge, Marin Headlands, and San Francisco Bay.",
+      "Features high ceilings, custom chef's kitchen, wine tasting cellar, private rooftop garden terrace, and 2-car garage with EV charger."
+    ],
+    "estimatedPayment": {
+      "monthly": 33500,
+      "formattedMonthly": "$33,500/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-31",
+    "slug": "roppongi-hills-panorama-suite-tokyo",
+    "title": "Roppongi Hills Panorama Suite",
+    "location": "6-10-1 Roppongi, Minato City, Tokyo",
+    "price": 5400000,
+    "formattedPrice": "$5,400,000",
+    "beds": 3,
+    "baths": 3,
+    "sqm": 260,
+    "garage": 2,
+    "badge": "NEW",
+    "badges": [
+      "NEW",
+      "Skyline Views"
+    ],
+    "type": "sale",
+    "category": "Penthouse",
+    "images": [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1502005229762-ee1b2da97327?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Roppongi Hills Panorama Suite with panoramic views over Tokyo",
+    "coordinates": {
+      "lat": 35.6604,
+      "lng": 139.7292
+    },
+    "amenities": [
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Ultra-high specification Tokyo penthouse situated high above Roppongi with direct Tokyo Tower views and Mount Fuji horizon sunsets.",
+      "Equipped with Hinoki cypress soaking tub, smart home climate automation, 24-hour bilingual concierge, and private underground parking."
+    ],
+    "estimatedPayment": {
+      "monthly": 23200,
+      "formattedMonthly": "$23,200/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-32",
+    "slug": "silverleaf-sonoran-villa-scottsdale",
+    "title": "Silverleaf Sonoran Villa",
+    "location": "10800 E Cactus Rd, Scottsdale, AZ",
+    "price": 3450000,
+    "formattedPrice": "$3,450,000",
+    "beds": 4,
+    "baths": 4.5,
+    "sqm": 490,
+    "garage": 3,
+    "badge": "FOR SALE",
+    "badges": [
+      "FOR SALE",
+      "Golf Club"
+    ],
+    "type": "sale",
+    "category": "Villa",
+    "images": [
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Silverleaf Sonoran Villa pool and mountain backdrop",
+    "coordinates": {
+      "lat": 33.5975,
+      "lng": -111.8485
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Mediterranean Spanish revival estate located behind the double gates of Silverleaf Club in North Scottsdale.",
+      "Courtyard entries, fountains, custom beamed ceilings, resort pool with swim-up bar, and outdoor kitchen with McDowell Mountain backdrops."
+    ],
+    "estimatedPayment": {
+      "monthly": 14800,
+      "formattedMonthly": "$14,800/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-33",
+    "slug": "lincoln-park-brick-masterpiece-chicago",
+    "title": "Lincoln Park Brick Masterpiece",
+    "location": "1940 N Orchard St, Chicago, IL",
+    "price": 3100000,
+    "formattedPrice": "$3,100,000",
+    "beds": 4,
+    "baths": 4,
+    "sqm": 390,
+    "garage": 2,
+    "badge": "NEW",
+    "badges": [
+      "NEW",
+      "Single Family"
+    ],
+    "type": "sale",
+    "category": "House",
+    "images": [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Lincoln Park Brick Masterpiece modern brick facade",
+    "coordinates": {
+      "lat": 41.9174,
+      "lng": -87.6469
+    },
+    "amenities": [
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Custom brick and limestone single family residence on one of Lincoln Park's most desirable tree-lined blocks.",
+      "Features 4 levels of living space, commercial-grade elevator, radiant heated lower level, and a lush landscaped rooftop terrace with skyline views."
+    ],
+    "estimatedPayment": {
+      "monthly": 13300,
+      "formattedMonthly": "$13,300/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-34",
+    "slug": "diamond-head-oceanfront-haven-honolulu",
+    "title": "Diamond Head Oceanfront Haven",
+    "location": "3920 Diamond Head Rd, Honolulu, HI",
+    "price": 11200000,
+    "formattedPrice": "$11,200,000",
+    "beds": 5,
+    "baths": 6,
+    "sqm": 670,
+    "garage": 3,
+    "badge": "EXCLUSIVE",
+    "badges": [
+      "EXCLUSIVE",
+      "Oceanfront"
+    ],
+    "type": "sale",
+    "category": "Villa",
+    "images": [
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Diamond Head Oceanfront Haven pool and Pacific ocean horizon",
+    "coordinates": {
+      "lat": 21.2588,
+      "lng": -157.8091
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "One-of-a-kind oceanfront sanctuary at the base of Diamond Head crater with direct private ocean and surf break access.",
+      "Featuring indoor-outdoor Hawaiian architecture, infinity edge saltwater pool, wrap-around lanais, and palm-shaded lawns."
+    ],
+    "estimatedPayment": {
+      "monthly": 48100,
+      "formattedMonthly": "$48,100/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-35",
+    "slug": "salamanca-luxury-flat-madrid",
+    "title": "Salamanca Luxury Flat",
+    "location": "Calle de Serrano 42, Salamanca, Madrid",
+    "price": 6500,
+    "formattedPrice": "$6,500",
+    "priceSuffix": "/mo",
+    "beds": 2,
+    "baths": 2,
+    "sqm": 160,
+    "garage": 1,
+    "badge": "FOR RENT",
+    "badges": [
+      "FOR RENT",
+      "Milla de Oro"
+    ],
+    "type": "rent",
+    "category": "Apartment",
+    "images": [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Salamanca Luxury Flat high-ceiling living space",
+    "coordinates": {
+      "lat": 40.4284,
+      "lng": -3.6874
+    },
+    "amenities": [
+      "Gym",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace",
+      "Parking"
+    ],
+    "description": [
+      "Exquisite furnished residence situated in Madrid's Golden Mile on Calle Serrano, steps away from haute couture boutiques and gourmet restaurants.",
+      "High ceilings, classic balconies overlooking Serrano, contemporary Italian furnishings, automated ducted climate control, and on-site concierge."
+    ],
+    "estimatedPayment": {
+      "monthly": 6500,
+      "formattedMonthly": "$6,500/mo",
+      "downPaymentPercent": 0
+    }
+  },
+  {
+    "id": "market-36",
+    "slug": "zurichberg-forest-view-penthouse-zurich",
+    "title": "Zurichberg Forest View Penthouse",
+    "location": "Zurichbergstrasse 90, 8044 Zurich, Switzerland",
+    "price": 6850000,
+    "formattedPrice": "$6,850,000",
+    "beds": 3,
+    "baths": 3.5,
+    "sqm": 320,
+    "garage": 2,
+    "badge": "EXCLUSIVE",
+    "badges": [
+      "EXCLUSIVE",
+      "Lake & Alps Views"
+    ],
+    "type": "sale",
+    "category": "Penthouse",
+    "images": [
+      "https://images.unsplash.com/photo-1502005229762-ee1b2da97327?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Zurichberg Forest View Penthouse terrace with Alps views",
+    "coordinates": {
+      "lat": 47.3792,
+      "lng": 8.5638
+    },
+    "amenities": [
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Exceptional penthouse apartment positioned atop the prestigious Zurichberg hill with panoramic views over Lake Zurich and the Swiss Alps.",
+      "Floor-to-ceiling triple glazing, private rooftop terrace with fireplace, Swiss precision finishes, private sauna, and 2 garage spaces."
+    ],
+    "estimatedPayment": {
+      "monthly": 29400,
+      "formattedMonthly": "$29,400/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-37",
+    "slug": "beacon-hill-brownstone-boston",
+    "title": "Beacon Hill Brownstone",
+    "location": "84 Chestnut St, Beacon Hill, Boston, MA",
+    "price": 4200000,
+    "formattedPrice": "$4,200,000",
+    "beds": 4,
+    "baths": 3.5,
+    "sqm": 340,
+    "garage": 1,
+    "badge": "FOR SALE",
+    "badges": [
+      "FOR SALE",
+      "Historic Landmark"
+    ],
+    "type": "sale",
+    "category": "House",
+    "images": [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Beacon Hill Brownstone historic brick entry",
+    "coordinates": {
+      "lat": 42.3571,
+      "lng": -71.0708
+    },
+    "amenities": [
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Historic brick townhome on quiet gas-lit Chestnut Street in Boston's storied Beacon Hill neighborhood.",
+      "Meticulously renovated five-story residence featuring an elevator, private brick garden patio, roof deck with Charles River views, and rare attached garage."
+    ],
+    "estimatedPayment": {
+      "monthly": 18000,
+      "formattedMonthly": "$18,000/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-38",
+    "slug": "palm-jumeirah-sunset-villa-dubai",
+    "title": "Palm Jumeirah Sunset Villa",
+    "location": "Frond N, Palm Jumeirah, Dubai, UAE",
+    "price": 15900000,
+    "formattedPrice": "$15,900,000",
+    "beds": 6,
+    "baths": 7,
+    "sqm": 820,
+    "garage": 4,
+    "badge": "EXCLUSIVE",
+    "badges": [
+      "EXCLUSIVE",
+      "Private Beach"
+    ],
+    "type": "sale",
+    "category": "Villa",
+    "images": [
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Palm Jumeirah Sunset Villa with private beach",
+    "coordinates": {
+      "lat": 25.1189,
+      "lng": 55.1328
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Bespoke beachfront signature villa situated on Palm Jumeirah with private white sand beach and direct sunset views towards the Arabian Gulf.",
+      "Private infinity swimming pool, marble-clad double height foyer, Poggenpohl showcase kitchen, spa sanctuary, and smart home automation."
+    ],
+    "estimatedPayment": {
+      "monthly": 68300,
+      "formattedMonthly": "$68,300/mo",
+      "downPaymentPercent": 20
+    }
+  },
+  {
+    "id": "market-39",
+    "slug": "golden-mile-beachfront-penthouse-marbella",
+    "title": "Golden Mile Beachfront Penthouse",
+    "location": "Bv. Príncipe Alfonso von Hohenlohe, Marbella, Spain",
+    "price": 9200,
+    "formattedPrice": "$9,200",
+    "priceSuffix": "/mo",
+    "beds": 3,
+    "baths": 3,
+    "sqm": 290,
+    "garage": 2,
+    "badge": "FOR RENT",
+    "badges": [
+      "FOR RENT",
+      "Costa del Sol"
+    ],
+    "type": "rent",
+    "category": "Penthouse",
+    "images": [
+      "https://images.unsplash.com/photo-1502005229762-ee1b2da97327?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Golden Mile Beachfront Penthouse rooftop solarium",
+    "coordinates": {
+      "lat": 36.5085,
+      "lng": -4.9213
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Gym",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Frontline Mediterranean penthouse in Marbella's famed Golden Mile, featuring an extensive wrap-around solarium with private plunge pool and summer bar.",
+      "Gated community with 24-hour security, lush subtropical gardens, fitness wellness center, and direct boardwalk access."
+    ],
+    "estimatedPayment": {
+      "monthly": 9200,
+      "formattedMonthly": "$9,200/mo",
+      "downPaymentPercent": 0
+    }
+  },
+  {
+    "id": "market-40",
+    "slug": "westmount-heritage-manor-montreal",
+    "title": "Westmount Heritage Manor",
+    "location": "480 Mountain Ave, Westmount, Montreal, QC",
+    "price": 3750000,
+    "formattedPrice": "$3,750,000",
+    "beds": 5,
+    "baths": 4,
+    "sqm": 460,
+    "garage": 2,
+    "badge": "FOR SALE",
+    "badges": [
+      "FOR SALE",
+      "Heritage"
+    ],
+    "type": "sale",
+    "category": "House",
+    "images": [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "imageAlt": "Westmount Heritage Manor stone facade and garden",
+    "coordinates": {
+      "lat": 45.4851,
+      "lng": -73.5997
+    },
+    "amenities": [
+      "Swimming Pool",
+      "Parking",
+      "Air Conditioning",
+      "High-speed Wifi",
+      "Patio / Terrace"
+    ],
+    "description": [
+      "Distinguished grey stone residence situated on prestigious Mountain Avenue in Westmount.",
+      "High ceilings, rich woodwork, leaded glass windows, contemporary open gourmet kitchen, heated outdoor inground pool, and private manicured grounds."
+    ],
+    "estimatedPayment": {
+      "monthly": 16100,
+      "formattedMonthly": "$16,100/mo",
+      "downPaymentPercent": 20
+    }
+  }
+];

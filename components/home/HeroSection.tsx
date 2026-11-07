@@ -11,6 +11,7 @@ interface HeroSectionProps {
   selectedCategory: PropertyCategory;
   onSelectCategory: (category: PropertyCategory) => void;
   onToggleFilters?: () => void;
+  activeFilterCount?: number;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -20,6 +21,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   selectedCategory,
   onSelectCategory,
   onToggleFilters,
+  activeFilterCount = 0,
 }) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -88,9 +90,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <button
             type="button"
             onClick={onToggleFilters}
-            className="whitespace-nowrap flex items-center gap-1 px-4 py-2 rounded-full text-nordic-dark font-medium text-sm hover:bg-black/5 transition-colors"
+            className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full font-medium text-sm transition-all ${
+              activeFilterCount > 0
+                ? "bg-mosque/10 text-mosque border border-mosque/30"
+                : "text-nordic-dark hover:bg-black/5"
+            }`}
           >
-            <span className="material-icons text-base">tune</span> Filters
+            <span className="material-icons text-base">tune</span>
+            <span>Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="w-5 h-5 rounded-full bg-mosque text-white text-[11px] font-bold flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
           </button>
         </div>
       </div>
