@@ -6,12 +6,14 @@ import { Property } from "@/types/property";
 import { PropertyMap } from "./PropertyMap";
 import { ScheduleVisitModal } from "./ScheduleVisitModal";
 import { ContactAgentModal } from "./ContactAgentModal";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface PropertySidebarProps {
   property: Property;
 }
 
 export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) => {
+  const { t } = useTranslation();
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
@@ -30,6 +32,18 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
   );
   const whatsappUrl = `https://wa.me/15553498201?text=${whatsappMessage}`;
 
+  const roleText =
+    agent.role === "Top Rated Agent"
+      ? t("propertyDetail.agentRating")
+      : agent.role;
+
+  const priceSuffixText =
+    property.priceSuffix &&
+    (property.priceSuffix.includes("/mo") ||
+      property.priceSuffix.includes("/mes"))
+      ? t("propertyDetail.perMonth")
+      : property.priceSuffix;
+
   return (
     <div className="lg:col-span-4 relative">
       <div className="sticky top-28 space-y-6">
@@ -38,9 +52,9 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
           <div className="mb-4">
             <h1 className="text-4xl font-display font-light text-nordic mb-2">
               {property.formattedPrice}
-              {property.priceSuffix && (
+              {priceSuffixText && (
                 <span className="text-lg font-normal text-nordic/60 ml-1">
-                  {property.priceSuffix}
+                  {priceSuffixText}
                 </span>
               )}
             </h1>
@@ -67,7 +81,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
               <h3 className="font-semibold text-nordic">{agent.name}</h3>
               <div className="flex items-center gap-1 text-xs text-mosque font-medium">
                 <span className="material-icons text-[14px]">star</span>
-                <span>{agent.role}</span>
+                <span>{roleText}</span>
               </div>
             </div>
             <div className="ml-auto flex gap-2">
@@ -75,16 +89,16 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Chat via WhatsApp"
-                aria-label="Chat with agent via WhatsApp"
+                title={t("propertyDetail.whatsappChat")}
+                aria-label={t("propertyDetail.whatsappChat")}
                 className="p-2 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors cursor-pointer"
               >
                 <span className="material-icons text-sm">chat</span>
               </a>
               <a
                 href={`tel:${agent.phone || "+15553498201"}`}
-                title="Call agent"
-                aria-label="Call agent"
+                title={t("propertyDetail.callAgent")}
+                aria-label={t("propertyDetail.callAgent")}
                 className="p-2 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors cursor-pointer"
               >
                 <span className="material-icons text-sm">call</span>
@@ -102,7 +116,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
               <span className="material-icons text-xl group-hover:scale-110 transition-transform">
                 calendar_today
               </span>
-              <span>Schedule Visit</span>
+              <span>{t("propertyDetail.scheduleTour")}</span>
             </button>
 
             <button
@@ -111,7 +125,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
               className="w-full bg-transparent border border-nordic/10 hover:border-mosque text-nordic/80 hover:text-mosque py-4 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span className="material-icons text-xl">mail_outline</span>
-              <span>Contact Agent</span>
+              <span>{t("propertyDetail.contactAgent")}</span>
             </button>
           </div>
         </div>
@@ -141,4 +155,3 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
     </div>
   );
 };
-

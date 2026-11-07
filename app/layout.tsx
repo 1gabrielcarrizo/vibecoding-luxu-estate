@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,8 +15,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang={DEFAULT_LOCALE} className="h-full antialiased">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var m=document.cookie.match(/(?:^|;\\s*)luxe_locale=([^;]+)/);if(m){var l=decodeURIComponent(m[1]);if(['es','en','fr'].indexOf(l)!==-1){document.documentElement.lang=l;}}}catch(e){}`,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -35,7 +42,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background-light text-nordic-dark font-display antialiased selection:bg-mosque selection:text-white">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

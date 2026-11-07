@@ -1,0 +1,46 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { PropertyCategory } from "@/types/property";
+
+interface PropertyBreadcrumbProps {
+  category: PropertyCategory;
+  title: string;
+}
+
+export const PropertyBreadcrumb: React.FC<PropertyBreadcrumbProps> = ({
+  category,
+  title,
+}) => {
+  const { t } = useTranslation();
+  const categoryLabel = t(`categories.${category}`) || category;
+
+  return (
+    <nav
+      aria-label="Breadcrumb"
+      className="mb-6 flex items-center gap-2 text-xs text-nordic/60"
+    >
+      <Link
+        href="/"
+        className="hover:text-mosque transition-colors flex items-center gap-1"
+      >
+        <span className="material-icons text-sm">home</span>
+        <span>{t("nav.home")}</span>
+      </Link>
+      <span className="text-nordic/30">/</span>
+      <Link
+        href={`/?category=${category}`}
+        className="hover:text-mosque transition-colors"
+      >
+        {categoryLabel}
+      </Link>
+      <span className="text-nordic/30">/</span>
+      <span className="text-nordic font-medium truncate max-w-xs sm:max-w-md">
+        {title}
+      </span>
+    </nav>
+  );
+};
+

@@ -4,6 +4,7 @@ import React from "react";
 import { Property, MarketFilterTab } from "@/types/property";
 import { PropertyCard } from "./PropertyCard";
 import { Pagination } from "./Pagination";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface MarketSectionProps {
   properties: Property[];
@@ -30,6 +31,7 @@ export const MarketSection: React.FC<MarketSectionProps> = ({
   isLoading = false,
   onSelectProperty,
 }) => {
+  const { t } = useTranslation();
   const tabs: MarketFilterTab[] = ["All", "Buy", "Rent"];
 
   return (
@@ -39,16 +41,16 @@ export const MarketSection: React.FC<MarketSectionProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-light text-nordic-dark">
-              New in Market
+              {t("market.title")}
             </h2>
             {isLoading && (
               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-nordic-dark/10 text-nordic-dark animate-pulse">
-                Updating...
+                {t("market.updating")}
               </span>
             )}
           </div>
           <p className="text-nordic-muted mt-1 text-sm">
-            Fresh opportunities added this week.
+            {t("market.subtitle")}
           </p>
         </div>
 
@@ -67,7 +69,7 @@ export const MarketSection: React.FC<MarketSectionProps> = ({
                     : "text-nordic-muted hover:text-nordic-dark"
                 }`}
               >
-                {tab}
+                {t(`market.tabs.${tab}`)}
               </button>
             );
           })}
@@ -75,14 +77,21 @@ export const MarketSection: React.FC<MarketSectionProps> = ({
       </div>
 
       {/* Properties Grid with smooth loading state */}
-      <div className={`transition-opacity duration-200 ${isLoading ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
+      <div
+        className={`transition-opacity duration-200 ${
+          isLoading ? "opacity-60 pointer-events-none" : "opacity-100"
+        }`}
+      >
         {properties.length === 0 ? (
           <div className="text-center py-16 bg-white/50 rounded-xl border border-dashed border-nordic-dark/10">
             <span className="material-icons text-4xl text-nordic-muted">
               search_off
             </span>
-            <p className="mt-2 text-nordic-muted">
-              No properties found matching your selection.
+            <p className="mt-2 text-nordic-muted font-medium">
+              {t("market.noProperties")}
+            </p>
+            <p className="mt-1 text-xs text-nordic-muted/70">
+              {t("market.noPropertiesSub")}
             </p>
           </div>
         ) : (

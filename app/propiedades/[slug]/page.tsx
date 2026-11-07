@@ -11,6 +11,7 @@ import { PropertyAmenities } from "@/components/property/PropertyAmenities";
 import { MortgageCalculatorSection } from "@/components/property/MortgageCalculatorSection";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { PropertyJsonLd } from "@/components/property/PropertyJsonLd";
+import { PropertyBreadcrumb } from "@/components/property/PropertyBreadcrumb";
 
 interface PropertyPageProps {
   params: Promise<{
@@ -110,23 +111,10 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
       {/* Main Content Container matching code.html */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs text-nordic/60">
-          <Link href="/" className="hover:text-mosque transition-colors flex items-center gap-1">
-            <span className="material-icons text-sm">home</span>
-            <span>Home</span>
-          </Link>
-          <span className="text-nordic/30">/</span>
-          <Link
-            href={`/?category=${property.category}`}
-            className="hover:text-mosque transition-colors"
-          >
-            {property.category}
-          </Link>
-          <span className="text-nordic/30">/</span>
-          <span className="text-nordic font-medium truncate max-w-xs sm:max-w-md">
-            {property.title}
-          </span>
-        </nav>
+        <PropertyBreadcrumb
+          category={property.category}
+          title={property.title}
+        />
 
         {/* 12-Column Grid Layout matching code.html */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">

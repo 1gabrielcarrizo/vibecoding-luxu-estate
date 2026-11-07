@@ -1,0 +1,171 @@
+{
+  "nav": {
+    "buy": "Comprar",
+    "rent": "Alquilar",
+    "sell": "Vender",
+    "savedHomes": "Favoritos",
+    "searchAria": "Buscar propiedades",
+    "notificationsAria": "Notificaciones",
+    "profileAria": "Perfil de usuario",
+    "toggleMenuAria": "Alternar menú de navegación",
+    "language": "Idioma",
+    "home": "Inicio"
+  },
+  "hero": {
+    "titlePrefix": "Encuentra tu",
+    "titleHighlight": "santuario",
+    "searchPlaceholder": "Buscar por ciudad, vecindario o dirección...",
+    "searchButton": "Buscar",
+    "filtersButton": "Filtros"
+  },
+  "categories": {
+    "All": "Todos",
+    "House": "Casas",
+    "Apartment": "Departamentos",
+    "Villa": "Villas",
+    "Penthouse": "Áticos"
+  },
+  "featured": {
+    "title": "Colecciones Destacadas",
+    "subtitle": "Propiedades curadas para los gustos más exigentes.",
+    "viewAll": "Ver todas"
+  },
+  "market": {
+    "title": "Nuevas en el Mercado",
+    "subtitle": "Oportunidades exclusivas añadidas esta semana.",
+    "updating": "Actualizando...",
+    "noProperties": "No se encontraron propiedades",
+    "noPropertiesSub": "Intenta ajustar tus criterios de búsqueda o limpia los filtros.",
+    "tabs": {
+      "All": "Todas",
+      "Buy": "Comprar",
+      "Rent": "Alquilar"
+    }
+  },
+  "propertyCard": {
+    "beds": "Hab.",
+    "baths": "Baños",
+    "sqm": "m²",
+    "forRent": "Alquiler",
+    "forSale": "Venta",
+    "exclusive": "Exclusivo",
+    "new": "Nuevo",
+    "featured": "Destacada",
+    "priceCut": "Rebajada",
+    "favoriteAria": "Guardar en favoritos",
+    "viewDetails": "Ver detalles"
+  },
+  "pagination": {
+    "showing": "Mostrando",
+    "to": "a",
+    "of": "de",
+    "properties": "propiedades",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "filters": {
+    "title": "Filtros de Búsqueda",
+    "location": "Ubicación",
+    "locationPlaceholder": "Ingresa ciudad o código postal...",
+    "priceRange": "Rango de Precio",
+    "minPrice": "Precio Mínimo",
+    "maxPrice": "Precio Máximo",
+    "propertyType": "Tipo de Propiedad",
+    "anyType": "Cualquier Tipo",
+    "roomsBeds": "Recámaras y Baños",
+    "bedrooms": "Recámaras",
+    "bathrooms": "Baños",
+    "any": "Cualquiera",
+    "amenities": "Amenidades y Características",
+    "clearAll": "Limpiar todos los filtros",
+    "showHomes": "Ver Propiedades",
+    "showHomesCount": "Ver {count} Propiedades"
+  },
+  "amenitiesList": {
+    "Swimming Pool": "Piscina",
+    "Gym": "Gimnasio",
+    "Parking": "Estacionamiento",
+    "Air Conditioning": "Aire Acondicionado",
+    "High-speed Wifi": "Wifi de Alta Velocidad",
+    "Patio / Terrace": "Patio / Terraza",
+    "Smart Home System": "Sistema Domótico Inteligente",
+    "Central Heating & Cooling": "Climatización y Calefacción Central",
+    "Electric Vehicle Charging": "Cargador de Vehículo Eléctrico",
+    "Private Gym": "Gimnasio Privado",
+    "Wine Cellar": "Cava de Vinos"
+  },
+  "propertyDetail": {
+    "breadcrumbHome": "Inicio",
+    "galleryAllPhotos": "Ver fotos",
+    "featuresTitle": "Características de la Propiedad",
+    "squareMeters": "Metros Cuadrados",
+    "bedrooms": "Recámaras",
+    "bathrooms": "Baños",
+    "garageSpaces": "Cocheras",
+    "aboutTitle": "Acerca de esta residencia",
+    "readMore": "Leer más",
+    "showLess": "Mostrar menos",
+    "amenitiesTitle": "Amenidades",
+    "locationTitle": "Ubicación",
+    "perMonth": "/mes",
+    "scheduleTour": "Agendar Visita Privada",
+    "contactAgent": "Contactar al Asesor",
+    "whatsappChat": "Chatear por WhatsApp",
+    "agentRating": "Asesor de Alto Nivel",
+    "callAgent": "Llamar",
+    "emailAgent": "Correo"
+  },
+  "mortgage": {
+    "estimatedPayment": "Pago Mensual Estimado",
+    "startingFrom": "Desde",
+    "calculate": "Calcular Hipoteca",
+    "hideCalculator": "Ocultar Calculadora",
+    "homePrice": "Precio del Inmueble",
+    "downPayment": "Enganche Inicial",
+    "interestRate": "Tasa de Interés Anual",
+    "loanTerm": "Plazo del Crédito",
+    "years": "años",
+    "breakdown": "Desglose Mensual",
+    "principalInterest": "Capital e Intereses",
+    "propertyTax": "Impuesto Predial",
+    "insurance": "Seguro de Vivienda",
+    "totalMonthly": "Total Mensual Estimado"
+  },
+  "modals": {
+    "scheduleTitle": "Agendar una Visita Privada",
+    "scheduleSubtitle": "Selecciona tu modalidad y horario preferido.",
+    "inPerson": "Visita Presencial",
+    "videoTour": "Paseo por Videollamada",
+    "selectDate": "Fecha de la visita",
+    "selectTime": "Horario preferido",
+    "fullName": "Nombre completo",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "confirmTour": "Confirmar Solicitud de Visita",
+    "tourSuccessTitle": "¡Solicitud Recibida!",
+    "tourSuccessMessage": "Tu asesor se pondrá en contacto a la brevedad para coordinar la visita a la propiedad.",
+    "contactTitle": "Contactar al Asesor",
+    "message": "Mensaje",
+    "sendMessage": "Enviar Mensaje",
+    "contactSuccessTitle": "¡Mensaje Enviado!",
+    "contactSuccessMessage": "Gracias por comunicarte. Nos pondremos en contacto contigo lo antes posible.",
+    "close": "Cerrar"
+  },
+  "notFound": {
+    "title": "Propiedad No Encontrada",
+    "description": "La propiedad que estás buscando no existe, ha sido vendida o la dirección web es incorrecta.",
+    "explore": "Explorar Propiedades Disponibles"
+  },
+  "footer": {
+    "rights": "© 2026 LuxeEstate Inc. Todos los derechos reservados.",
+    "privacy": "Privacidad",
+    "terms": "Términos"
+  },
+  "languages": {
+    "es": "Español",
+    "en": "English",
+    "fr": "Français",
+    "selectLanguage": "Seleccionar idioma"
+  }
+}
+

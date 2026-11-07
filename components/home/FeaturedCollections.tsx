@@ -3,6 +3,7 @@
 import React from "react";
 import { Property } from "@/types/property";
 import { FeaturedCard } from "./FeaturedCard";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface FeaturedCollectionsProps {
   properties: Property[];
@@ -15,6 +16,7 @@ export const FeaturedCollections: React.FC<FeaturedCollectionsProps> = ({
   onViewAll,
   onSelectProperty,
 }) => {
+  const { t } = useTranslation();
   // Enforce strictly 2 featured properties at all times
   const displayedProperties = properties.slice(0, 2);
 
@@ -25,17 +27,18 @@ export const FeaturedCollections: React.FC<FeaturedCollectionsProps> = ({
       <div className="flex items-end justify-between mb-8">
         <div>
           <h2 className="text-2xl font-light text-nordic-dark">
-            Featured Collections
+            {t("featured.title")}
           </h2>
           <p className="text-nordic-muted mt-1 text-sm">
-            Curated properties for the discerning eye.
+            {t("featured.subtitle")}
           </p>
         </div>
         <button
           onClick={onViewAll}
           className="hidden sm:flex items-center gap-1 text-sm font-medium text-mosque hover:opacity-70 transition-opacity cursor-pointer"
         >
-          View all <span className="material-icons text-sm">arrow_forward</span>
+          {t("featured.viewAll")}{" "}
+          <span className="material-icons text-sm">arrow_forward</span>
         </button>
       </div>
 

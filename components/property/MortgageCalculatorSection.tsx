@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { EstimatedPaymentInfo } from "@/types/property";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface MortgageCalculatorProps {
   price: number;
@@ -12,6 +13,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
   price,
   estimatedPayment,
 }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   // Mortgage calculation state
@@ -44,7 +46,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
 
   const displayMonthly =
     estimatedPayment?.formattedMonthly ||
-    `$${totalMonthly.toLocaleString("en-US")}/mo`;
+    `$${totalMonthly.toLocaleString("en-US")}${t("propertyDetail.perMonth")}`;
 
   return (
     <>
@@ -54,13 +56,15 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
             <span className="material-icons text-xl">calculate</span>
           </div>
           <div>
-            <h3 className="font-semibold text-nordic">Estimated Payment</h3>
+            <h3 className="font-semibold text-nordic">
+              {t("mortgage.estimatedPayment")}
+            </h3>
             <p className="text-sm text-nordic/60">
-              Starting from{" "}
+              {t("mortgage.startingFrom")}{" "}
               <strong className="text-mosque font-bold">
                 {displayMonthly}
               </strong>{" "}
-              with {estimatedPayment?.downPaymentPercent || 20}% down
+              ({estimatedPayment?.downPaymentPercent || 20}% {t("mortgage.downPayment").toLowerCase()})
             </p>
           </div>
         </div>
@@ -69,7 +73,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
           onClick={() => setIsOpen(true)}
           className="whitespace-nowrap px-4 py-2 bg-white border border-nordic/10 rounded-lg text-sm font-semibold hover:border-mosque transition-colors text-nordic cursor-pointer shadow-xs hover:shadow"
         >
-          Calculate Mortgage
+          {t("mortgage.calculate")}
         </button>
       </div>
 
@@ -86,7 +90,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
               <div className="flex items-center gap-2">
                 <span className="material-icons text-mosque">calculate</span>
                 <h3 className="text-xl font-bold text-nordic">
-                  Mortgage Calculator
+                  {t("mortgage.calculate")}
                 </h3>
               </div>
               <button
@@ -101,29 +105,31 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
             {/* Monthly Result Card */}
             <div className="my-6 p-5 bg-mosque/5 border border-mosque/15 rounded-xl text-center">
               <span className="text-xs font-semibold uppercase tracking-wider text-nordic/60 block mb-1">
-                Estimated Total Monthly Payment
+                {t("mortgage.totalMonthly")}
               </span>
               <span className="text-3xl font-bold text-mosque font-display">
                 ${totalMonthly.toLocaleString("en-US")}
               </span>
-              <span className="text-sm text-nordic/60 font-medium ml-1">/month</span>
+              <span className="text-sm text-nordic/60 font-medium ml-1">
+                {t("propertyDetail.perMonth")}
+              </span>
 
               {/* Breakdown */}
               <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-mosque/10 text-xs">
                 <div>
-                  <div className="text-nordic/50">Principal & Interest</div>
+                  <div className="text-nordic/50">{t("mortgage.principalInterest")}</div>
                   <div className="font-semibold text-nordic mt-0.5">
                     ${monthlyPrincipalAndInterest.toLocaleString("en-US")}
                   </div>
                 </div>
                 <div>
-                  <div className="text-nordic/50">Property Taxes</div>
+                  <div className="text-nordic/50">{t("mortgage.propertyTax")}</div>
                   <div className="font-semibold text-nordic mt-0.5">
                     ${monthlyPropertyTax.toLocaleString("en-US")}
                   </div>
                 </div>
                 <div>
-                  <div className="text-nordic/50">Homeowners Ins.</div>
+                  <div className="text-nordic/50">{t("mortgage.insurance")}</div>
                   <div className="font-semibold text-nordic mt-0.5">
                     ${monthlyInsurance.toLocaleString("en-US")}
                   </div>
@@ -135,7 +141,9 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <label className="font-medium text-nordic">Home Price</label>
+                  <label className="font-medium text-nordic">
+                    {t("mortgage.homePrice")}
+                  </label>
                   <span className="font-bold text-mosque">
                     ${homePrice.toLocaleString("en-US")}
                   </span>
@@ -154,7 +162,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <label className="font-medium text-nordic">
-                    Down Payment ({downPercent}%)
+                    {t("mortgage.downPayment")} ({downPercent}%)
                   </label>
                   <span className="font-semibold text-nordic">
                     ${downPaymentAmount.toLocaleString("en-US")}
@@ -174,7 +182,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-nordic mb-1">
-                    Interest Rate (%)
+                    {t("mortgage.interestRate")}
                   </label>
                   <input
                     type="number"
@@ -188,16 +196,16 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-nordic mb-1">
-                    Loan Term
+                    {t("mortgage.loanTerm")}
                   </label>
                   <select
                     value={loanTermYears}
                     onChange={(e) => setLoanTermYears(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-nordic bg-white focus:outline-none focus:border-mosque"
                   >
-                    <option value={15}>15 Years</option>
-                    <option value={20}>20 Years</option>
-                    <option value={30}>30 Years</option>
+                    <option value={15}>15 {t("mortgage.years")}</option>
+                    <option value={20}>20 {t("mortgage.years")}</option>
+                    <option value={30}>30 {t("mortgage.years")}</option>
                   </select>
                 </div>
               </div>
@@ -210,7 +218,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
                 onClick={() => setIsOpen(false)}
                 className="w-full bg-mosque hover:bg-primary-hover text-white py-3 rounded-lg font-medium transition-colors cursor-pointer"
               >
-                Apply & Close
+                {t("modals.close")}
               </button>
             </div>
           </div>
@@ -219,4 +227,3 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
     </>
   );
 };
-

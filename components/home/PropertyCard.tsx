@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Property } from "@/types/property";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface PropertyCardProps {
   property: Property;
@@ -18,6 +19,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   className = "",
   priority = false,
 }) => {
+  const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(false);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -34,6 +36,31 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       ? property.images[0]
       : property.imageUrl) ||
     "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
+
+  // Translate badges if available
+  const getTranslatedBadge = (badgeText?: string) => {
+    if (!badgeText) return null;
+    const lower = badgeText.toLowerCase().trim();
+    if (lower === "rent" || lower === "alquiler" || lower === "for rent" || lower === "location") {
+      return t("propertyCard.forRent");
+    }
+    if (lower === "sale" || lower === "venta" || lower === "for sale") {
+      return t("propertyCard.forSale");
+    }
+    if (lower === "exclusive" || lower === "exclusivo" || lower === "exclusif") {
+      return t("propertyCard.exclusive");
+    }
+    if (lower === "new" || lower === "nuevo" || lower === "nouveau") {
+      return t("propertyCard.new");
+    }
+    if (lower === "featured" || lower === "destacada" || lower === "en vedette") {
+      return t("propertyCard.featured");
+    }
+    if (lower === "price cut" || lower === "rebajada" || lower === "prix réduit") {
+      return t("propertyCard.priceCut");
+    }
+    return badgeText;
+  };
 
   return (
     <Link
@@ -61,8 +88,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         <button
           type="button"
           onClick={handleFavoriteClick}
-          aria-label={isFavorite ? "Remove from favorites" : "Save to favorites"}
-          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-colors z-10 ${
+          aria-label={t("propertyCard.favoriteAria")}
+          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-colors z-10 cursor-pointer ${
             isFavorite
               ? "bg-mosque text-white"
               : "bg-white/90 text-nordic hover:bg-mosque hover:text-white"
@@ -78,7 +105,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           <div
             className={`absolute bottom-3 left-3 ${badgeBg} text-white text-xs font-bold px-2.5 py-1 rounded shadow-sm`}
           >
-            {property.badge}
+            {getTranslatedBadge(property.badge)}
           </div>
         )}
       </div>
@@ -90,7 +117,9 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             {property.formattedPrice}
             {property.priceSuffix && (
               <span className="text-sm font-normal text-nordic-muted">
-                {property.priceSuffix}
+                {property.priceSuffix.includes("/mo") || property.priceSuffix.includes("/mes")
+                  ? ` ${t("propertyDetail.perMonth")}`
+                  : ` ${property.priceSuffix}`}
               </span>
             )}
           </h3>
@@ -110,19 +139,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             <span className="material-icons text-sm text-mosque/80">
               king_bed
             </span>{" "}
-            {property.beds}
+            {property.beds} {t("propertyCard.beds")}
           </div>
           <div className="flex items-center gap-1 text-nordic-muted text-xs">
             <span className="material-icons text-sm text-mosque/80">
               bathtub
             </span>{" "}
-            {property.baths}
+            {property.baths} {t("propertyCard.baths")}
           </div>
           <div className="flex items-center gap-1 text-nordic-muted text-xs">
             <span className="material-icons text-sm text-mosque/80">
               square_foot
             </span>{" "}
-            {property.sqm}m²
+            {property.sqm} {t("propertyCard.sqm")}
           </div>
         </div>
       </div>

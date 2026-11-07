@@ -10,6 +10,7 @@ import { PropertyCategory, MarketFilterTab, Property } from "@/types/property";
 import { PaginationResult } from "@/types/pagination";
 import { fetchPropertiesAction } from "@/app/actions/properties";
 import { SearchFiltersModal, FilterState } from "@/components/home/SearchFiltersModal";
+import { PropertyFooter } from "@/components/property/PropertyFooter";
 
 interface HomeScreenProps {
   initialFeaturedProperties: Property[];
@@ -364,6 +365,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           />
         </div>
       </main>
+
+      {/* Footer */}
+      <PropertyFooter />
 
       {/* Search Filters Modal matching search_filters_screen/code.html */}
       <SearchFiltersModal

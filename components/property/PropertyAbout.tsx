@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface PropertyAboutProps {
   description?: string[];
@@ -11,6 +12,7 @@ export const PropertyAbout: React.FC<PropertyAboutProps> = ({
   description,
   title,
 }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const paragraphs = description && description.length > 0 ? description : [
@@ -24,7 +26,7 @@ export const PropertyAbout: React.FC<PropertyAboutProps> = ({
   return (
     <div className="bg-white p-8 rounded-xl shadow-sm border border-mosque/5">
       <h2 className="text-lg font-semibold mb-4 text-nordic">
-        About this home
+        {t("propertyDetail.aboutTitle")}
       </h2>
 
       <div className="prose prose-slate max-w-none text-nordic/70 leading-relaxed space-y-4">
@@ -39,7 +41,11 @@ export const PropertyAbout: React.FC<PropertyAboutProps> = ({
           onClick={() => setIsExpanded(!isExpanded)}
           className="mt-4 text-mosque font-semibold text-sm flex items-center gap-1 hover:gap-2 transition-all cursor-pointer focus:outline-none"
         >
-          <span>{isExpanded ? "Show less" : "Read more"}</span>
+          <span>
+            {isExpanded
+              ? t("propertyDetail.showLess")
+              : t("propertyDetail.readMore")}
+          </span>
           <span
             className={`material-icons text-sm transition-transform duration-300 ${
               isExpanded ? "rotate-90" : ""
@@ -52,4 +58,3 @@ export const PropertyAbout: React.FC<PropertyAboutProps> = ({
     </div>
   );
 };
-

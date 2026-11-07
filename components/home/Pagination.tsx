@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface PaginationProps {
   currentPage: number;
@@ -19,6 +20,8 @@ export const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   isLoading = false,
 }) => {
+  const { t } = useTranslation();
+
   if (totalPages <= 1) return null;
 
   const startItem = (currentPage - 1) * pageSize + 1;
@@ -65,9 +68,13 @@ export const Pagination: React.FC<PaginationProps> = ({
     <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-nordic-dark/10 pt-6">
       {/* Items count summary */}
       <div className="text-sm text-nordic-muted">
-        Showing <span className="font-medium text-nordic-dark">{startItem}</span> to{" "}
-        <span className="font-medium text-nordic-dark">{endItem}</span> of{" "}
-        <span className="font-medium text-nordic-dark">{totalCount}</span> properties
+        {t("pagination.showing")}{" "}
+        <span className="font-medium text-nordic-dark">{startItem}</span>{" "}
+        {t("pagination.to")}{" "}
+        <span className="font-medium text-nordic-dark">{endItem}</span>{" "}
+        {t("pagination.of")}{" "}
+        <span className="font-medium text-nordic-dark">{totalCount}</span>{" "}
+        {t("pagination.properties")}
       </div>
 
       {/* Pagination Controls */}
@@ -81,10 +88,10 @@ export const Pagination: React.FC<PaginationProps> = ({
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1 || isLoading}
           className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-nordic-dark hover:bg-clear-day disabled:opacity-40 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
-          title="Previous page"
+          title={t("pagination.previous")}
         >
           <span className="material-icons text-base">chevron_left</span>
-          <span className="hidden sm:inline">Previous</span>
+          <span className="hidden sm:inline">{t("pagination.previous")}</span>
         </button>
 
         {/* Page numbers */}
@@ -128,9 +135,9 @@ export const Pagination: React.FC<PaginationProps> = ({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages || isLoading}
           className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-nordic-dark hover:bg-clear-day disabled:opacity-40 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
-          title="Next page"
+          title={t("pagination.next")}
         >
-          <span className="hidden sm:inline">Next</span>
+          <span className="hidden sm:inline">{t("pagination.next")}</span>
           <span className="material-icons text-base">chevron_right</span>
         </button>
       </nav>

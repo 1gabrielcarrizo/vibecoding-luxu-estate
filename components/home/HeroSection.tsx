@@ -3,6 +3,7 @@
 import React from "react";
 import { PropertyCategory } from "@/types/property";
 import { categoryFilters } from "@/data/mockData";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface HeroSectionProps {
   searchQuery: string;
@@ -23,6 +24,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onToggleFilters,
   activeFilterCount = 0,
 }) => {
+  const { t } = useTranslation();
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -34,9 +37,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     <section className="py-12 md:py-16">
       <div className="max-w-3xl mx-auto text-center space-y-8">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-nordic-dark leading-tight">
-          Find your{" "}
+          {t("hero.titlePrefix")}{" "}
           <span className="relative inline-block">
-            <span className="relative z-10 font-medium">sanctuary</span>
+            <span className="relative z-10 font-medium">
+              {t("hero.titleHighlight")}
+            </span>
             <span className="absolute bottom-2 left-0 w-full h-3 bg-mosque/20 -rotate-1 z-0"></span>
           </span>
           .
@@ -51,7 +56,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
           <input
             className="block w-full pl-12 pr-28 py-4 rounded-xl border-none bg-white text-nordic-dark shadow-soft placeholder-nordic-muted/60 focus:ring-2 focus:ring-mosque focus:bg-white transition-all text-lg outline-none"
-            placeholder="Search by city, neighborhood, or address..."
+            placeholder={t("hero.searchPlaceholder")}
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -60,9 +65,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <button
             onClick={onSearchSubmit}
             type="button"
-            className="absolute inset-y-2 right-2 px-6 bg-mosque hover:bg-mosque/90 text-white font-medium rounded-lg transition-colors flex items-center justify-center shadow-lg shadow-mosque/20"
+            className="absolute inset-y-2 right-2 px-6 bg-mosque hover:bg-mosque/90 text-white font-medium rounded-lg transition-colors flex items-center justify-center shadow-lg shadow-mosque/20 cursor-pointer"
           >
-            Search
+            {t("hero.searchButton")}
           </button>
         </div>
 
@@ -70,17 +75,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="flex items-center justify-center gap-3 overflow-x-auto hide-scroll py-2 px-4 -mx-4">
           {categoryFilters.map((category) => {
             const isSelected = selectedCategory === category;
+            const categoryLabel = t(`categories.${category}`);
             return (
               <button
                 key={category}
                 type="button"
                 onClick={() => onSelectCategory(category)}
-                className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-all ${isSelected
+                className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                  isSelected
                     ? "bg-nordic-dark text-white shadow-lg shadow-nordic-dark/10 -translate-y-0.5"
                     : "bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 hover:bg-mosque/5"
-                  }`}
+                }`}
               >
-                {category}
+                {categoryLabel}
               </button>
             );
           })}
@@ -90,14 +97,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <button
             type="button"
             onClick={onToggleFilters}
-            className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full font-medium text-sm transition-all ${
+            className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full font-medium text-sm transition-all cursor-pointer ${
               activeFilterCount > 0
                 ? "bg-mosque/10 text-mosque border border-mosque/30"
                 : "text-nordic-dark hover:bg-black/5"
             }`}
           >
             <span className="material-icons text-base">tune</span>
-            <span>Filters</span>
+            <span>{t("hero.filtersButton")}</span>
             {activeFilterCount > 0 && (
               <span className="w-5 h-5 rounded-full bg-mosque text-white text-[11px] font-bold flex items-center justify-center">
                 {activeFilterCount}

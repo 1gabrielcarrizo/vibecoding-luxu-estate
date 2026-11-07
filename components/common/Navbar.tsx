@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { currentUser, navLinks } from "@/data/mockData";
+import { currentUser } from "@/data/mockData";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { LanguageSelector } from "./LanguageSelector";
 
 interface NavbarProps {
   activeTab?: string;
@@ -19,11 +21,19 @@ export const Navbar: React.FC<NavbarProps> = ({
   isDetailPage = false,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleLinkClick = (tabLabel: string, href: string) => {
+  const navLinks = [
+    { key: "Buy", label: t("nav.buy"), href: "/?tab=Buy" },
+    { key: "Rent", label: t("nav.rent"), href: "/?tab=Rent" },
+    { key: "Sell", label: t("nav.sell"), href: "/?tab=Sell" },
+    { key: "Saved Homes", label: t("nav.savedHomes"), href: "/#saved" },
+  ];
+
+  const handleLinkClick = (tabKey: string, href: string) => {
     if (onTabChange) {
-      onTabChange(tabLabel);
+      onTabChange(tabKey);
     } else {
       router.push(href);
     }
@@ -59,12 +69,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-10">
             {navLinks.map((link) => {
-              const isActive = !isDetailPage && activeTab === link.label;
+              const isActive =
+                !isDetailPage &&
+                (activeTab === link.key || activeTab === link.label);
               return (
                 <button
-                  key={link.label}
+                  key={link.key}
                   type="button"
-                  onClick={() => handleLinkClick(link.label, link.href)}
+                  onClick={() => handleLinkClick(link.key, link.href)}
                   className={`relative py-2 text-sm font-semibold transition-colors cursor-pointer ${
                     isActive
                       ? "text-nordic"
@@ -80,18 +92,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </div>
 
-          {/* Right Action Icons */}
+          {/* Right Action Icons & Language Selector */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Language Selector Dropdown */}
+            <LanguageSelector />
+
             <button
               onClick={handleSearchAction}
-              aria-label="Search properties"
+              aria-label={t("nav.searchAria")}
               className="p-2 text-nordic hover:text-mosque transition-colors rounded-full hover:bg-mosque/5 cursor-pointer"
             >
               <span className="material-symbols-outlined">search</span>
             </button>
 
             <button
-              aria-label="Notifications"
+              aria-label={t("nav.notificationsAria")}
               className="p-2 text-nordic hover:text-mosque transition-colors relative rounded-full hover:bg-mosque/5 cursor-pointer"
             >
               <span className="material-symbols-outlined">notifications</span>
@@ -99,8 +114,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <button
-              aria-label="User Profile"
-              className="ml-2 flex items-center gap-2 p-1 rounded-full hover:bg-mosque/5 transition-colors cursor-pointer"
+              aria-label={t("nav.profileAria")}
+              className="ml-1 sm:ml-2 flex items-center gap-2 p-1 rounded-full hover:bg-mosque/5 transition-colors cursor-pointer"
             >
               <div className="w-9 h-9 rounded-full bg-mosque/10 overflow-hidden border border-mosque/20">
                 <img
@@ -115,7 +130,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden text-nordic hover:text-mosque p-2 rounded-md hover:bg-mosque/5 cursor-pointer"
-              aria-label="Toggle navigation menu"
+              aria-label={t("nav.toggleMenuAria")}
             >
               <span className="material-symbols-outlined">
                 {mobileMenuOpen ? "close" : "menu"}
@@ -128,17 +143,19 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile Menu Dropdown */}
       <div
         className={`md:hidden border-t border-mosque/10 bg-clear-day overflow-hidden transition-all duration-300 ${
-          mobileMenuOpen ? "max-h-64 py-3" : "max-h-0 py-0"
+          mobileMenuOpen ? "max-h-96 py-3" : "max-h-0 py-0"
         }`}
       >
         <div className="px-4 space-y-1">
           {navLinks.map((link) => {
-            const isActive = !isDetailPage && activeTab === link.label;
+            const isActive =
+              !isDetailPage &&
+              (activeTab === link.key || activeTab === link.label);
             return (
               <button
-                key={link.label}
+                key={link.key}
                 onClick={() => {
-                  handleLinkClick(link.label, link.href);
+                  handleLinkClick(link.key, link.href);
                   setMobileMenuOpen(false);
                 }}
                 className={`w-full text-left block px-3 py-2 rounded-md text-base font-medium transition-colors ${
@@ -151,6 +168,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             );
           })}
+
+          {/* Mobile Language Selector */}
+          <LanguageSelector variant="mobile" className="mt-3" />
         </div>
       </div>
     </nav>
