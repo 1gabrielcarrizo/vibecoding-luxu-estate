@@ -23,7 +23,7 @@ export type Database = {
           beds: number;
           baths: number;
           sqm: number;
-          image_url: string;
+          image_url: string | string[];
           images?: string[] | null;
           image_alt: string;
           badge: string | null;
@@ -44,7 +44,7 @@ export type Database = {
           beds: number;
           baths: number;
           sqm: number;
-          image_url: string;
+          image_url: string | string[];
           images?: string[] | null;
           image_alt: string;
           badge?: string | null;
@@ -65,7 +65,7 @@ export type Database = {
           beds?: number;
           baths?: number;
           sqm?: number;
-          image_url?: string;
+          image_url?: string | string[] | null;
           images?: string[] | null;
           image_alt?: string;
           badge?: string | null;

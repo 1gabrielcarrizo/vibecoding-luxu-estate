@@ -23,18 +23,61 @@ const extraFallbackImages = [
   "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
 ];
 
+/**
+ * Safely extracts an array of image URLs from a database row,
+ * supporting native arrays (text[]/jsonb), JSON string ('["..."]'), or single URL string.
+ */
+export function parseImagesFromRow(
+  row: PropertyRow,
+  fallbackImages?: string[]
+): string[] {
+  // 1. Direct array in image_url
+  if (Array.isArray(row.image_url) && row.image_url.length > 0) {
+    return (row.image_url as unknown[]).map(String).filter(Boolean);
+  }
+
+  // 2. Direct array in images column (if present)
+  if (Array.isArray(row.images) && row.images.length > 0) {
+    return (row.images as unknown[]).map(String).filter(Boolean);
+  }
+
+  // 3. String representation in image_url (e.g. JSON string '["url1","url2"]' or single string)
+  if (typeof row.image_url === "string" && row.image_url.trim().length > 0) {
+    const trimmed = row.image_url.trim();
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(String).filter(Boolean);
+        }
+      } catch {
+        // Fallback below
+      }
+    } else if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      const items = trimmed
+        .slice(1, -1)
+        .split(",")
+        .map((s) => s.replace(/^"|"$/g, "").trim())
+        .filter(Boolean);
+      if (items.length > 0) return items;
+    } else {
+      return [trimmed];
+    }
+  }
+
+  // 4. Use matching fallback images from local data
+  if (fallbackImages && fallbackImages.length > 0) {
+    return fallbackImages;
+  }
+
+  return extraFallbackImages;
+}
+
 export function mapRowToProperty(row: PropertyRow): Property {
   // Check if we have richer mock data for this property id
   const matchingFallback = allFallbackProperties.find((p) => p.id === row.id);
 
-  const rawImages =
-    row.images && Array.isArray(row.images) && row.images.length > 0
-      ? row.images
-      : matchingFallback?.images && matchingFallback.images.length > 0
-      ? matchingFallback.images
-      : row.image_url
-      ? [row.image_url]
-      : [extraFallbackImages[0]];
+  const rawImages = parseImagesFromRow(row, matchingFallback?.images);
 
   // Ensure each property has at least 4 images (1 main + 3 additional)
   const images =
