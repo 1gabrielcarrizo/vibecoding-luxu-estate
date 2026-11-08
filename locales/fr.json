@@ -238,6 +238,8 @@
     "connectingGithub": "Connexion à GitHub...",
     "noAccount": "Vous n'avez pas de compte ?",
     "signUp": "S'inscrire",
+    "termsAgreement": "En continuant, vous acceptez nos",
+    "and": "et",
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation",
     "helpCenter": "Centre d'aide",

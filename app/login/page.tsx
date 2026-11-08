@@ -145,8 +145,8 @@ function LoginContent() {
               )}
               <span className="relative z-10 text-sm">
                 {loadingProvider === "google"
-                  ? t("auth.connecting")
-                  : t("auth.continueGoogle")}
+                  ? t("auth.connectingGoogle")
+                  : t("auth.continueWithGoogle")}
               </span>
             </button>
 
@@ -175,8 +175,8 @@ function LoginContent() {
               )}
               <span className="relative z-10 text-sm">
                 {loadingProvider === "github"
-                  ? t("auth.connecting")
-                  : t("auth.continueGithub")}
+                  ? t("auth.connectingGithub")
+                  : t("auth.continueWithGithub")}
               </span>
             </button>
           </div>
@@ -204,7 +204,7 @@ function LoginContent() {
         {/* Alternative Links */}
         <div className="mt-8 text-center">
           <p className="text-sm text-nordic/60 dark:text-gray-400">
-            {t("auth.dontHaveAccount")}{" "}
+            {t("auth.noAccount")}{" "}
             <button
               onClick={() => handleGoogleSignIn()}
               className="text-primary dark:text-accent font-semibold hover:underline cursor-pointer"

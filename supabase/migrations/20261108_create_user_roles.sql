@@ -68,12 +68,15 @@ FOR UPDATE
 USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
--- Policy: Admins can insert user roles (or self-insert initial row)
+-- Policy: Allow users to insert their own initial record as 'user', or admins to insert any role
+DROP POLICY IF EXISTS "Users can insert default role" ON public.user_roles;
 DROP POLICY IF EXISTS "Admins can insert user roles" ON public.user_roles;
-CREATE POLICY "Admins can insert user roles"
+CREATE POLICY "Users can insert default role"
 ON public.user_roles
 FOR INSERT
-WITH CHECK (public.is_admin() OR auth.uid() = id);
+WITH CHECK (
+  public.is_admin() OR (auth.uid() = id AND role = 'user')
+);
 
 -- Policy: Admins can delete user role records
 DROP POLICY IF EXISTS "Admins can delete user roles" ON public.user_roles;
@@ -112,7 +115,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
--- 7. Backfill existing authenticated users who may not have a role record yet
+-- 7. Backfill existing authenticated users who may already exist in auth.users without a role
 INSERT INTO public.user_roles (id, email, role, created_at, updated_at)
 SELECT
   id,
@@ -124,6 +127,5 @@ FROM auth.users
 ON CONFLICT (id) DO UPDATE
 SET email = EXCLUDED.email;
 
--- 8. OPTIONAL: To grant yourself admin role immediately, run:
+-- 8. To grant yourself admin role, execute this query with your email:
 -- UPDATE public.user_roles SET role = 'admin' WHERE email = 'tu_correo@ejemplo.com';
-

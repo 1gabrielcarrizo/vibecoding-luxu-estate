@@ -226,15 +226,15 @@ $$;
 CREATE POLICY "Users can view own role" ON public.user_roles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Admins can view all user roles" ON public.user_roles FOR SELECT USING (public.is_admin());
 CREATE POLICY "Admins can update user roles" ON public.user_roles FOR UPDATE USING (public.is_admin());
-CREATE POLICY "Admins can insert user roles" ON public.user_roles FOR INSERT WITH CHECK (public.is_admin() OR auth.uid() = id);
+CREATE POLICY "Users can insert default role" ON public.user_roles FOR INSERT WITH CHECK (public.is_admin() OR (auth.uid() = id AND role = 'user'));
 
 -- 5. Trigger automático al registrarse un nuevo usuario en auth.users
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
-  INSERT INTO public.user_roles (id, email, role)
-  VALUES (NEW.id, NEW.email, 'user')
-  ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email;
+  INSERT INTO public.user_roles (id, email, role, created_at, updated_at)
+  VALUES (NEW.id, NEW.email, 'user', timezone('utc'::text, now()), timezone('utc'::text, now()))
+  ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, updated_at = timezone('utc'::text, now());
   RETURN NEW;
 END;
 $$;
@@ -242,7 +242,13 @@ $$;
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 6. Asignar rol inicial de admin a tu cuenta (reemplaza con tu correo):
+-- 6. Poblar usuarios existentes en auth.users que aún no tengan rol
+INSERT INTO public.user_roles (id, email, role, created_at, updated_at)
+SELECT id, email, 'user', created_at, timezone('utc'::text, now())
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;
+
+-- 7. Asignar rol inicial de admin a tu cuenta (reemplaza con tu correo):
 -- UPDATE public.user_roles SET role = 'admin' WHERE email = 'tu_correo@ejemplo.com';`;
 
   const handleCopySql = () => {

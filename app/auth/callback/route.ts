@@ -42,8 +42,36 @@ export async function GET(request: Request) {
       }
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data: authData, error } =
+      await supabase.auth.exchangeCodeForSession(code);
+
     if (!error) {
+      // Automatically ensure user is registered in user_roles with default role
+      const user = authData?.user;
+      if (user) {
+        try {
+          const userEmail = (user.email || "").toLowerCase();
+          const adminEmails = (process.env.ADMIN_EMAILS || "")
+            .split(",")
+            .map((e) => e.trim().toLowerCase())
+            .filter(Boolean);
+
+          const defaultRole = adminEmails.includes(userEmail) ? "admin" : "user";
+
+          await supabase.from("user_roles").upsert(
+            {
+              id: user.id,
+              email: user.email || null,
+              role: defaultRole,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "id", ignoreDuplicates: true }
+          );
+        } catch (dbErr) {
+          console.warn("Auto-register in user_roles:", dbErr);
+        }
+      }
+
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
 
