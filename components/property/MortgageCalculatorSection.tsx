@@ -64,7 +64,9 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
               <strong className="text-mosque font-bold">
                 {displayMonthly}
               </strong>{" "}
-              ({estimatedPayment?.downPaymentPercent || 20}% {t("mortgage.downPayment").toLowerCase()})
+              {t("mortgage.withDownPayment", {
+                percent: estimatedPayment?.downPaymentPercent || 20,
+              })}
             </p>
           </div>
         </div>

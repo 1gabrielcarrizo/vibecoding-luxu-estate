@@ -92,11 +92,16 @@
     "Central Heating & Cooling": "Chauffage et Climatisation Centrale",
     "Electric Vehicle Charging": "Borne de Recharge Électrique",
     "Private Gym": "Salle de Sport Privée",
-    "Wine Cellar": "Cave à Vin"
+    "Wine Cellar": "Cave à Vin",
+    "Spa & Sauna": "Spa et Sauna",
+    "Tesla EV Superchargers": "Superchargeurs Tesla"
   },
   "propertyDetail": {
     "breadcrumbHome": "Accueil",
-    "galleryAllPhotos": "Voir les photos",
+    "galleryAllPhotos": "Voir toutes les photos",
+    "photoOf": "Photo {current} sur {total}",
+    "closeViewer": "Fermer la galerie",
+    "viewOnMap": "Voir sur la carte",
     "featuresTitle": "Caractéristiques du Bien",
     "squareMeters": "Mètres Carrés",
     "bedrooms": "Chambres",
@@ -113,11 +118,26 @@
     "whatsappChat": "Discuter sur WhatsApp",
     "agentRating": "Agent d'Excellence",
     "callAgent": "Appeler",
-    "emailAgent": "E-mail"
+    "emailAgent": "E-mail",
+    "badges": {
+      "premium": "Exclusif",
+      "new": "Nouveau",
+      "exclusive": "Exclusif",
+      "featured": "En Vedette",
+      "priceCut": "Prix Réduit",
+      "forSale": "À Vendre",
+      "forRent": "Location"
+    },
+    "defaultDescription": [
+      "Découvrez le luxe contemporain dans cette demeure architecturale d'exception, idéalement située au cœur d'un quartier résidentiel prestigieux. Conçue pour une harmonie parfaite entre intérieur et extérieur, la résidence dispose de baies vitrées toute hauteur inondant les espaces de lumière naturelle.",
+      "La cuisine ouverte haut de gamme est équipée d'appareils de dernière génération et de finitions sur-mesure, idéale pour les passionnés de gastronomie. La suite parentale est un véritable sanctuaire de détente avec sa salle de bain d'inspiration spa et son balcon privé.",
+      "Un jardin paysager soigné complète à merveille les espaces extérieurs, la piscine et les salons de détente pour de magnifiques soirées sous les étoiles."
+    ]
   },
   "mortgage": {
     "estimatedPayment": "Paiement Mensuel Estimé",
     "startingFrom": "À partir de",
+    "withDownPayment": "avec {percent}% d'apport initial",
     "calculate": "Calculer l'Hypothèque",
     "hideCalculator": "Masquer le Calculateur",
     "homePrice": "Prix du Bien",
@@ -141,6 +161,7 @@
     "fullName": "Nom complet",
     "email": "Adresse e-mail",
     "phone": "Numéro de téléphone",
+    "tourHostedBy": "Visite guidée par {name}",
     "confirmTour": "Confirmer la Demande de Visite",
     "tourSuccessTitle": "Demande Envoyée !",
     "tourSuccessMessage": "Votre conseiller dédié vous contactera très rapidement pour confirmer votre rendez-vous.",
@@ -149,6 +170,7 @@
     "sendMessage": "Envoyer le Message",
     "contactSuccessTitle": "Message Envoyé !",
     "contactSuccessMessage": "Merci pour votre message. Notre équipe reviendra vers vous dans les plus brefs délais.",
+    "defaultContactMessage": "Bonjour, je souhaiterais obtenir plus d'informations concernant {title} situé à {location}.",
     "close": "Fermer"
   },
   "notFound": {
@@ -168,4 +190,3 @@
     "selectLanguage": "Sélectionner la langue"
   }
 }
-

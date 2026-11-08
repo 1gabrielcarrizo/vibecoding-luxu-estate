@@ -212,7 +212,7 @@ export const ScheduleVisitModal: React.FC<ScheduleVisitModalProps> = ({
               </div>
               <div className="text-xs">
                 <span className="font-semibold text-nordic block">
-                  {agent.name}
+                  {t("modals.tourHostedBy", { name: agent.name })}
                 </span>
                 <span className="text-nordic/60">
                   {agent.role === "Top Rated Agent"

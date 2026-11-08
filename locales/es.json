@@ -92,11 +92,16 @@
     "Central Heating & Cooling": "Climatización y Calefacción Central",
     "Electric Vehicle Charging": "Cargador de Vehículo Eléctrico",
     "Private Gym": "Gimnasio Privado",
-    "Wine Cellar": "Cava de Vinos"
+    "Wine Cellar": "Cava de Vinos",
+    "Spa & Sauna": "Spa y Sauna",
+    "Tesla EV Superchargers": "Supercargadores Tesla"
   },
   "propertyDetail": {
     "breadcrumbHome": "Inicio",
-    "galleryAllPhotos": "Ver fotos",
+    "galleryAllPhotos": "Ver todas las fotos",
+    "photoOf": "Foto {current} de {total}",
+    "closeViewer": "Cerrar visor de fotos",
+    "viewOnMap": "Ver en el mapa",
     "featuresTitle": "Características de la Propiedad",
     "squareMeters": "Metros Cuadrados",
     "bedrooms": "Recámaras",
@@ -113,11 +118,26 @@
     "whatsappChat": "Chatear por WhatsApp",
     "agentRating": "Asesor de Alto Nivel",
     "callAgent": "Llamar",
-    "emailAgent": "Correo"
+    "emailAgent": "Correo",
+    "badges": {
+      "premium": "Exclusivo",
+      "new": "Nuevo",
+      "exclusive": "Exclusivo",
+      "featured": "Destacada",
+      "priceCut": "Rebajada",
+      "forSale": "En Venta",
+      "forRent": "En Alquiler"
+    },
+    "defaultDescription": [
+      "Experimenta el lujo contemporáneo en esta impresionante residencia de diseño arquitectónico exclusivo, ubicada en una de las zonas residenciales más codiciadas de la ciudad. Diseñada con un enfoque vanguardista de integración interior-exterior, la propiedad cuenta con ventanales de piso a techo que inundan de luz natural todos sus ambientes.",
+      "La cocina de concepto abierto está equipada con electrodomésticos de última generación y acabados de autor, ideal para los amantes de la alta gastronomía. La suite principal es un auténtico santuario de relajación con baño estilo spa y terraza privada.",
+      "El jardín con paisajismo de diseño complementa a la perfección las áreas al aire libre, con piscina infinita y espacios pensados para el descanso y la convivencia bajo las estrellas."
+    ]
   },
   "mortgage": {
     "estimatedPayment": "Pago Mensual Estimado",
     "startingFrom": "Desde",
+    "withDownPayment": "con {percent}% de enganche inicial",
     "calculate": "Calcular Hipoteca",
     "hideCalculator": "Ocultar Calculadora",
     "homePrice": "Precio del Inmueble",
@@ -141,6 +161,7 @@
     "fullName": "Nombre completo",
     "email": "Correo electrónico",
     "phone": "Teléfono",
+    "tourHostedBy": "Visita guiada por {name}",
     "confirmTour": "Confirmar Solicitud de Visita",
     "tourSuccessTitle": "¡Solicitud Recibida!",
     "tourSuccessMessage": "Tu asesor se pondrá en contacto a la brevedad para coordinar la visita a la propiedad.",
@@ -149,6 +170,7 @@
     "sendMessage": "Enviar Mensaje",
     "contactSuccessTitle": "¡Mensaje Enviado!",
     "contactSuccessMessage": "Gracias por comunicarte. Nos pondremos en contacto contigo lo antes posible.",
+    "defaultContactMessage": "Hola, me gustaría recibir más información sobre {title} ubicada en {location}.",
     "close": "Cerrar"
   },
   "notFound": {
@@ -168,4 +190,3 @@
     "selectLanguage": "Seleccionar idioma"
   }
 }
-

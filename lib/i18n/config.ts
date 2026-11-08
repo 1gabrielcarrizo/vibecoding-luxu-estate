@@ -5,7 +5,6 @@ export interface LocaleInfo {
   name: string;
   nativeName: string;
   flag: string;
-  shortLabel: string;
 }
 
 export const SUPPORTED_LOCALES: LocaleInfo[] = [
@@ -14,21 +13,18 @@ export const SUPPORTED_LOCALES: LocaleInfo[] = [
     name: "Spanish",
     nativeName: "Español",
     flag: "🇪🇸",
-    shortLabel: "ES",
   },
   {
     code: "en",
     name: "English",
     nativeName: "English",
     flag: "🇺🇸",
-    shortLabel: "EN",
   },
   {
     code: "fr",
     name: "French",
     nativeName: "Français",
     flag: "🇫🇷",
-    shortLabel: "FR",
   },
 ];
 
@@ -45,4 +41,3 @@ export function getLocaleInfo(locale: Locale): LocaleInfo {
     SUPPORTED_LOCALES.find((l) => l.code === locale) || SUPPORTED_LOCALES[0]
   );
 }
-

@@ -92,11 +92,16 @@
     "Central Heating & Cooling": "Central Heating & Cooling",
     "Electric Vehicle Charging": "Electric Vehicle Charging",
     "Private Gym": "Private Gym",
-    "Wine Cellar": "Wine Cellar"
+    "Wine Cellar": "Wine Cellar",
+    "Spa & Sauna": "Spa & Sauna",
+    "Tesla EV Superchargers": "Tesla EV Superchargers"
   },
   "propertyDetail": {
     "breadcrumbHome": "Home",
-    "galleryAllPhotos": "View photos",
+    "galleryAllPhotos": "View All Photos",
+    "photoOf": "Photo {current} of {total}",
+    "closeViewer": "Close photo viewer",
+    "viewOnMap": "View on Map",
     "featuresTitle": "Property Features",
     "squareMeters": "Square Meters",
     "bedrooms": "Bedrooms",
@@ -113,11 +118,26 @@
     "whatsappChat": "Chat via WhatsApp",
     "agentRating": "Top Rated Agent",
     "callAgent": "Call",
-    "emailAgent": "Email"
+    "emailAgent": "Email",
+    "badges": {
+      "premium": "Premium",
+      "new": "New",
+      "exclusive": "Exclusive",
+      "featured": "Featured",
+      "priceCut": "Price Cut",
+      "forSale": "For Sale",
+      "forRent": "For Rent"
+    },
+    "defaultDescription": [
+      "Experience contemporary luxury in this architecturally stunning residence located in one of the most prestigious prime residential areas. Designed with an emphasis on seamless indoor-outdoor living, the home features floor-to-ceiling glass walls that flood every room with natural light.",
+      "The open-concept gourmet kitchen is equipped with top-of-the-line appliances and bespoke cabinetry, perfect for culinary enthusiasts. The primary suite is a true sanctuary of relaxation with a spa-inspired bath and private balcony.",
+      "A beautifully landscaped garden courtyard seamlessly complements outdoor dining, pool lounging, and evening gatherings under the stars."
+    ]
   },
   "mortgage": {
     "estimatedPayment": "Estimated Payment",
     "startingFrom": "Starting from",
+    "withDownPayment": "with {percent}% down payment",
     "calculate": "Calculate Mortgage",
     "hideCalculator": "Hide Calculator",
     "homePrice": "Home Price",
@@ -141,6 +161,7 @@
     "fullName": "Full Name",
     "email": "Email Address",
     "phone": "Phone Number",
+    "tourHostedBy": "Tour hosted by {name}",
     "confirmTour": "Confirm Tour Request",
     "tourSuccessTitle": "Tour Request Confirmed!",
     "tourSuccessMessage": "An agent will contact you shortly to confirm your private appointment.",
@@ -149,6 +170,7 @@
     "sendMessage": "Send Message",
     "contactSuccessTitle": "Message Sent!",
     "contactSuccessMessage": "Thank you for reaching out. We will get back to you as soon as possible.",
+    "defaultContactMessage": "Hello, I would like more information regarding {title} located in {location}.",
     "close": "Close"
   },
   "notFound": {
@@ -168,4 +190,3 @@
     "selectLanguage": "Select language"
   }
 }
-

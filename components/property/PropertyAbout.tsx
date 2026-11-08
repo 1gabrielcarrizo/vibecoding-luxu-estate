@@ -12,14 +12,20 @@ export const PropertyAbout: React.FC<PropertyAboutProps> = ({
   description,
   title,
 }) => {
-  const { t } = useTranslation();
+  const { t, dict, locale } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const paragraphs = description && description.length > 0 ? description : [
-    `Experience modern luxury in this architecturally stunning home located in the heart of prime residential real estate. Designed with an emphasis on indoor-outdoor living, the residence features floor-to-ceiling glass walls that flood the interiors with natural light.`,
-    `The open-concept kitchen is equipped with top-of-the-line appliances and custom cabinetry, perfect for culinary enthusiasts. Retreat to the primary suite, a sanctuary of relaxation with a spa-inspired bath and private balcony.`,
-    `A landscaped garden courtyard seamlessly complements outdoor dining, pool lounging, and evening gatherings under the stars.`,
-  ];
+  // If description matches default mock or is not provided, use translated description
+  const isDefaultOrEmpty =
+    !description ||
+    description.length === 0 ||
+    description[0]?.startsWith("Experience modern luxury") ||
+    description[0]?.startsWith("Set amidst the rolling foothills");
+
+  const paragraphs =
+    isDefaultOrEmpty && dict.propertyDetail.defaultDescription
+      ? dict.propertyDetail.defaultDescription
+      : description || [];
 
   const visibleParagraphs = isExpanded ? paragraphs : paragraphs.slice(0, 2);
 

@@ -3,6 +3,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { PropertyCoordinates } from "@/types/property";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 // Dynamically import the React-Leaflet map to prevent SSR window reference issues
 const DynamicReactLeafletMap = dynamic(
@@ -28,6 +29,7 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
   title,
   location,
 }) => {
+  const { t } = useTranslation();
   const mapExternalUrl = `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`;
 
   return (
@@ -46,7 +48,7 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
           rel="noopener noreferrer"
           className="absolute bottom-2 right-2 bg-white/90 hover:bg-white text-xs font-medium px-2.5 py-1 rounded shadow-sm text-nordic hover:text-mosque transition-colors z-[400] flex items-center gap-1 cursor-pointer"
         >
-          <span>View on Map</span>
+          <span>{t("propertyDetail.viewOnMap")}</span>
           <span className="material-icons text-[12px]">open_in_new</span>
         </a>
       </div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface PropertyGalleryProps {
   images: string[];
@@ -14,6 +15,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   title,
   badges = ["Premium", "New"],
 }) => {
+  const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
@@ -50,6 +52,24 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isLightboxOpen, handleNext, handlePrev]);
 
+  const getBadgeLabel = (b: string) => {
+    const key = b.toLowerCase().trim().replace(/[^a-z]/g, "");
+    if (key === "premium") return t("propertyDetail.badges.premium");
+    if (key === "new" || key === "nuevo" || key === "nouveau")
+      return t("propertyDetail.badges.new");
+    if (key === "exclusive" || key === "exclusivo" || key === "exclusif")
+      return t("propertyDetail.badges.exclusive");
+    if (key === "featured" || key === "destacada" || key === "envedette")
+      return t("propertyDetail.badges.featured");
+    if (key === "pricecut" || key === "rebajada" || key === "prixreduit")
+      return t("propertyDetail.badges.priceCut");
+    if (key === "forsale" || key === "sale" || key === "venta" || key === "avendre")
+      return t("propertyDetail.badges.forSale");
+    if (key === "forrent" || key === "rent" || key === "alquiler" || key === "location")
+      return t("propertyDetail.badges.forRent");
+    return b;
+  };
+
   return (
     <div className="space-y-4">
       {/* Hero Primary Image */}
@@ -78,7 +98,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     : "bg-white/90 backdrop-blur text-nordic text-xs font-medium px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm"
                 }
               >
-                {b}
+                {getBadgeLabel(b)}
               </span>
             ))}
           </div>
@@ -90,16 +110,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <button
               type="button"
               onClick={handlePrev}
-              aria-label="Previous image"
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label={t("pagination.previous")}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
             >
               <span className="material-icons text-xl">chevron_left</span>
             </button>
             <button
               type="button"
               onClick={handleNext}
-              aria-label="Next image"
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label={t("pagination.next")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
             >
               <span className="material-icons text-xl">chevron_right</span>
             </button>
@@ -116,7 +136,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-nordic px-4 py-2 rounded-lg text-sm font-medium shadow-lg backdrop-blur transition-all flex items-center gap-2 z-10 cursor-pointer"
         >
           <span className="material-icons text-sm">grid_view</span>
-          <span>View All Photos</span>
+          <span>{t("propertyDetail.galleryAllPhotos")}</span>
           {safeImages.length > 1 && (
             <span className="text-xs text-nordic/60 ml-0.5">
               ({safeImages.length})
@@ -166,12 +186,15 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <div>
               <h3 className="text-lg font-semibold">{title}</h3>
               <p className="text-xs text-white/60">
-                Photo {activeIndex + 1} of {safeImages.length}
+                {t("propertyDetail.photoOf", {
+                  current: activeIndex + 1,
+                  total: safeImages.length,
+                })}
               </p>
             </div>
             <button
               onClick={() => setIsLightboxOpen(false)}
-              aria-label="Close photo viewer"
+              aria-label={t("propertyDetail.closeViewer")}
               className="p-2 rounded-full hover:bg-white/10 text-white transition-colors cursor-pointer"
             >
               <span className="material-icons text-2xl">close</span>
@@ -196,16 +219,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 <button
                   type="button"
                   onClick={handlePrev}
-                  aria-label="Previous photo"
-                  className="absolute left-2 sm:left-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all"
+                  aria-label={t("pagination.previous")}
+                  className="absolute left-2 sm:left-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all cursor-pointer"
                 >
                   <span className="material-icons text-2xl">chevron_left</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleNext}
-                  aria-label="Next photo"
-                  className="absolute right-2 sm:right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all"
+                  aria-label={t("pagination.next")}
+                  className="absolute right-2 sm:right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all cursor-pointer"
                 >
                   <span className="material-icons text-2xl">chevron_right</span>
                 </button>
@@ -220,7 +243,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 <button
                   key={`lightbox-${img}-${i}`}
                   onClick={() => setActiveIndex(i)}
-                  className={`relative w-16 h-12 rounded-md overflow-hidden flex-shrink-0 transition-all ${
+                  className={`relative w-16 h-12 rounded-md overflow-hidden flex-shrink-0 transition-all cursor-pointer ${
                     i === activeIndex
                       ? "ring-2 ring-white scale-105 opacity-100"
                       : "opacity-50 hover:opacity-80"
@@ -242,4 +265,3 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     </div>
   );
 };
-

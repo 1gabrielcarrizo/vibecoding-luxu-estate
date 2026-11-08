@@ -22,10 +22,20 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState(
-    `Hello, I would like more information regarding ${property.title} located in ${property.location}.`
-  );
+  const [message, setMessage] = useState("");
   const [isSent, setIsSent] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setMessage(
+        t("modals.defaultContactMessage", {
+          title: property.title,
+          location: property.location,
+        })
+      );
+      setIsSent(false);
+    }
+  }, [isOpen, property.title, property.location, t]);
 
   if (!isOpen) return null;
 
