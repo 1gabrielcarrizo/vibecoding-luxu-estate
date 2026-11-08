@@ -9,7 +9,10 @@
     "profileAria": "User Profile",
     "toggleMenuAria": "Toggle navigation menu",
     "language": "Language",
-    "home": "Home"
+    "home": "Home",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "myProfile": "My Profile"
   },
   "hero": {
     "titlePrefix": "Find your",

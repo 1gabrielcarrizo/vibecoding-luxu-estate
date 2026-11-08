@@ -9,7 +9,10 @@
     "profileAria": "Profil utilisateur",
     "toggleMenuAria": "Basculer le menu de navigation",
     "language": "Langue",
-    "home": "Accueil"
+    "home": "Accueil",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "myProfile": "Mon Profil"
   },
   "hero": {
     "titlePrefix": "Trouvez votre",

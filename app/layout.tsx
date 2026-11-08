@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { AuthProvider } from "@/lib/supabase/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -37,13 +38,23 @@ export default function RootLayout({
           rel="stylesheet"
         />
         <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <link
           href="https://fonts.cdnfonts.com/css/sf-pro-display"
           rel="stylesheet"
         />
       </head>
       <body className="min-h-full flex flex-col bg-background-light text-nordic-dark font-display antialiased selection:bg-mosque selection:text-white">
         <LanguageProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

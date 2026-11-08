@@ -9,7 +9,10 @@
     "profileAria": "Perfil de usuario",
     "toggleMenuAria": "Alternar menú de navegación",
     "language": "Idioma",
-    "home": "Inicio"
+    "home": "Inicio",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "myProfile": "Mi Perfil"
   },
   "hero": {
     "titlePrefix": "Encuentra tu",
