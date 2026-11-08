@@ -92,11 +92,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       return;
     }
     try {
-      // 1. Check user/app metadata
-      if (
-        currentUser.app_metadata?.role === "admin" ||
-        currentUser.user_metadata?.role === "admin"
-      ) {
+      // 1. Check secure app_metadata (never user_metadata)
+      if (currentUser.app_metadata?.role === "admin") {
         setRole("admin");
         return;
       }
@@ -228,10 +225,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const displayName = useMemo(() => extractDisplayName(user), [user]);
   const provider = useMemo(() => extractProvider(user), [user]);
   const email = user?.email || null;
-  const isAdmin =
-    role === "admin" ||
-    user?.app_metadata?.role === "admin" ||
-    user?.user_metadata?.role === "admin";
+  const isAdmin = role === "admin" || user?.app_metadata?.role === "admin";
 
   const value = useMemo(
     () => ({

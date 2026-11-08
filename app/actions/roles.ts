@@ -34,11 +34,8 @@ export async function verifyIsAdmin(): Promise<{
     return { isAdmin: true, userId: user.id, userEmail };
   }
 
-  // Check user metadata
-  if (
-    user.app_metadata?.role === "admin" ||
-    user.user_metadata?.role === "admin"
-  ) {
+  // Check secure app_metadata (never trust client-writable user_metadata for authorization)
+  if (user.app_metadata?.role === "admin") {
     return { isAdmin: true, userId: user.id, userEmail };
   }
 
