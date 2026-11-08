@@ -22,7 +22,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   currentUserEmail,
 }) => {
   // Tab state
-  const [activeTab, setActiveTab] = useState<"properties" | "roles" | "sql">(
+  const [activeTab, setActiveTab] = useState<"properties" | "roles">(
     "properties"
   );
 
@@ -202,61 +202,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const agentUsersCount = users.filter((u) => u.role === "agent").length;
   const regularUsersCount = users.filter((u) => u.role === "user").length;
 
-  // Copy SQL script helper
-  const [copiedSql, setCopiedSql] = useState(false);
-  const sqlScript = `-- 1. Tabla de roles vinculada a auth.users
-CREATE TABLE IF NOT EXISTS public.user_roles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT,
-  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'agent', 'user')),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
-);
-
--- 2. Habilitar RLS
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
-
--- 3. Función auxiliar para verificar si es admin
-CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS BOOLEAN LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE AS $$
-  SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE id = auth.uid() AND role = 'admin');
-$$;
-
--- 4. Políticas de Seguridad RLS
-CREATE POLICY "Users can view own role" ON public.user_roles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Admins can view all user roles" ON public.user_roles FOR SELECT USING (public.is_admin());
-CREATE POLICY "Admins can update user roles" ON public.user_roles FOR UPDATE USING (public.is_admin());
-CREATE POLICY "Users can insert default role" ON public.user_roles FOR INSERT WITH CHECK (public.is_admin() OR (auth.uid() = id AND role = 'user'));
-
--- 5. Trigger automático al registrarse un nuevo usuario en auth.users
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-BEGIN
-  INSERT INTO public.user_roles (id, email, role, created_at, updated_at)
-  VALUES (NEW.id, NEW.email, 'user', timezone('utc'::text, now()), timezone('utc'::text, now()))
-  ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, updated_at = timezone('utc'::text, now());
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
--- 6. Poblar usuarios existentes en auth.users que aún no tengan rol
-INSERT INTO public.user_roles (id, email, role, created_at, updated_at)
-SELECT id, email, 'user', created_at, timezone('utc'::text, now())
-FROM auth.users
-ON CONFLICT (id) DO NOTHING;
-
--- 7. Asignar rol inicial de admin a tu cuenta (reemplaza con tu correo):
--- UPDATE public.user_roles SET role = 'admin' WHERE email = 'tu_correo@ejemplo.com';`;
-
-  const handleCopySql = () => {
-    navigator.clipboard.writeText(sqlScript);
-    setCopiedSql(true);
-    setTimeout(() => setCopiedSql(false), 3000);
-  };
-
   return (
     <div className="space-y-8">
       {/* Toast Notification */}
@@ -341,18 +286,6 @@ ON CONFLICT (id) DO NOTHING;
           <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-mosque/10 text-mosque font-bold">
             {totalUsersCount}
           </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("sql")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
-            activeTab === "sql"
-              ? "border-mosque text-mosque bg-mosque/5 rounded-t-lg"
-              : "border-transparent text-nordic/60 hover:text-nordic hover:border-nordic/30"
-          }`}
-        >
-          <span className="material-symbols-outlined text-lg">terminal</span>
-          <span>Esquema SQL & Migración</span>
         </button>
       </div>
 
@@ -930,62 +863,6 @@ ON CONFLICT (id) DO NOTHING;
               <span className="italic">
                 Cualquier cambio de rol actualiza la tabla de base de datos `public.user_roles` al instante.
               </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================== */}
-      {/* TAB 3: ESQUEMA SQL & MIGRACIÓN                                 */}
-      {/* ============================================================== */}
-      {activeTab === "sql" && (
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-xl border border-mosque/10 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div>
-                <h2 className="text-lg font-bold text-nordic flex items-center gap-2">
-                  <span className="material-symbols-outlined text-mosque">
-                    database
-                  </span>
-                  <span>Script de Migración SQL para Supabase</span>
-                </h2>
-                <p className="text-xs text-nordic/60 mt-0.5">
-                  Ejecuta este script en el <strong>SQL Editor</strong> de tu proyecto Supabase para crear la tabla <code className="bg-nordic/5 px-1 py-0.5 rounded font-mono text-mosque">user_roles</code>, configurar las políticas RLS y el trigger automático.
-                </p>
-              </div>
-
-              <button
-                onClick={handleCopySql}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-mosque text-white text-xs font-semibold hover:bg-mosque-light transition-all shadow-xs cursor-pointer self-start sm:self-auto"
-              >
-                <span className="material-symbols-outlined text-sm">
-                  {copiedSql ? "done" : "content_copy"}
-                </span>
-                <span>{copiedSql ? "¡Copiado!" : "Copiar SQL"}</span>
-              </button>
-            </div>
-
-            {/* Code Block */}
-            <div className="relative rounded-xl overflow-hidden bg-nordic text-gray-200 p-4 font-mono text-xs overflow-x-auto max-h-[500px]">
-              <pre>{sqlScript}</pre>
-            </div>
-
-            <div className="mt-4 p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs leading-relaxed space-y-1">
-              <p className="font-bold flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">info</span>
-                <span>Instrucciones rápidas:</span>
-              </p>
-              <ol className="list-decimal pl-5 space-y-1 text-amber-800">
-                <li>Abre el panel de control de Supabase en tu navegador.</li>
-                <li>Ve a la sección <strong>SQL Editor</strong> en el menú lateral.</li>
-                <li>Pega el código anterior y pulsa <strong>Run</strong>.</li>
-                <li>
-                  Para hacer que tu usuario sea administrador de inmediato, ejecuta: <br />
-                  <code className="font-bold bg-amber-100 px-1 py-0.5 rounded">
-                    UPDATE public.user_roles SET role = &apos;admin&apos; WHERE email = &apos;{currentUserEmail || "tu_correo@ejemplo.com"}&apos;;
-                  </code>
-                </li>
-              </ol>
             </div>
           </div>
         </div>

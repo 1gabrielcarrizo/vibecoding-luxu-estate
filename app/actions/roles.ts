@@ -59,7 +59,7 @@ export async function verifyIsAdmin(): Promise<{
 
 /**
  * Retrieves all users from the user_roles table.
- * If user_roles is empty or caller is not yet present, auto-registers the current admin.
+ * Restricted to administrators.
  */
 export async function getAdminUsersAction(): Promise<{
   success: boolean;
@@ -67,93 +67,23 @@ export async function getAdminUsersAction(): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { isAdmin } = await verifyIsAdmin();
+    if (!isAdmin) {
+      return { success: false, users: [], error: "No autorizado." };
+    }
 
-    // Query all records from user_roles
+    const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase
       .from("user_roles")
       .select("*")
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.warn("Could not query user_roles table:", error.message);
-      // Fallback: If user is logged in, at least show the current user
-      if (user) {
-        return {
-          success: true,
-          users: [
-            {
-              id: user.id,
-              email: user.email || "Usuario actual",
-              role: "admin",
-              created_at: user.created_at || new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            },
-          ],
-        };
-      }
+      console.error("Error querying user_roles table:", error.message);
       return { success: false, users: [], error: error.message };
     }
 
-    let users = (data as UserRoleRow[]) || [];
-
-    // Ensure the current user exists in the returned list
-    if (user && !users.some((u) => u.id === user.id)) {
-      const isEnvAdmin =
-        ADMIN_EMAILS.length > 0 &&
-        ADMIN_EMAILS.includes((user.email || "").toLowerCase());
-      const roleToAssign: UserRole =
-        isEnvAdmin || users.length === 0 ? "admin" : "user";
-
-      // Attempt upsert to DB
-      try {
-        const { data: inserted } = await supabase
-          .from("user_roles")
-          .upsert(
-            {
-              id: user.id,
-              email: user.email,
-              role: roleToAssign,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "id" }
-          )
-          .select()
-          .maybeSingle();
-
-        if (inserted) {
-          users = [inserted as UserRoleRow, ...users];
-        } else {
-          users = [
-            {
-              id: user.id,
-              email: user.email || null,
-              role: roleToAssign,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            },
-            ...users,
-          ];
-        }
-      } catch {
-        // Fallback in memory
-        users = [
-          {
-            id: user.id,
-            email: user.email || null,
-            role: "admin",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          ...users,
-        ];
-      }
-    }
-
-    return { success: true, users };
+    return { success: true, users: (data as UserRoleRow[]) || [] };
   } catch (err: any) {
     console.error("Unexpected error fetching user roles:", err);
     return {

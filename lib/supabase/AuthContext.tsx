@@ -99,38 +99,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       // 2. Query user_roles table
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("id", currentUser.id)
         .maybeSingle();
 
-      if (data?.role) {
+      if (!error && data?.role) {
         setRole(data.role as UserRole);
       } else {
-        // Auto-register user in user_roles with default 'user' role
-        try {
-          const { data: inserted } = await supabase
-            .from("user_roles")
-            .upsert(
-              {
-                id: currentUser.id,
-                email: currentUser.email || null,
-                role: "user",
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: "id", ignoreDuplicates: true }
-            )
-            .select("role")
-            .maybeSingle();
-
-          if (inserted?.role) {
-            setRole(inserted.role as UserRole);
-            return;
-          }
-        } catch {
-          // Table may not yet be created in Supabase
-        }
         setRole("user");
       }
     } catch {
