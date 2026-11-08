@@ -34,12 +34,23 @@ export const ScheduleVisitModal: React.FC<ScheduleVisitModalProps> = ({
     setIsSubmitted(true);
   };
 
+  const tourTypeLabel =
+    visitType === "in-person"
+      ? t("modals.inPerson")
+      : t("modals.videoTour");
+
   const whatsappMessage = encodeURIComponent(
-    `Hello ${agent.name}, I'd like to schedule a ${
-      visitType === "in-person" ? "in-person tour" : "video walkthrough"
-    } for ${property.title} on ${selectedDate || "this week"} at ${selectedTime}. My name is ${
-      name || "Client"
-    }.`
+    t("modals.whatsappScheduleMessage", {
+      agent: agent.name,
+      tourType: tourTypeLabel,
+      title: property.title,
+      date: selectedDate || (tourTypeLabel.includes("visita") ? "esta semana" : "this week"),
+      time: selectedTime,
+      name: name || "Client",
+    }) ||
+      `Hello ${agent.name}, I'd like to schedule a ${tourTypeLabel} for ${property.title} on ${selectedDate || "this week"} at ${selectedTime}. My name is ${
+        name || "Client"
+      }.`
   );
 
   return (

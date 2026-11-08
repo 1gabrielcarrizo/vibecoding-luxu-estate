@@ -3,19 +3,23 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
 
 interface PropertyGalleryProps {
   images: string[];
   title: string;
   badges?: string[];
+  slug?: string;
 }
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   images,
   title,
   badges = ["Premium", "New"],
+  slug,
 }) => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const displayTitle = slug ? getLocalizedTitle(slug, locale, title) : title;
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
@@ -53,7 +57,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [isLightboxOpen, handleNext, handlePrev]);
 
   const getBadgeLabel = (b: string) => {
-    const key = b.toLowerCase().trim().replace(/[^a-z]/g, "");
+    const key = b.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
     if (key === "premium") return t("propertyDetail.badges.premium");
     if (key === "new" || key === "nuevo" || key === "nouveau")
       return t("propertyDetail.badges.new");
@@ -67,6 +71,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       return t("propertyDetail.badges.forSale");
     if (key === "forrent" || key === "rent" || key === "alquiler" || key === "location")
       return t("propertyDetail.badges.forRent");
+    if (key === "newarrival") return t("propertyDetail.badges.newArrival");
+    if (key === "newlisting") return t("propertyDetail.badges.newListing");
+    if (key === "topfloor") return t("propertyDetail.badges.topFloor");
+    if (key === "alpine") return t("propertyDetail.badges.alpine");
+    if (key === "minimalist") return t("propertyDetail.badges.minimalist");
+    if (key === "penthouse") return t("propertyDetail.badges.penthouse");
     return b;
   };
 
@@ -79,7 +89,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       >
         <Image
           src={currentImage}
-          alt={`${title} - Photo ${activeIndex + 1}`}
+          alt={`${displayTitle} - Photo ${activeIndex + 1}`}
           fill
           priority
           sizes="(max-width: 1024px) 100vw, 66vw"
@@ -206,7 +216,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <div className="relative w-full h-full max-w-5xl">
               <Image
                 src={currentImage}
-                alt={`${title} photo ${activeIndex + 1}`}
+                alt={`${displayTitle} photo ${activeIndex + 1}`}
                 fill
                 className="object-contain"
                 sizes="100vw"

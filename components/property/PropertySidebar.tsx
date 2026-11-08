@@ -7,15 +7,18 @@ import { PropertyMap } from "./PropertyMap";
 import { ScheduleVisitModal } from "./ScheduleVisitModal";
 import { ContactAgentModal } from "./ContactAgentModal";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
 
 interface PropertySidebarProps {
   property: Property;
 }
 
 export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+
+  const displayTitle = getLocalizedTitle(property.slug, locale, property.title);
 
   const agent = property.agent || {
     name: "Sarah Jenkins",
@@ -28,7 +31,14 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
   };
 
   const whatsappMessage = encodeURIComponent(
-    `Hello ${agent.name}, I'm interested in viewing ${property.title} (${property.location}) priced at ${property.formattedPrice}. Reference: ${property.slug}`
+    t("propertyDetail.whatsappPropertyMessage", {
+      agent: agent.name,
+      title: displayTitle,
+      location: property.location,
+      price: property.formattedPrice,
+      slug: property.slug,
+    }) ||
+      `Hello ${agent.name}, I'm interested in viewing ${displayTitle} (${property.location}) priced at ${property.formattedPrice}. Reference: ${property.slug}`
   );
   const whatsappUrl = `https://wa.me/15553498201?text=${whatsappMessage}`;
 
@@ -133,7 +143,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
         {/* Card 2: Interactive Leaflet Map */}
         <PropertyMap
           coordinates={property.coordinates}
-          title={property.title}
+          title={displayTitle}
           location={property.location}
         />
       </div>
@@ -142,14 +152,14 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
       <ScheduleVisitModal
         isOpen={isScheduleOpen}
         onClose={() => setIsScheduleOpen(false)}
-        property={property}
+        property={{ ...property, title: displayTitle }}
         agent={agent}
       />
 
       <ContactAgentModal
         isOpen={isContactOpen}
         onClose={() => setIsContactOpen(false)}
-        property={property}
+        property={{ ...property, title: displayTitle }}
         agent={agent}
       />
     </div>

@@ -17,7 +17,7 @@ export const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
     "Wine Cellar",
   ],
 }) => {
-  const { t } = useTranslation();
+  const { t, dict } = useTranslation();
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-sm border border-mosque/5">
@@ -26,9 +26,26 @@ export const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
         {amenities.map((amenity) => {
-          const translated = t(`amenitiesList.${amenity}`);
-          const displayLabel =
-            translated !== `amenitiesList.${amenity}` ? translated : amenity;
+          const trimmed = (amenity || "").trim();
+          let displayLabel = t(`amenitiesList.${trimmed}`);
+
+          // Fallback to case-insensitive dictionary lookup
+          if (displayLabel === `amenitiesList.${trimmed}`) {
+            const list = dict?.amenitiesList as Record<string, string> | undefined;
+            if (list) {
+              const matchedKey = Object.keys(list).find(
+                (k) => k.toLowerCase() === trimmed.toLowerCase()
+              );
+              if (matchedKey && list[matchedKey]) {
+                displayLabel = list[matchedKey];
+              } else {
+                displayLabel = trimmed;
+              }
+            } else {
+              displayLabel = trimmed;
+            }
+          }
+
           return (
             <div key={amenity} className="flex items-center gap-3 text-nordic/70">
               <span className="material-icons text-mosque/60 text-sm">

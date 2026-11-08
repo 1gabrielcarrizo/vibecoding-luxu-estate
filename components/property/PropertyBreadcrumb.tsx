@@ -4,18 +4,22 @@ import React from "react";
 import Link from "next/link";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { PropertyCategory } from "@/types/property";
+import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
 
 interface PropertyBreadcrumbProps {
   category: PropertyCategory;
   title: string;
+  slug?: string;
 }
 
 export const PropertyBreadcrumb: React.FC<PropertyBreadcrumbProps> = ({
   category,
   title,
+  slug,
 }) => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const categoryLabel = t(`categories.${category}`) || category;
+  const displayTitle = slug ? getLocalizedTitle(slug, locale, title) : title;
 
   return (
     <nav
@@ -38,7 +42,7 @@ export const PropertyBreadcrumb: React.FC<PropertyBreadcrumbProps> = ({
       </Link>
       <span className="text-nordic/30">/</span>
       <span className="text-nordic font-medium truncate max-w-xs sm:max-w-md">
-        {title}
+        {displayTitle}
       </span>
     </nav>
   );

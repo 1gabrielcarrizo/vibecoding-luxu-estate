@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Property } from "@/types/property";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
 
 interface FeaturedCardProps {
   property: Property;
@@ -17,8 +18,9 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
   onSelect,
   priority = false,
 }) => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(false);
+  const displayTitle = getLocalizedTitle(property.slug, locale, property.title);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -35,18 +37,42 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
   // Translate badges if available
   const getTranslatedBadge = (badgeText?: string) => {
     if (!badgeText) return null;
-    const lower = badgeText.toLowerCase().trim();
-    if (lower === "exclusive" || lower === "exclusivo" || lower === "exclusif") {
+    const clean = badgeText.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
+    if (clean === "exclusive" || clean === "exclusivo" || clean === "exclusif") {
       return t("propertyCard.exclusive");
     }
-    if (lower === "new" || lower === "nuevo" || lower === "nouveau") {
+    if (clean === "new" || clean === "nuevo" || clean === "nouveau") {
       return t("propertyCard.new");
     }
-    if (lower === "featured" || lower === "destacada" || lower === "en vedette") {
+    if (clean === "featured" || clean === "destacada" || clean === "envedette") {
       return t("propertyCard.featured");
     }
-    if (lower === "price cut" || lower === "rebajada" || lower === "prix réduit") {
+    if (clean === "pricecut" || clean === "rebajada" || clean === "prixreduit") {
       return t("propertyCard.priceCut");
+    }
+    if (clean === "rent" || clean === "forrent" || clean === "alquiler" || clean === "location") {
+      return t("propertyCard.forRent");
+    }
+    if (clean === "sale" || clean === "forsale" || clean === "venta" || clean === "avendre") {
+      return t("propertyCard.forSale");
+    }
+    if (clean === "newarrival") {
+      return t("propertyCard.newArrival");
+    }
+    if (clean === "newlisting") {
+      return t("propertyCard.newListing");
+    }
+    if (clean === "topfloor") {
+      return t("propertyCard.topFloor");
+    }
+    if (clean === "alpine") {
+      return t("propertyCard.alpine");
+    }
+    if (clean === "minimalist") {
+      return t("propertyCard.minimalist");
+    }
+    if (clean === "penthouse") {
+      return t("propertyCard.penthouse");
     }
     return badgeText;
   };
@@ -65,7 +91,7 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
       {/* Media Container */}
       <div className="aspect-[4/3] w-full overflow-hidden relative bg-slate-100">
         <Image
-          alt={property.imageAlt || property.title}
+          alt={property.imageAlt || displayTitle}
           src={primaryImage}
           fill
           sizes="(max-width: 1024px) 100vw, 50vw"
@@ -105,7 +131,7 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
         <div className="flex justify-between items-start mb-2">
           <div>
             <h3 className="text-xl font-medium text-nordic group-hover:text-mosque transition-colors">
-              {property.title}
+              {displayTitle}
             </h3>
             <p className="text-nordic-muted text-sm flex items-center gap-1 mt-1">
               <span className="material-icons text-sm text-mosque">place</span>{" "}

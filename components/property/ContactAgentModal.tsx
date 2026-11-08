@@ -45,7 +45,14 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
   };
 
   const whatsappMessage = encodeURIComponent(
-    `Hello ${agent.name}, ${message} My contact is ${name} (${email}, ${phone}).`
+    t("modals.whatsappContactMessage", {
+      agent: agent.name,
+      message,
+      name: name || "Client",
+      email: email || "",
+      phone: phone || "",
+    }) ||
+      `Hello ${agent.name}, ${message} My contact is ${name} (${email}, ${phone}).`
   );
 
   return (

@@ -114,6 +114,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
         <PropertyBreadcrumb
           category={property.category}
           title={property.title}
+          slug={property.slug}
         />
 
         {/* 12-Column Grid Layout matching code.html */}
@@ -124,6 +125,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
               images={allImages}
               title={property.title}
               badges={badges}
+              slug={property.slug}
             />
           </div>
 
@@ -142,6 +144,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
             {/* About this home */}
             <PropertyAbout
+              slug={property.slug}
               description={property.description}
               title={property.title}
             />

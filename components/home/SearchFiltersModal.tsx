@@ -275,7 +275,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
             onClick={onClose}
             type="button"
             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400 cursor-pointer"
-            aria-label="Close filters"
+            aria-label={t("modals.close")}
           >
             <span className="material-icons">close</span>
           </button>
