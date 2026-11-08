@@ -228,5 +228,23 @@
     "en": "English",
     "fr": "Français",
     "selectLanguage": "Sélectionner la langue"
+  },
+  "auth": {
+    "welcome": "Bienvenue sur LuxeEstate",
+    "subtitle": "Découvrez des propriétés exclusives dans le monde entier.",
+    "continueWithGoogle": "Continuer avec Google",
+    "continueWithGithub": "Continuer avec GitHub",
+    "connectingGoogle": "Connexion à Google...",
+    "connectingGithub": "Connexion à GitHub...",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signUp": "S'inscrire",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "helpCenter": "Centre d'aide",
+    "returnHome": "Retour à l'accueil",
+    "authIssue": "Problème d'authentification",
+    "signingIn": "Connexion en cours...",
+    "waitSession": "Veuillez patienter pendant la finalisation de votre session LuxeEstate.",
+    "returnToLogin": "Retour à la connexion"
   }
 }

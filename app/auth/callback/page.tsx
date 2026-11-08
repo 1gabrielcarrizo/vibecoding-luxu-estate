@@ -3,10 +3,12 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 function CallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -70,7 +72,7 @@ function CallbackHandler() {
           <span className="material-symbols-rounded text-3xl">real_estate_agent</span>
         </div>
         <h2 className="text-xl font-bold tracking-tight text-nordic dark:text-white mb-2">
-          {errorMessage ? "Authentication Issue" : "Signing you in..."}
+          {errorMessage ? t("auth.authIssue") : t("auth.signingIn")}
         </h2>
         {errorMessage ? (
           <div className="mt-4">
@@ -79,12 +81,12 @@ function CallbackHandler() {
               onClick={() => router.replace("/login")}
               className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors cursor-pointer"
             >
-              Return to Login
+              {t("auth.returnToLogin")}
             </button>
           </div>
         ) : (
           <p className="text-xs text-nordic/60 dark:text-gray-400">
-            Please wait while we finalize your LuxeEstate session.
+            {t("auth.waitSession")}
           </p>
         )}
       </div>
@@ -107,4 +109,3 @@ export default function AuthCallbackPage() {
     </Suspense>
   );
 }
-

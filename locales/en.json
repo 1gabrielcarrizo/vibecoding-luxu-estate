@@ -228,5 +228,23 @@
     "en": "English",
     "fr": "Français",
     "selectLanguage": "Select language"
+  },
+  "auth": {
+    "welcome": "Welcome to LuxeEstate",
+    "subtitle": "Unlock exclusive properties worldwide.",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithGithub": "Continue with GitHub",
+    "connectingGoogle": "Connecting to Google...",
+    "connectingGithub": "Connecting to GitHub...",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "helpCenter": "Help Center",
+    "returnHome": "Return to Home",
+    "authIssue": "Authentication Issue",
+    "signingIn": "Signing you in...",
+    "waitSession": "Please wait while we finalize your LuxeEstate session.",
+    "returnToLogin": "Return to Login"
   }
 }

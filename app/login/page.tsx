@@ -4,9 +4,12 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/supabase/AuthContext";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { LanguageSelector } from "@/components/common/LanguageSelector";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user, signInWithGoogle, signInWithGithub } = useAuth();
   const [loadingProvider, setLoadingProvider] = useState<"google" | "github" | null>(
     null
@@ -51,6 +54,11 @@ export default function LoginPage() {
 
   return (
     <div className="font-display bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4 antialiased text-nordic dark:text-gray-100 relative overflow-hidden">
+      {/* Top Language Selector */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+        <LanguageSelector />
+      </div>
+
       {/* Background Decorative Blur Gradients */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-accent/30 rounded-full blur-3xl dark:bg-primary/10"></div>
@@ -63,15 +71,15 @@ export default function LoginPage() {
           <Link
             href="/"
             className="inline-flex items-center justify-center w-14 h-14 bg-primary rounded-xl mb-6 shadow-soft text-white transition-transform hover:scale-105 cursor-pointer"
-            aria-label="Return to LuxeEstate home"
+            aria-label={t("auth.returnHome") || "Return to LuxeEstate home"}
           >
             <span className="material-symbols-rounded text-3xl">real_estate_agent</span>
           </Link>
           <h1 className="text-3xl font-bold tracking-tight text-nordic dark:text-white mb-2">
-            Welcome to LuxeEstate
+            {t("auth.welcome")}
           </h1>
           <p className="text-nordic/60 dark:text-gray-400">
-            Unlock exclusive properties worldwide.
+            {t("auth.subtitle")}
           </p>
         </div>
 
@@ -120,8 +128,8 @@ export default function LoginPage() {
               )}
               <span className="relative z-10">
                 {loadingProvider === "google"
-                  ? "Connecting to Google..."
-                  : "Continue with Google"}
+                  ? t("auth.connectingGoogle")
+                  : t("auth.continueWithGoogle")}
               </span>
             </button>
 
@@ -146,20 +154,20 @@ export default function LoginPage() {
               )}
               <span className="relative z-10">
                 {loadingProvider === "github"
-                  ? "Connecting to GitHub..."
-                  : "Continue with GitHub"}
+                  ? t("auth.connectingGithub")
+                  : t("auth.continueWithGithub")}
               </span>
             </button>
           </div>
 
           <p className="mt-8 text-center text-sm text-nordic/70 dark:text-gray-400">
-            Don&apos;t have an account?{" "}
+            {t("auth.noAccount")}{" "}
             <button
               type="button"
               onClick={handleGoogleSignIn}
               className="font-semibold text-primary hover:text-primary-dark transition-colors cursor-pointer"
             >
-              Sign up
+              {t("auth.signUp")}
             </button>
           </p>
         </div>
@@ -171,19 +179,19 @@ export default function LoginPage() {
               className="hover:text-nordic dark:hover:text-gray-300 transition-colors"
               href="#"
             >
-              Privacy Policy
+              {t("auth.privacyPolicy")}
             </Link>
             <Link
               className="hover:text-nordic dark:hover:text-gray-300 transition-colors"
               href="#"
             >
-              Terms of Service
+              {t("auth.termsOfService")}
             </Link>
             <Link
               className="hover:text-nordic dark:hover:text-gray-300 transition-colors"
               href="#"
             >
-              Help Center
+              {t("auth.helpCenter")}
             </Link>
           </nav>
         </div>
@@ -191,4 +199,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
