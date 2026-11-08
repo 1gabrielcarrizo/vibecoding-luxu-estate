@@ -6,10 +6,12 @@ import React, {
   useEffect,
   useState,
   useMemo,
+  useCallback,
   ReactNode,
 } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "./client";
+import { UserRole } from "@/types/database.types";
 
 interface AuthContextType {
   user: User | null;
@@ -19,8 +21,15 @@ interface AuthContextType {
   displayName: string | null;
   email: string | null;
   provider: "google" | "github" | "email" | string | null;
-  signInWithGoogle: () => Promise<{ data?: any; error: AuthError | null }>;
-  signInWithGithub: () => Promise<{ data?: any; error: AuthError | null }>;
+  role: UserRole | null;
+  isAdmin: boolean;
+  refreshRole: () => Promise<void>;
+  signInWithGoogle: (
+    redirectToUrl?: string
+  ) => Promise<{ data?: any; error: AuthError | null }>;
+  signInWithGithub: (
+    redirectToUrl?: string
+  ) => Promise<{ data?: any; error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
 }
 
@@ -74,7 +83,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [role, setRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const fetchUserRole = useCallback(async (currentUser: User | null) => {
+    if (!currentUser) {
+      setRole(null);
+      return;
+    }
+    try {
+      // 1. Check user/app metadata
+      if (
+        currentUser.app_metadata?.role === "admin" ||
+        currentUser.user_metadata?.role === "admin"
+      ) {
+        setRole("admin");
+        return;
+      }
+
+      // 2. Query user_roles table
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+
+      if (data?.role) {
+        setRole(data.role as UserRole);
+      } else {
+        setRole("user");
+      }
+    } catch {
+      setRole("user");
+    }
+  }, []);
+
+  const refreshRole = useCallback(async () => {
+    await fetchUserRole(user);
+  }, [user, fetchUserRole]);
 
   useEffect(() => {
     let mounted = true;
@@ -85,6 +131,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         if (!error && session) {
           setSession(session);
           setUser(session.user);
+          fetchUserRole(session.user);
+        } else {
+          setRole(null);
         }
         setIsLoading(false);
       }
@@ -97,6 +146,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       if (mounted) {
         setSession(newSession);
         setUser(newSession?.user ?? null);
+        if (newSession?.user) {
+          fetchUserRole(newSession.user);
+        } else {
+          setRole(null);
+        }
         setIsLoading(false);
       }
     });
@@ -105,17 +159,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchUserRole]);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (redirectToUrl?: string) => {
     const origin =
       typeof window !== "undefined"
         ? window.location.origin
         : process.env.NEXT_PUBLIC_SITE_URL || "";
+    const redirect = redirectToUrl || `${origin}/auth/callback`;
     return await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${origin}/auth/callback`,
+        redirectTo: redirect,
         queryParams: {
           access_type: "offline",
           prompt: "consent",
@@ -124,15 +179,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     });
   };
 
-  const signInWithGithub = async () => {
+  const signInWithGithub = async (redirectToUrl?: string) => {
     const origin =
       typeof window !== "undefined"
         ? window.location.origin
         : process.env.NEXT_PUBLIC_SITE_URL || "";
+    const redirect = redirectToUrl || `${origin}/auth/callback`;
     return await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
-        redirectTo: `${origin}/auth/callback`,
+        redirectTo: redirect,
       },
     });
   };
@@ -141,6 +197,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const result = await supabase.auth.signOut();
     setUser(null);
     setSession(null);
+    setRole(null);
     return result;
   };
 
@@ -148,6 +205,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const displayName = useMemo(() => extractDisplayName(user), [user]);
   const provider = useMemo(() => extractProvider(user), [user]);
   const email = user?.email || null;
+  const isAdmin =
+    role === "admin" ||
+    user?.app_metadata?.role === "admin" ||
+    user?.user_metadata?.role === "admin";
 
   const value = useMemo(
     () => ({
@@ -158,11 +219,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       displayName,
       email,
       provider,
+      role,
+      isAdmin,
+      refreshRole,
       signInWithGoogle,
       signInWithGithub,
       signOut,
     }),
-    [user, session, isLoading, avatarUrl, displayName, email, provider]
+    [
+      user,
+      session,
+      isLoading,
+      avatarUrl,
+      displayName,
+      email,
+      provider,
+      role,
+      isAdmin,
+      refreshRole,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -212,6 +212,32 @@ export async function getAllMarketProperties(): Promise<Property[]> {
 }
 
 /**
+ * Retrieves ALL properties for the admin dashboard (both featured and standard),
+ * merging Supabase entries with fallbacks.
+ */
+export async function getAllPropertiesForAdmin(): Promise<Property[]> {
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (data && data.length > 0 && !error) {
+      const dbProps = data.map(mapRowToProperty);
+      const existingIds = new Set(dbProps.map((p) => p.id));
+      const extraProps = allFallbackProperties.filter(
+        (p) => !existingIds.has(p.id)
+      );
+      return [...dbProps, ...extraProps];
+    }
+  } catch (err) {
+    console.warn("Using fallback properties for admin:", err);
+  }
+
+  return allFallbackProperties;
+}
+
+/**
  * Server-side paginated properties query with filters
  */
 export async function getPaginatedProperties(

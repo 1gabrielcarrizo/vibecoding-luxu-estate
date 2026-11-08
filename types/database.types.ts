@@ -75,15 +75,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_roles: {
+        Row: {
+          id: string;
+          email: string | null;
+          role: "admin" | "agent" | "user";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          email?: string | null;
+          role?: "admin" | "agent" | "user";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string | null;
+          role?: "admin" | "agent" | "user";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      is_admin: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
     };
     Enums: {
-      [_ in never]: never;
+      app_user_role: "admin" | "agent" | "user";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -92,3 +119,5 @@ export type Database = {
 };
 
 export type PropertyRow = Database["public"]["Tables"]["properties"]["Row"];
+export type UserRole = "admin" | "agent" | "user";
+export type UserRoleRow = Database["public"]["Tables"]["user_roles"]["Row"];

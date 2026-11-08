@@ -22,8 +22,17 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const router = useRouter();
   const { t } = useTranslation();
-  const { user, avatarUrl, displayName, email, provider, signOut, isLoading } =
-    useAuth();
+  const {
+    user,
+    avatarUrl,
+    displayName,
+    email,
+    provider,
+    signOut,
+    isLoading,
+    isAdmin,
+    role,
+  } = useAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -193,15 +202,34 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <p className="text-xs text-nordic/60 dark:text-gray-400 truncate">
                           {email || "Signed in"}
                         </p>
-                        {provider && (
-                          <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-mosque/10 text-mosque dark:bg-mosque/20 dark:text-accent capitalize">
-                            {provider}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1.5 mt-1">
+                          {provider && (
+                            <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full bg-mosque/10 text-mosque dark:bg-mosque/20 dark:text-accent capitalize">
+                              {provider}
+                            </span>
+                          )}
+                          {role && (
+                            <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full bg-nordic/10 text-nordic dark:bg-white/10 dark:text-white capitalize">
+                              {role}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
                     <div className="py-1">
+                      {isAdmin && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="w-full text-left px-4 py-2 text-sm text-mosque font-semibold hover:bg-mosque/10 flex items-center gap-2 cursor-pointer transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-lg">
+                            admin_panel_settings
+                          </span>
+                          <span>Panel Admin</span>
+                        </Link>
+                      )}
                       <button
                         onClick={handleSignOut}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 cursor-pointer transition-colors"
@@ -297,6 +325,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </p>
                   </div>
                 </div>
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-left px-3 py-2 text-sm text-mosque font-semibold hover:bg-mosque/10 rounded-md flex items-center gap-2 cursor-pointer mb-1"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      admin_panel_settings
+                    </span>
+                    <span>Panel Administrador</span>
+                  </Link>
+                )}
                 <button
                   onClick={handleSignOut}
                   className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md flex items-center gap-2 cursor-pointer"
