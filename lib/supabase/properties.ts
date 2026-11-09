@@ -31,14 +31,14 @@ export function parseImagesFromRow(
   row: PropertyRow,
   fallbackImages?: string[]
 ): string[] {
-  // 1. Direct array in image_url
-  if (Array.isArray(row.image_url) && row.image_url.length > 0) {
-    return (row.image_url as unknown[]).map(String).filter(Boolean);
-  }
-
-  // 2. Direct array in images column (if present)
+  // 1. Direct array in images column (primary Postgres column)
   if (Array.isArray(row.images) && row.images.length > 0) {
     return (row.images as unknown[]).map(String).filter(Boolean);
+  }
+
+  // 2. Direct array in image_url
+  if (Array.isArray(row.image_url) && row.image_url.length > 0) {
+    return (row.image_url as unknown[]).map(String).filter(Boolean);
   }
 
   // 3. String representation in image_url (e.g. JSON string '["url1","url2"]' or single string)
@@ -70,23 +70,16 @@ export function parseImagesFromRow(
     return fallbackImages;
   }
 
-  return extraFallbackImages;
+  return [extraFallbackImages[0]];
 }
 
 export function mapRowToProperty(row: PropertyRow): Property {
   // Check if we have richer mock data for this property id
   const matchingFallback = allFallbackProperties.find((p) => p.id === row.id);
 
+  // Return the exact images stored in DB without artificially padding up to 5
   const rawImages = parseImagesFromRow(row, matchingFallback?.images);
-
-  // Ensure each property has at least 4 images (1 main + 3 additional)
-  const images =
-    rawImages.length >= 4
-      ? rawImages
-      : [
-        ...rawImages,
-        ...extraFallbackImages.filter((img) => !rawImages.includes(img)),
-      ].slice(0, 5);
+  const images = rawImages.length > 0 ? rawImages : [extraFallbackImages[0]];
 
   const slug =
     row.slug ||
@@ -159,27 +152,27 @@ export function mapRowToProperty(row: PropertyRow): Property {
 }
 
 /**
- * Fetches featured properties from Supabase (strictly limited to 2)
+ * Fetches featured properties from Supabase, ordered by most recently created/updated
  */
-export async function getFeaturedProperties(): Promise<Property[]> {
+export async function getFeaturedProperties(limit = 4): Promise<Property[]> {
   try {
     const { data, error } = await supabase
       .from("properties")
       .select("*")
       .eq("is_featured", true)
       .eq("is_active", true)
-      .order("id", { ascending: true })
-      .limit(2);
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
     if (error || !data || data.length === 0) {
       console.warn("Using fallback featured properties:", error?.message);
-      return fallbackFeatured.filter((p) => p.isActive !== false).slice(0, 2);
+      return fallbackFeatured.filter((p) => p.isActive !== false).slice(0, limit);
     }
 
-    return data.slice(0, 2).map(mapRowToProperty);
+    return data.map(mapRowToProperty);
   } catch (err) {
     console.error("Error fetching featured properties:", err);
-    return fallbackFeatured.filter((p) => p.isActive !== false).slice(0, 2);
+    return fallbackFeatured.filter((p) => p.isActive !== false).slice(0, limit);
   }
 }
 
@@ -211,15 +204,21 @@ export async function setPropertyFeaturedStatus(
 }
 
 /**
- * Retrieves all market properties, merging Supabase database entries with rich mock additions
+ * Retrieves market properties, merging Supabase database entries with rich mock additions.
+ * By default includes featured properties so all active properties are accessible and searchable.
  */
-export async function getAllMarketProperties(): Promise<Property[]> {
+export async function getAllMarketProperties(includeFeatured = true): Promise<Property[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("properties")
       .select("*")
-      .eq("is_featured", false)
       .eq("is_active", true);
+
+    if (!includeFeatured) {
+      query = query.eq("is_featured", false);
+    }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
 
     if (data && data.length > 0 && !error) {
       const dbProps = data.map(mapRowToProperty);

@@ -17,8 +17,8 @@ export const FeaturedCollections: React.FC<FeaturedCollectionsProps> = ({
   onSelectProperty,
 }) => {
   const { t } = useTranslation();
-  // Enforce strictly 2 featured properties at all times
-  const displayedProperties = properties.slice(0, 2);
+  // Display featured properties (up to 4 in a balanced 2-column grid)
+  const displayedProperties = properties.slice(0, 4);
 
   if (displayedProperties.length === 0) return null;
 

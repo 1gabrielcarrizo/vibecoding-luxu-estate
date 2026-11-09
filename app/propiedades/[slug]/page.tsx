@@ -19,6 +19,9 @@ interface PropertyPageProps {
   }>;
 }
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * Static params generation for ISR / static pre-rendering
  */

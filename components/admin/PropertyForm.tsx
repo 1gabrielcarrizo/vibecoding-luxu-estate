@@ -309,7 +309,34 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     }
   };
 
-  // Set Main Image
+  // Drag and drop reordering between image thumbnails
+  const [draggedThumbIndex, setDraggedThumbIndex] = useState<number | null>(null);
+
+  // Move image left (toward main cover position)
+  const handleMoveImageLeft = (index: number) => {
+    if (index <= 0) return;
+    setImages((prev) => {
+      const copy = [...prev];
+      const temp = copy[index - 1];
+      copy[index - 1] = copy[index];
+      copy[index] = temp;
+      return copy;
+    });
+  };
+
+  // Move image right
+  const handleMoveImageRight = (index: number) => {
+    if (index >= images.length - 1) return;
+    setImages((prev) => {
+      const copy = [...prev];
+      const temp = copy[index + 1];
+      copy[index + 1] = copy[index];
+      copy[index] = temp;
+      return copy;
+    });
+  };
+
+  // Set Main Image (moves it directly to position 0)
   const handleSetMainImage = (index: number) => {
     if (index === 0) return;
     setImages((prev) => {
@@ -317,7 +344,33 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       const [selected] = copy.splice(index, 1);
       return [selected, ...copy];
     });
-    showToast("success", "Set as main cover image.");
+    showToast("success", "Imagen configurada como Portada Principal (#1).");
+  };
+
+  const handleThumbDragStart = (e: React.DragEvent, index: number) => {
+    e.stopPropagation();
+    setDraggedThumbIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleThumbDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleThumbDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (draggedThumbIndex === null || draggedThumbIndex === dropIndex) return;
+    setImages((prev) => {
+      const copy = [...prev];
+      const [item] = copy.splice(draggedThumbIndex, 1);
+      copy.splice(dropIndex, 0, item);
+      return copy;
+    });
+    setDraggedThumbIndex(null);
+    showToast("success", "Orden de imágenes actualizado.");
   };
 
   // Remove image
@@ -892,68 +945,133 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   </button>
                 </div>
 
-                {/* Thumbnails Grid matching code.html */}
+                {/* Thumbnails Grid matching code.html with reordering & main selection */}
                 {images.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-                    {images.map((imgUrl, index) => (
-                      <div
-                        key={`${imgUrl}-${index}`}
-                        className="aspect-square rounded-lg overflow-hidden relative group shadow-sm bg-gray-100 border border-gray-200"
-                      >
-                        <img
-                          alt={`Listing photo ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          src={imgUrl}
-                        />
+                  <div className="space-y-3 mt-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {images.map((imgUrl, index) => {
+                        const isMain = index === 0;
+                        const isDraggingCurrent = draggedThumbIndex === index;
 
-                        {/* Hover Overlay */}
-                        <div className="absolute inset-0 bg-nordic/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
-                          <button
-                            onClick={() => handleRemoveImage(index)}
-                            className="w-8 h-8 rounded-full bg-white text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors cursor-pointer"
-                            type="button"
-                            title="Delete image"
+                        return (
+                          <div
+                            key={`${imgUrl}-${index}`}
+                            draggable={true}
+                            onDragStart={(e) => handleThumbDragStart(e, index)}
+                            onDragOver={handleThumbDragOver}
+                            onDrop={(e) => handleThumbDrop(e, index)}
+                            onDragEnd={() => setDraggedThumbIndex(null)}
+                            className={`aspect-square rounded-xl overflow-hidden relative group shadow-sm bg-gray-100 border transition-all ${
+                              isMain
+                                ? "border-mosque ring-2 ring-mosque/30"
+                                : "border-gray-200 hover:border-gray-300"
+                            } ${isDraggingCurrent ? "opacity-40 scale-95" : "opacity-100"}`}
                           >
-                            <span className="material-icons text-sm">
-                              delete
-                            </span>
-                          </button>
-                          {index !== 0 && (
-                            <button
-                              onClick={() => handleSetMainImage(index)}
-                              className="w-8 h-8 rounded-full bg-white text-nordic hover:bg-gray-50 flex items-center justify-center transition-colors cursor-pointer"
-                              type="button"
-                              title="Set as Main Cover"
-                            >
-                              <span className="material-icons text-sm">
-                                star
-                              </span>
-                            </button>
-                          )}
-                        </div>
+                            <img
+                              alt={`Listing photo ${index + 1}`}
+                              className="w-full h-full object-cover pointer-events-none select-none"
+                              src={imgUrl}
+                            />
 
-                        {/* Main Badge for index 0 */}
-                        {index === 0 && (
-                          <span className="absolute top-2 left-2 bg-mosque text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm font-sf-pro uppercase tracking-wider">
-                            Main
-                          </span>
-                        )}
-                      </div>
-                    ))}
+                            {/* Badge: Main Cover vs Index */}
+                            <div className="absolute top-2 left-2 z-10 pointer-events-none">
+                              {isMain ? (
+                                <span className="bg-mosque text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm font-sf-pro uppercase tracking-wider flex items-center gap-1">
+                                  <span className="material-icons text-[12px]">star</span> Portada
+                                </span>
+                              ) : (
+                                <span className="bg-black/60 backdrop-blur text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm font-sf-pro">
+                                  #{index + 1}
+                                </span>
+                              )}
+                            </div>
 
-                    {/* Add More Button */}
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="aspect-square rounded-lg border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:text-mosque hover:border-mosque hover:bg-hint-green/20 transition-all group cursor-pointer"
-                      type="button"
-                    >
-                      <span className="material-icons group-hover:scale-110 transition-transform">
-                        add
+                            {/* Quick Action Buttons (Bottom Bar) */}
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 flex items-center justify-between opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                              <div className="flex items-center gap-1">
+                                {index > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleMoveImageLeft(index);
+                                    }}
+                                    title="Mover a la izquierda"
+                                    className="w-6 h-6 rounded bg-white/90 hover:bg-white text-nordic flex items-center justify-center transition-colors cursor-pointer"
+                                  >
+                                    <span className="material-icons text-[14px]">arrow_back</span>
+                                  </button>
+                                )}
+                                {index < images.length - 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleMoveImageRight(index);
+                                    }}
+                                    title="Mover a la derecha"
+                                    className="w-6 h-6 rounded bg-white/90 hover:bg-white text-nordic flex items-center justify-center transition-colors cursor-pointer"
+                                  >
+                                    <span className="material-icons text-[14px]">arrow_forward</span>
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-1">
+                                {!isMain && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSetMainImage(index);
+                                    }}
+                                    title="Definir como Portada Principal"
+                                    className="w-6 h-6 rounded bg-amber-400 hover:bg-amber-300 text-nordic flex items-center justify-center transition-colors cursor-pointer"
+                                  >
+                                    <span className="material-icons text-[14px]">star</span>
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveImage(index);
+                                  }}
+                                  title="Eliminar imagen"
+                                  className="w-6 h-6 rounded bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition-colors cursor-pointer"
+                                >
+                                  <span className="material-icons text-[14px]">delete</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* Add More Button */}
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:text-mosque hover:border-mosque hover:bg-hint-green/20 transition-all group cursor-pointer"
+                        type="button"
+                      >
+                        <span className="material-icons group-hover:scale-110 transition-transform">
+                          add_photo_alternate
+                        </span>
+                        <span className="text-xs mt-1 font-medium font-sf-pro">
+                          Agregar Más
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Helper text explaining drag & swap */}
+                    <div className="p-2.5 bg-hint-green/20 rounded-lg border border-mosque/20 flex items-center gap-2 text-xs text-nordic font-sf-pro">
+                      <span className="material-icons text-mosque text-sm flex-shrink-0">
+                        swap_horiz
                       </span>
-                      <span className="text-xs mt-1 font-medium font-sf-pro">
-                        Add More
+                      <span>
+                        <strong>Gestión de imágenes:</strong> Arrastra y suelta para reordenar, o usa las flechas ◀ ▶. El botón ★ define la <strong>Portada Principal (#1)</strong>. No hay límite obligatorio de fotos (mínimo 1).
                       </span>
-                    </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1044,7 +1162,6 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   {hasValidCoords ? (
                     <div className="relative w-full h-full">
                       <DynamicReactLeafletMap
-                        key={`${parsedLatNum}-${parsedLngNum}`}
                         coordinates={{ lat: parsedLatNum, lng: parsedLngNum }}
                         title={title.trim() || "Property Location"}
                         location={location.trim() || `${parsedLatNum}, ${parsedLngNum}`}

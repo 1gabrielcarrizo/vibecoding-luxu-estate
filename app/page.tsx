@@ -20,6 +20,9 @@ interface PageProps {
   }>;
 }
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function HomeContent({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
@@ -53,7 +56,7 @@ async function HomeContent({ searchParams }: PageProps) {
 
   return (
     <HomeScreen
-      initialFeaturedProperties={featuredProperties.slice(0, 2)}
+      initialFeaturedProperties={featuredProperties.slice(0, 4)}
       initialPagination={paginationResult}
       initialPage={page}
       initialCategory={category}
