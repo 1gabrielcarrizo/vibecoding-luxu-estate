@@ -3,7 +3,8 @@ export type PropertyCategory =
   | "House"
   | "Apartment"
   | "Villa"
-  | "Penthouse";
+  | "Penthouse"
+  | "Commercial";
 
 export type ListingType = "sale" | "rent";
 
@@ -38,11 +39,12 @@ export interface Property {
   formattedPrice: string;
   priceSuffix?: string;
   type: ListingType;
-  category: "House" | "Apartment" | "Villa" | "Penthouse";
+  category: "House" | "Apartment" | "Villa" | "Penthouse" | "Commercial";
   beds: number;
   baths: number;
   sqm: number;
   garage?: number;
+  yearBuilt?: number;
   images: string[];
   imageUrl?: string;
   imageAlt: string;

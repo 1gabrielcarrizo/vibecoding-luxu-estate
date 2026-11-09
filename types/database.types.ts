@@ -19,7 +19,7 @@ export type Database = {
           formatted_price: string;
           price_suffix: string | null;
           type: "sale" | "rent";
-          category: "House" | "Apartment" | "Villa" | "Penthouse";
+          category: "House" | "Apartment" | "Villa" | "Penthouse" | "Commercial";
           beds: number;
           baths: number;
           sqm: number;
@@ -29,10 +29,14 @@ export type Database = {
           badge: string | null;
           is_featured: boolean | null;
           hide_on_breakpoint: string | null;
+          description?: string | null;
+          amenities?: string[] | null;
+          garage?: number | null;
+          year_built?: number | null;
           created_at: string | null;
         };
         Insert: {
-          id: string;
+          id?: string;
           slug?: string | null;
           title: string;
           location: string;
@@ -40,7 +44,7 @@ export type Database = {
           formatted_price: string;
           price_suffix?: string | null;
           type: "sale" | "rent";
-          category: "House" | "Apartment" | "Villa" | "Penthouse";
+          category: "House" | "Apartment" | "Villa" | "Penthouse" | "Commercial";
           beds: number;
           baths: number;
           sqm: number;
@@ -50,6 +54,10 @@ export type Database = {
           badge?: string | null;
           is_featured?: boolean | null;
           hide_on_breakpoint?: string | null;
+          description?: string | null;
+          amenities?: string[] | null;
+          garage?: number | null;
+          year_built?: number | null;
           created_at?: string | null;
         };
         Update: {
@@ -61,7 +69,7 @@ export type Database = {
           formatted_price?: string;
           price_suffix?: string | null;
           type?: "sale" | "rent";
-          category?: "House" | "Apartment" | "Villa" | "Penthouse";
+          category?: "House" | "Apartment" | "Villa" | "Penthouse" | "Commercial";
           beds?: number;
           baths?: number;
           sqm?: number;
@@ -71,6 +79,10 @@ export type Database = {
           badge?: string | null;
           is_featured?: boolean | null;
           hide_on_breakpoint?: string | null;
+          description?: string | null;
+          amenities?: string[] | null;
+          garage?: number | null;
+          year_built?: number | null;
           created_at?: string | null;
         };
         Relationships: [];

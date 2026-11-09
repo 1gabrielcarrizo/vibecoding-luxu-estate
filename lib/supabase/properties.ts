@@ -1,6 +1,6 @@
 import { supabase } from "./client";
 import { Property, PropertyCategory, slugify } from "@/types/property";
-import { PropertyRow } from "@/types/database.types";
+import { PropertyRow, Database } from "@/types/database.types";
 import { PaginationResult, PropertyFilterParams } from "@/types/pagination";
 import {
   featuredProperties as fallbackFeatured,
@@ -84,9 +84,9 @@ export function mapRowToProperty(row: PropertyRow): Property {
     rawImages.length >= 4
       ? rawImages
       : [
-          ...rawImages,
-          ...extraFallbackImages.filter((img) => !rawImages.includes(img)),
-        ].slice(0, 5);
+        ...rawImages,
+        ...extraFallbackImages.filter((img) => !rawImages.includes(img)),
+      ].slice(0, 5);
 
   const slug =
     row.slug ||
@@ -94,6 +94,21 @@ export function mapRowToProperty(row: PropertyRow): Property {
     slugify(row.title || `property-${row.id}`);
 
   const monthlyEst = Math.round(Number(row.price) * 0.0043);
+
+  const description = row.description
+    ? (row.description.includes("\n\n") ? row.description.split("\n\n").filter(Boolean) : [row.description])
+    : (matchingFallback?.description ?? [
+      `Experience exceptional luxury living at ${row.title}, situated in ${row.location}. Crafted with meticulous attention to detail, this residence provides expansive open spaces and modern comfort.`,
+      `Featuring ${row.beds} spacious bedrooms, ${row.baths} pristine bathrooms, and high-end finishes throughout. Contact our dedicated advisory team for a private viewing.`,
+    ]);
+
+  const amenities =
+    row.amenities && row.amenities.length > 0
+      ? row.amenities
+      : (matchingFallback?.amenities ?? defaultAmenities);
+
+  const garage = row.garage != null ? Number(row.garage) : (matchingFallback?.garage ?? 2);
+  const yearBuilt = row.year_built != null ? Number(row.year_built) : undefined;
 
   return {
     id: row.id,
@@ -108,7 +123,8 @@ export function mapRowToProperty(row: PropertyRow): Property {
     beds: Number(row.beds),
     baths: Number(row.baths),
     sqm: Number(row.sqm),
-    garage: matchingFallback?.garage ?? 2,
+    garage,
+    yearBuilt,
     images,
     imageUrl: images[0],
     imageAlt: row.image_alt,
@@ -116,11 +132,8 @@ export function mapRowToProperty(row: PropertyRow): Property {
     badges: matchingFallback?.badges ?? (row.badge ? [row.badge] : []),
     isFeatured: row.is_featured ?? false,
     hideOnBreakpoint: row.hide_on_breakpoint ?? undefined,
-    description: matchingFallback?.description ?? [
-      `Experience exceptional luxury living at ${row.title}, situated in ${row.location}. Crafted with meticulous attention to detail, this residence provides expansive open spaces and modern comfort.`,
-      `Featuring ${row.beds} spacious bedrooms, ${row.baths} pristine bathrooms, and high-end finishes throughout. Contact our dedicated advisory team for a private viewing.`,
-    ],
-    amenities: matchingFallback?.amenities ?? defaultAmenities,
+    description,
+    amenities,
     agent: matchingFallback?.agent ?? defaultAgent,
     coordinates: matchingFallback?.coordinates ?? {
       lat: 37.7749,
@@ -466,4 +479,196 @@ function getFallbackPaginatedProperties(
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
   };
+}
+
+export interface PropertyInput {
+  id?: string;
+  title: string;
+  location: string;
+  price: number;
+  type: "sale" | "rent";
+  category: "House" | "Apartment" | "Villa" | "Penthouse" | "Commercial";
+  beds: number;
+  baths: number;
+  sqm: number;
+  garage?: number;
+  yearBuilt?: number;
+  images: string[];
+  description?: string;
+  amenities?: string[];
+  isFeatured?: boolean;
+  badge?: string;
+  priceSuffix?: string;
+}
+
+/**
+ * Fetches a single property by its ID (checking Supabase DB first, then fallback mock data)
+ */
+export async function getPropertyById(id: string): Promise<Property | null> {
+  const cleanId = decodeURIComponent(id).trim();
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("id", cleanId)
+      .maybeSingle();
+
+    if (data && !error) {
+      return mapRowToProperty(data);
+    }
+  } catch (err) {
+    console.warn("Error fetching property by id from db:", err);
+  }
+
+  // Fallback to local
+  const fallback = allFallbackProperties.find(
+    (p) => p.id === cleanId || p.slug === cleanId
+  );
+  return fallback || null;
+}
+
+/**
+ * Creates a new property in Supabase database
+ */
+export async function createProperty(input: PropertyInput): Promise<Property> {
+  const newId = input.id || `prop-${Date.now()}`;
+  const slug = slugify(input.title) || `prop-${Date.now()}`;
+  const formattedPrice = `$${Number(input.price).toLocaleString("en-US")}`;
+  const images =
+    input.images && input.images.length > 0
+      ? input.images
+      : [extraFallbackImages[0]];
+  const imageUrl = JSON.stringify(images);
+  const imageAlt = `${input.title} - ${input.location}`;
+
+  const rowData: Database["public"]["Tables"]["properties"]["Insert"] = {
+    id: newId,
+    slug,
+    title: input.title,
+    location: input.location,
+    price: input.price,
+    formatted_price: formattedPrice,
+    price_suffix: input.priceSuffix || (input.type === "rent" ? "/month" : null),
+    type: input.type,
+    category: input.category,
+    beds: input.beds,
+    baths: input.baths,
+    sqm: input.sqm,
+    garage: input.garage ?? 1,
+    year_built: input.yearBuilt ?? new Date().getFullYear(),
+    image_url: imageUrl,
+    images: images,
+    image_alt: imageAlt,
+    badge:
+      input.badge ||
+      (input.isFeatured
+        ? "Featured"
+        : input.type === "rent"
+          ? "For Rent"
+          : "For Sale"),
+    is_featured: !!input.isFeatured,
+    description: input.description || null,
+    amenities: input.amenities && input.amenities.length > 0 ? input.amenities : defaultAmenities,
+  };
+
+  const { data, error } = await supabase
+    .from("properties")
+    .insert(rowData)
+    .select()
+    .single();
+
+  if (error || !data) {
+    console.error("Error creating property in Supabase:", error);
+    throw new Error(error?.message || "Failed to create property in database");
+  }
+
+  return mapRowToProperty(data);
+}
+
+/**
+ * Updates an existing property in Supabase database
+ */
+export async function updateProperty(
+  id: string,
+  input: Partial<PropertyInput>
+): Promise<Property> {
+  const updateData: Database["public"]["Tables"]["properties"]["Update"] = {};
+
+  if (input.title !== undefined) {
+    updateData.title = input.title;
+    updateData.slug = slugify(input.title);
+  }
+  if (input.location !== undefined) {
+    updateData.location = input.location;
+  }
+  if (input.price !== undefined) {
+    updateData.price = input.price;
+    updateData.formatted_price = `$${Number(input.price).toLocaleString("en-US")}`;
+  }
+  if (input.priceSuffix !== undefined) {
+    updateData.price_suffix = input.priceSuffix;
+  }
+  if (input.type !== undefined) {
+    updateData.type = input.type;
+  }
+  if (input.category !== undefined) {
+    updateData.category = input.category;
+  }
+  if (input.beds !== undefined) {
+    updateData.beds = input.beds;
+  }
+  if (input.baths !== undefined) {
+    updateData.baths = input.baths;
+  }
+  if (input.sqm !== undefined) {
+    updateData.sqm = input.sqm;
+  }
+  if (input.garage !== undefined) {
+    updateData.garage = input.garage;
+  }
+  if (input.yearBuilt !== undefined) {
+    updateData.year_built = input.yearBuilt;
+  }
+  if (input.images !== undefined && input.images.length > 0) {
+    updateData.images = input.images;
+    updateData.image_url = JSON.stringify(input.images);
+  }
+  if (input.badge !== undefined) {
+    updateData.badge = input.badge;
+  }
+  if (input.isFeatured !== undefined) {
+    updateData.is_featured = input.isFeatured;
+  }
+  if (input.description !== undefined) {
+    updateData.description = input.description;
+  }
+  if (input.amenities !== undefined) {
+    updateData.amenities = input.amenities;
+  }
+
+  const { data, error } = await supabase
+    .from("properties")
+    .update(updateData)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error || !data) {
+    console.error(`Error updating property ${id} in Supabase:`, error);
+    throw new Error(error?.message || "Failed to update property in database");
+  }
+
+  return mapRowToProperty(data);
+}
+
+/**
+ * Deletes a property from Supabase database
+ */
+export async function deleteProperty(id: string): Promise<boolean> {
+  const { error } = await supabase.from("properties").delete().eq("id", id);
+  if (error) {
+    console.error(`Error deleting property ${id} from Supabase:`, error);
+    throw new Error(error.message);
+  }
+  return true;
 }

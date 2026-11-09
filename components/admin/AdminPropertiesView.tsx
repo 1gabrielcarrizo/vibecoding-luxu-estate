@@ -3,7 +3,7 @@
 import React, { useState, useTransition, useMemo } from "react";
 import Link from "next/link";
 import { Property } from "@/types/property";
-import { setPropertyFeaturedAction } from "@/app/actions/properties";
+import { setPropertyFeaturedAction, deletePropertyAction } from "@/app/actions/properties";
 
 interface AdminPropertiesViewProps {
   initialProperties?: Property[];
@@ -229,531 +229,536 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
   };
 
   // Delete property
-  const handleDeleteProperty = (propertyId: string, title: string) => {
-    if (confirm(`Are you sure you want to delete "${title}"?`)) {
-      setPropertyList((prev) => prev.filter((p) => p.id !== propertyId));
-      showToast("success", `Property "${title}" deleted successfully.`);
-    }
-  };
-
-  // Add property submit
-  const handleAddPropertySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTitle.trim() || !newPrice.trim()) return;
-
-    const numericPrice = parseFloat(newPrice.replace(/[^0-9.]/g, "")) || 950000;
-    const newProp: PropertyItemDisplay = {
-      id: `prop-${Date.now()}`,
-      title: newTitle.trim(),
-      location: newLocation.trim() || "Beverly Hills, CA",
-      beds: parseInt(newBeds) || 3,
-      baths: parseFloat(newBaths) || 2,
-      sqft: `${newSqft} sqft`,
-      price: numericPrice,
-      formattedPrice: `$${numericPrice.toLocaleString("en-US")}`,
-      monthly: `$${Math.round(numericPrice * 0.0038).toLocaleString("en-US")}`,
-      status: newStatus,
-      image:
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-      isFeatured: false,
+    const handleDeleteProperty = async (propertyId: string, title: string) => {
+      if (confirm(`Are you sure you want to delete "${title}"?`)) {
+        setPropertyList((prev) => prev.filter((p) => p.id !== propertyId));
+        try {
+          const res = await deletePropertyAction(propertyId);
+          if (res.success) {
+            showToast("success", `Property "${title}" deleted successfully.`);
+          } else {
+            showToast("error", res.error || "Failed to delete property from database.");
+          }
+        } catch {
+          showToast("success", `Property "${title}" removed.`);
+        }
+      }
     };
 
-    setPropertyList((prev) => [newProp, ...prev]);
-    showToast("success", `Property "${newTitle}" added to portfolio.`);
-    setIsAddModalOpen(false);
-    setNewTitle("");
-    setNewLocation("");
-    setNewPrice("");
-  };
+    // Add property submit
+    const handleAddPropertySubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newTitle.trim() || !newPrice.trim()) return;
 
-  return (
-    <div className="flex-grow flex flex-col w-full">
-      {/* Toast Notification */}
-      {toast && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-dropdown border text-sm font-medium animate-in fade-in slide-in-from-bottom-3 duration-200 ${
-            toast.type === "success"
-              ? "bg-white text-emerald-800 border-emerald-200 dark:bg-[#152e2a] dark:text-emerald-300 dark:border-emerald-800"
-              : "bg-white text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-200 dark:border-rose-800"
-          }`}
-        >
-          <span className="material-icons text-lg">
-            {toast.type === "success" ? "check_circle" : "error"}
-          </span>
-          <span>{toast.text}</span>
-        </div>
-      )}
+      const numericPrice = parseFloat(newPrice.replace(/[^0-9.]/g, "")) || 950000;
+      const newProp: PropertyItemDisplay = {
+        id: `prop-${Date.now()}`,
+        title: newTitle.trim(),
+        location: newLocation.trim() || "Beverly Hills, CA",
+        beds: parseInt(newBeds) || 3,
+        baths: parseFloat(newBaths) || 2,
+        sqft: `${newSqft} sqft`,
+        price: numericPrice,
+        formattedPrice: `$${numericPrice.toLocaleString("en-US")}`,
+        monthly: `$${Math.round(numericPrice * 0.0038).toLocaleString("en-US")}`,
+        status: newStatus,
+        image:
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+        isFeatured: false,
+      };
 
-      {/* Main Container */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-nordic dark:text-white tracking-tight">
-              My Properties
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Manage your portfolio and track performance.
-            </p>
-          </div>
+      setPropertyList((prev) => [newProp, ...prev]);
+      showToast("success", `Property "${newTitle}" added to portfolio.`);
+      setIsAddModalOpen(false);
+      setNewTitle("");
+      setNewLocation("");
+      setNewPrice("");
+    };
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setFilterDrawerOpen(!filterDrawerOpen)}
-              className={`bg-white dark:bg-[#152e2a] border border-gray-200 dark:border-primary/30 text-nordic dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-primary/10 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-2 cursor-pointer ${
-                filterDrawerOpen || filterStatus !== "All" || searchQuery
-                  ? "border-primary text-primary"
-                  : ""
+    return (
+      <div className="flex-grow flex flex-col w-full">
+        {/* Toast Notification */}
+        {toast && (
+          <div
+            className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-dropdown border text-sm font-medium animate-in fade-in slide-in-from-bottom-3 duration-200 ${toast.type === "success"
+                ? "bg-white text-emerald-800 border-emerald-200 dark:bg-[#152e2a] dark:text-emerald-300 dark:border-emerald-800"
+                : "bg-white text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-200 dark:border-rose-800"
               }`}
-            >
-              <span className="material-icons text-base">filter_list</span> Filter
-            </button>
-
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-md shadow-primary/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center gap-2 cursor-pointer"
-            >
-              <span className="material-icons text-base">add</span> Add New Property
-            </button>
-          </div>
-        </div>
-
-        {/* Collapsible Filter Bar */}
-        {filterDrawerOpen && (
-          <div className="bg-white dark:bg-[#152e2a] p-4 sm:p-5 rounded-xl border border-primary/15 shadow-sm mb-8 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                  Search Properties
-                </label>
-                <div className="relative">
-                  <span className="material-icons absolute left-3 top-2.5 text-nordic/40 text-lg">
-                    search
-                  </span>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    placeholder="Search by title, city..."
-                    className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                  Status Filter
-                </label>
-                <select
-                  value={filterStatus}
-                  onChange={(e) => {
-                    setFilterStatus(e.target.value as any);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                >
-                  <option value="All">All Statuses</option>
-                  <option value="Active">Active Only</option>
-                  <option value="Pending">Pending Sale</option>
-                  <option value="Sold">Sold</option>
-                </select>
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setFilterStatus("All");
-                    setCurrentPage(1);
-                  }}
-                  className="w-full py-2 text-xs font-semibold text-nordic/70 hover:text-nordic border border-nordic/15 rounded-lg hover:bg-nordic/5 transition-colors"
-                >
-                  Reset Filters
-                </button>
-              </div>
-            </div>
+          >
+            <span className="material-icons text-lg">
+              {toast.type === "success" ? "check_circle" : "error"}
+            </span>
+            <span>{toast.text}</span>
           </div>
         )}
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          {/* Card 1: Total Listings */}
-          <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
+        {/* Main Container */}
+        <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Total Listings
-              </p>
-              <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
-                {totalCount}
+              <h1 className="text-3xl font-bold text-nordic dark:text-white tracking-tight">
+                My Properties
+              </h1>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">
+                Manage your portfolio and track performance.
               </p>
             </div>
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <span className="material-icons">apartment</span>
-            </div>
-          </div>
 
-          {/* Card 2: Active Properties */}
-          <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Active Properties
-              </p>
-              <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
-                {activeCount}
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-hint-green flex items-center justify-center text-primary">
-              <span className="material-icons">check_circle</span>
-            </div>
-          </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setFilterDrawerOpen(!filterDrawerOpen)}
+                className={`bg-white dark:bg-[#152e2a] border border-gray-200 dark:border-primary/30 text-nordic dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-primary/10 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-2 cursor-pointer ${filterDrawerOpen || filterStatus !== "All" || searchQuery
+                    ? "border-primary text-primary"
+                    : ""
+                  }`}
+              >
+                <span className="material-icons text-base">filter_list</span> Filter
+              </button>
 
-          {/* Card 3: Pending Sale */}
-          <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
+            <Link
+                href="/admin/properties/new"
+                className="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-md shadow-primary/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center gap-2 cursor-pointer"
+              >
+                <span className="material-icons text-base">add</span> Add New Property
+            </Link>
+          </div>
+      </div>
+
+        {/* Collapsible Filter Bar */ }
+    {
+      filterDrawerOpen && (
+        <div className="bg-white dark:bg-[#152e2a] p-4 sm:p-5 rounded-xl border border-primary/15 shadow-sm mb-8 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Pending Sale
-              </p>
-              <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
-                {pendingCount}
-              </p>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+                Search Properties
+              </label>
+              <div className="relative">
+                <span className="material-icons absolute left-3 top-2.5 text-nordic/40 text-lg">
+                  search
+                </span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  placeholder="Search by title, city..."
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
             </div>
-            <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
-              <span className="material-icons">pending</span>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+                Status Filter
+              </label>
+              <select
+                value={filterStatus}
+                onChange={(e) => {
+                  setFilterStatus(e.target.value as any);
+                  setCurrentPage(1);
+                }}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Active">Active Only</option>
+                <option value="Pending">Pending Sale</option>
+                <option value="Sold">Sold</option>
+              </select>
+            </div>
+
+            <div className="flex items-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setFilterStatus("All");
+                  setCurrentPage(1);
+                }}
+                className="w-full py-2 text-xs font-semibold text-nordic/70 hover:text-nordic border border-nordic/15 rounded-lg hover:bg-nordic/5 transition-colors"
+              >
+                Reset Filters
+              </button>
             </div>
           </div>
         </div>
+      )
+    }
 
-        {/* Property List Container */}
-        <div className="bg-white dark:bg-[#152e2a] rounded-xl shadow-sm border border-gray-200 dark:border-primary/20 overflow-hidden">
-          {/* Table Header */}
-          <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 dark:bg-primary/5 border-b border-gray-100 dark:border-primary/10 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            <div className="col-span-6">Property Details</div>
-            <div className="col-span-2">Price</div>
-            <div className="col-span-2">Status</div>
-            <div className="col-span-2 text-right">Actions</div>
-          </div>
+    {/* Stats Overview */ }
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+      {/* Card 1: Total Listings */}
+      <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Total Listings
+          </p>
+          <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
+            {totalCount}
+          </p>
+        </div>
+        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <span className="material-icons">apartment</span>
+        </div>
+      </div>
 
-          {/* List Items */}
-          {paginatedProps.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">
-              <span className="material-icons text-4xl text-nordic/30 mb-2">
-                domain_disabled
-              </span>
-              <p className="text-base font-semibold text-nordic dark:text-white">
-                No properties found
-              </p>
-              <p className="text-xs text-nordic/60 mt-1">
-                Try modifying your filter settings.
-              </p>
-            </div>
-          ) : (
-            paginatedProps.map((item) => (
-              <div
-                key={item.id}
-                className="group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 dark:border-primary/10 hover:bg-background-light dark:hover:bg-primary/5 transition-colors items-center"
-              >
-                {/* Property Details */}
-                <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
-                  <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
-                    <img
-                      alt={item.title}
-                      src={item.image}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-nordic dark:text-white group-hover:text-primary transition-colors cursor-pointer">
-                      {item.slug ? (
-                        <Link href={`/propiedades/${item.slug}`}>
-                          {item.title}
-                        </Link>
-                      ) : (
-                        item.title
-                      )}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {item.location}
-                    </p>
-                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400 dark:text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <span className="material-icons text-[14px]">bed</span>{" "}
-                        {item.beds} Beds
-                      </span>
-                      <span className="w-1 h-1 rounded-full bg-gray-300" />
-                      <span className="flex items-center gap-1">
-                        <span className="material-icons text-[14px]">
-                          bathtub
-                        </span>{" "}
-                        {item.baths} Baths
-                      </span>
-                      <span className="w-1 h-1 rounded-full bg-gray-300" />
-                      <span>{item.sqft}</span>
-                    </div>
-                  </div>
-                </div>
+      {/* Card 2: Active Properties */}
+      <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Active Properties
+          </p>
+          <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
+            {activeCount}
+          </p>
+        </div>
+        <div className="h-10 w-10 rounded-full bg-hint-green flex items-center justify-center text-primary">
+          <span className="material-icons">check_circle</span>
+        </div>
+      </div>
 
-                {/* Price */}
-                <div className="col-span-6 md:col-span-2">
-                  <div className="text-base font-semibold text-nordic dark:text-gray-200">
-                    {item.formattedPrice}
-                  </div>
-                  <div className="text-xs text-gray-400">{item.monthly}</div>
-                </div>
+      {/* Card 3: Pending Sale */}
+      <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Pending Sale
+          </p>
+          <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
+            {pendingCount}
+          </p>
+        </div>
+        <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+          <span className="material-icons">pending</span>
+        </div>
+      </div>
+    </div>
 
-                {/* Status */}
-                <div className="col-span-6 md:col-span-2">
-                  {item.status === "Active" ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-hint-green text-primary border border-primary/10">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5" />
-                      Active
-                    </span>
-                  ) : item.status === "Pending" ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
-                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5" />
-                      Pending
-                    </span>
+    {/* Property List Container */ }
+    <div className="bg-white dark:bg-[#152e2a] rounded-xl shadow-sm border border-gray-200 dark:border-primary/20 overflow-hidden">
+      {/* Table Header */}
+      <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 dark:bg-primary/5 border-b border-gray-100 dark:border-primary/10 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        <div className="col-span-6">Property Details</div>
+        <div className="col-span-2">Price</div>
+        <div className="col-span-2">Status</div>
+        <div className="col-span-2 text-right">Actions</div>
+      </div>
+
+      {/* List Items */}
+      {paginatedProps.length === 0 ? (
+        <div className="p-12 text-center text-gray-500">
+          <span className="material-icons text-4xl text-nordic/30 mb-2">
+            domain_disabled
+          </span>
+          <p className="text-base font-semibold text-nordic dark:text-white">
+            No properties found
+          </p>
+          <p className="text-xs text-nordic/60 mt-1">
+            Try modifying your filter settings.
+          </p>
+        </div>
+      ) : (
+        paginatedProps.map((item) => (
+          <div
+            key={item.id}
+            className="group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 dark:border-primary/10 hover:bg-background-light dark:hover:bg-primary/5 transition-colors items-center"
+          >
+            {/* Property Details */}
+            <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
+              <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                <img
+                  alt={item.title}
+                  src={item.image}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-nordic dark:text-white group-hover:text-primary transition-colors cursor-pointer">
+                  {item.slug ? (
+                    <Link href={`/propiedades/${item.slug}`}>
+                      {item.title}
+                    </Link>
                   ) : (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mr-1.5" />
-                      Sold
-                    </span>
+                    item.title
                   )}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {item.location}
+                </p>
+                <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span className="material-icons text-[14px]">bed</span>{" "}
+                    {item.beds} Beds
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-gray-300" />
+                  <span className="flex items-center gap-1">
+                    <span className="material-icons text-[14px]">
+                      bathtub
+                    </span>{" "}
+                    {item.baths} Baths
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-gray-300" />
+                  <span>{item.sqft}</span>
                 </div>
+              </div>
+            </div>
 
-                {/* Actions */}
-                <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-2">
-                  {/* Star / Feature */}
-                  <button
-                    onClick={() => handleToggleFeatured(item.id, item.isFeatured)}
-                    className={`p-2 rounded-lg transition-all cursor-pointer ${
-                      item.isFeatured
-                        ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20"
-                        : "text-gray-400 hover:text-amber-500 hover:bg-hint-green/30"
-                    }`}
-                    title={item.isFeatured ? "Featured Property" : "Feature on Homepage"}
-                  >
-                    <span className="material-icons text-xl">
-                      {item.isFeatured ? "star" : "star_border"}
-                    </span>
-                  </button>
+            {/* Price */}
+            <div className="col-span-6 md:col-span-2">
+              <div className="text-base font-semibold text-nordic dark:text-gray-200">
+                {item.formattedPrice}
+              </div>
+              <div className="text-xs text-gray-400">{item.monthly}</div>
+            </div>
 
-                  {/* Edit */}
-                  <button
-                    onClick={() => {
-                      showToast(
-                        "success",
-                        `Editing "${item.title}" - detail form ready.`
-                      );
-                    }}
-                    className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-hint-green/30 transition-all cursor-pointer tooltip-trigger"
-                    title="Edit Property"
-                  >
-                    <span className="material-icons text-xl">edit</span>
-                  </button>
+            {/* Status */}
+            <div className="col-span-6 md:col-span-2">
+              {item.status === "Active" ? (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-hint-green text-primary border border-primary/10">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5" />
+                  Active
+                </span>
+              ) : item.status === "Pending" ? (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5" />
+                  Pending
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mr-1.5" />
+                  Sold
+                </span>
+              )}
+            </div>
 
-                  {/* Delete */}
-                  <button
-                    onClick={() => handleDeleteProperty(item.id, item.title)}
-                    className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all cursor-pointer tooltip-trigger"
-                    title="Delete Property"
-                  >
-                    <span className="material-icons text-xl">delete_outline</span>
-                  </button>
-                </div>
+            {/* Actions */}
+            <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-2">
+              {/* Star / Feature */}
+              <button
+                onClick={() => handleToggleFeatured(item.id, item.isFeatured)}
+                className={`p-2 rounded-lg transition-all cursor-pointer ${item.isFeatured
+                    ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20"
+                    : "text-gray-400 hover:text-amber-500 hover:bg-hint-green/30"
+                  }`}
+                title={item.isFeatured ? "Featured Property" : "Feature on Homepage"}
+              >
+                <span className="material-icons text-xl">
+                  {item.isFeatured ? "star" : "star_border"}
+                </span>
+              </button>
+
+              {/* Edit */}
+                  <Link
+                href={`/admin/properties/${item.id}/edit`}
+                className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-hint-green/30 transition-all cursor-pointer"
+                title="Edit Property"
+              >
+                <span className="material-icons text-xl">edit</span>
+            </Link>
+
+            {/* Delete */}
+            <button
+              onClick={() => handleDeleteProperty(item.id, item.title)}
+              className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all cursor-pointer tooltip-trigger"
+              title="Delete Property"
+            >
+              <span className="material-icons text-xl">delete_outline</span>
+            </button>
+          </div>
               </div>
             ))
           )}
 
-          {/* Pagination */}
-          <div className="px-6 py-4 border-t border-gray-100 dark:border-primary/20 flex items-center justify-between bg-gray-50/50 dark:bg-primary/5">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing{" "}
-              <span className="font-medium text-nordic dark:text-white">
-                {filteredProperties.length > 0 ? startIndex + 1 : 0}
-              </span>{" "}
-              to{" "}
-              <span className="font-medium text-nordic dark:text-white">
-                {Math.min(startIndex + pageSize, filteredProperties.length)}
-              </span>{" "}
-              of{" "}
-              <span className="font-medium text-nordic dark:text-white">
-                {filteredProperties.length}
-              </span>{" "}
-              results
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                disabled={currentPage <= 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="px-3 py-1 text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
-              >
-                Previous
-              </button>
-              <button
-                type="button"
-                disabled={currentPage >= totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="px-3 py-1 text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
+{/* Pagination */ }
+<div className="px-6 py-4 border-t border-gray-100 dark:border-primary/20 flex items-center justify-between bg-gray-50/50 dark:bg-primary/5">
+  <div className="text-sm text-gray-500 dark:text-gray-400">
+    Showing{" "}
+    <span className="font-medium text-nordic dark:text-white">
+      {filteredProperties.length > 0 ? startIndex + 1 : 0}
+    </span>{" "}
+    to{" "}
+    <span className="font-medium text-nordic dark:text-white">
+      {Math.min(startIndex + pageSize, filteredProperties.length)}
+    </span>{" "}
+    of{" "}
+    <span className="font-medium text-nordic dark:text-white">
+      {filteredProperties.length}
+    </span>{" "}
+    results
+  </div>
+  <div className="flex gap-2">
+    <button
+      type="button"
+      disabled={currentPage <= 1}
+      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+      className="px-3 py-1 text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
+    >
+      Previous
+    </button>
+    <button
+      type="button"
+      disabled={currentPage >= totalPages}
+      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+      className="px-3 py-1 text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
+    >
+      Next
+    </button>
+  </div>
+</div>
+        </div >
+      </main >
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-gray-200 dark:border-primary/20 bg-white dark:bg-[#152e2a]">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-gray-400 dark:text-gray-500">
-            © 2026 LuxeEstate Property Management. All rights reserved.
-          </p>
-        </div>
-      </footer>
-
-      {/* Add New Property Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#152e2a] rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-dropdown border border-nordic/10 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-4 border-b border-nordic/10">
-              <div className="flex items-center gap-2.5">
-                <span className="material-icons text-primary text-2xl">
-                  add_business
-                </span>
-                <h3 className="text-lg font-bold text-nordic dark:text-white">
-                  Add New Property
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(false)}
-                className="text-nordic/40 hover:text-nordic transition-colors p-1 rounded-lg"
-              >
-                <span className="material-icons text-xl">close</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleAddPropertySubmit} className="mt-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                  Property Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="e.g. Modern Glass Penthouse"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                  Location / Address
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newLocation}
-                  onChange={(e) => setNewLocation(e.target.value)}
-                  placeholder="e.g. 500 Sunset Blvd, Los Angeles, CA"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                    Price (USD)
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={newPrice}
-                    onChange={(e) => setNewPrice(e.target.value)}
-                    placeholder="1250000"
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={newStatus}
-                    onChange={(e) => setNewStatus(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white cursor-pointer"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Sold">Sold</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                    Beds
-                  </label>
-                  <input
-                    type="number"
-                    value={newBeds}
-                    onChange={(e) => setNewBeds(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                    Baths
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    value={newBaths}
-                    onChange={(e) => setNewBaths(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                    Area (sqft)
-                  </label>
-                  <input
-                    type="text"
-                    value={newSqft}
-                    onChange={(e) => setNewSqft(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-4 flex items-center justify-end gap-3 border-t border-nordic/10">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-nordic/70 hover:text-nordic transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center px-5 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium shadow-sm transition-colors cursor-pointer"
-                >
-                  Save Property
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+  {/* Footer */ }
+  < footer className = "mt-auto border-t border-gray-200 dark:border-primary/20 bg-white dark:bg-[#152e2a]" >
+    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <p className="text-center text-sm text-gray-400 dark:text-gray-500">
+        © 2026 LuxeEstate Property Management. All rights reserved.
+      </p>
     </div>
+      </footer >
+
+  {/* Add New Property Modal */ }
+{
+  isAddModalOpen && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#152e2a] rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-dropdown border border-nordic/10 animate-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-4 border-b border-nordic/10">
+          <div className="flex items-center gap-2.5">
+            <span className="material-icons text-primary text-2xl">
+              add_business
+            </span>
+            <h3 className="text-lg font-bold text-nordic dark:text-white">
+              Add New Property
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsAddModalOpen(false)}
+            className="text-nordic/40 hover:text-nordic transition-colors p-1 rounded-lg"
+          >
+            <span className="material-icons text-xl">close</span>
+          </button>
+        </div>
+
+        <form onSubmit={handleAddPropertySubmit} className="mt-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+              Property Title
+            </label>
+            <input
+              type="text"
+              required
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="e.g. Modern Glass Penthouse"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+              Location / Address
+            </label>
+            <input
+              type="text"
+              required
+              value={newLocation}
+              onChange={(e) => setNewLocation(e.target.value)}
+              placeholder="e.g. 500 Sunset Blvd, Los Angeles, CA"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+                Price (USD)
+              </label>
+              <input
+                type="number"
+                required
+                value={newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                placeholder="1250000"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+                Status
+              </label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value as any)}
+                className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white cursor-pointer"
+              >
+                <option value="Active">Active</option>
+                <option value="Pending">Pending</option>
+                <option value="Sold">Sold</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+                Beds
+              </label>
+              <input
+                type="number"
+                value={newBeds}
+                onChange={(e) => setNewBeds(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+                Baths
+              </label>
+              <input
+                type="number"
+                step="0.5"
+                value={newBaths}
+                onChange={(e) => setNewBaths(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+                Area (sqft)
+              </label>
+              <input
+                type="text"
+                value={newSqft}
+                onChange={(e) => setNewSqft(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-nordic/10">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-nordic/70 hover:text-nordic transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center px-5 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium shadow-sm transition-colors cursor-pointer"
+            >
+              Save Property
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+    </div >
   );
 };
 
