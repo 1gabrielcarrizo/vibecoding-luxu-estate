@@ -481,7 +481,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       )}
 
       {/* Sticky Action Bar & Header */}
-      <div className="sticky top-16 z-30 bg-clear-day/95 backdrop-blur-md border-b border-gray-200/80 shadow-xs transition-all">
+      <div className="sticky top-16 z-40 bg-clear-day/95 backdrop-blur-md border-b border-gray-200/80 shadow-xs transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <nav aria-label="Breadcrumb" className="flex">
@@ -1036,7 +1036,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 </div>
 
                 {/* Map preview or interactive Leaflet map */}
-                <div className="relative h-56 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                <div className="relative z-0 [isolation:isolate] h-56 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                   {hasValidCoords ? (
                     <div className="relative w-full h-full">
                       <DynamicReactLeafletMap
@@ -1045,14 +1045,6 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                         title={title.trim() || "Property Location"}
                         location={location.trim() || `${parsedLatNum}, ${parsedLngNum}`}
                       />
-                      <div className="absolute top-2 right-2 pointer-events-none z-[400]">
-                        <span className="bg-white/95 text-nordic px-2.5 py-1 rounded shadow-md backdrop-blur-sm text-[11px] font-semibold font-sf-pro flex items-center gap-1 border border-gray-100">
-                          <span className="material-icons text-xs text-mosque">
-                            place
-                          </span>
-                          {parsedLatNum.toFixed(4)}, {parsedLngNum.toFixed(4)}
-                        </span>
-                      </div>
                     </div>
                   ) : (
                     <div className="relative w-full h-full group">

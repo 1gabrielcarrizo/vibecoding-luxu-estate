@@ -34,7 +34,7 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
 
   return (
     <div className="bg-white p-2 rounded-xl shadow-sm border border-mosque/5">
-      <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-slate-100">
+      <div className="relative z-0 [isolation:isolate] w-full aspect-[4/3] rounded-lg overflow-hidden bg-slate-100">
         <DynamicReactLeafletMap
           coordinates={coordinates}
           title={title}
