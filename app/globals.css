@@ -12,6 +12,9 @@
   --color-primary-hover: #005544;
   --color-primary-light: #e6f0ee;
   --color-hint-of-green: #d9ecc8;
+  --color-active-green: #d9ecc8;
+  --color-hint-green: #d9ecc8;
+  --color-card-white: #ffffff;
   --color-clear-day: #eef6f6;
   --color-background-light: #eef6f6;
   --color-background-dark: #0f2320;
@@ -25,6 +28,7 @@
 
   --shadow-soft: 0 4px 20px -2px rgba(25, 50, 47, 0.05);
   --shadow-soft-hover: 0 10px 25px -5px rgba(25, 50, 47, 0.1);
+  --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
 }
 
@@ -121,4 +125,8 @@ body {
 .custom-leaflet-pin {
   background: transparent !important;
   border: none !important;
+}
+
+.user-card {
+  transition: all 0.2s ease-in-out;
 }
