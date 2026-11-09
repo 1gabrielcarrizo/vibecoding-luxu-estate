@@ -2,11 +2,30 @@
 
 import React, { useState, useRef, useTransition } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Property } from "@/types/property";
 import { PropertyInput } from "@/lib/supabase/properties";
 import { createPropertyAction, updatePropertyAction } from "@/app/actions/properties";
 import { supabase } from "@/lib/supabase/client";
+
+// Dynamically import Leaflet map to avoid window SSR issues
+const DynamicReactLeafletMap = dynamic(
+  () => import("@/components/property/ReactLeafletMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-56 bg-slate-100 animate-pulse flex flex-col items-center justify-center gap-2">
+        <span className="material-icons text-mosque/40 text-2xl animate-spin">
+          sync
+        </span>
+        <span className="text-xs text-gray-400 font-sf-pro">
+          Loading map...
+        </span>
+      </div>
+    ),
+  }
+);
 
 interface PropertyFormProps {
   initialData?: Property | null;
@@ -89,6 +108,18 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     }
     return "";
   });
+
+  const parsedLatNum = parseFloat(lat);
+  const parsedLngNum = parseFloat(lng);
+  const hasValidCoords =
+    lat.trim() !== "" &&
+    lng.trim() !== "" &&
+    !isNaN(parsedLatNum) &&
+    !isNaN(parsedLngNum) &&
+    parsedLatNum >= -90 &&
+    parsedLatNum <= 90 &&
+    parsedLngNum >= -180 &&
+    parsedLngNum <= 180;
 
   // Details
   const [sqm, setSqm] = useState<string>(
@@ -449,12 +480,12 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header matching code.html */}
-        <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-200 pb-8">
-          <div className="space-y-4">
+      {/* Sticky Action Bar & Header */}
+      <div className="sticky top-16 z-30 bg-clear-day/95 backdrop-blur-md border-b border-gray-200/80 shadow-xs transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
             <nav aria-label="Breadcrumb" className="flex">
-              <ol className="flex items-center space-x-2 text-sm text-gray-500 font-medium font-sf-pro">
+              <ol className="flex items-center space-x-2 text-xs text-gray-500 font-medium font-sf-pro">
                 <li>
                   <Link
                     className="hover:text-mosque transition-colors"
@@ -474,21 +505,21 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
               </ol>
             </nav>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-nordic tracking-tight mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-nordic tracking-tight">
                 {isEdit ? "Edit Property" : "Add New Property"}
               </h1>
-              <p className="text-base text-gray-500 max-w-2xl font-normal font-sf-pro">
+              <p className="text-xs sm:text-sm text-gray-500 font-normal font-sf-pro hidden sm:block">
                 {isEdit
-                  ? "Update listing specifications, pricing, amenities, and gallery."
+                  ? "Update listing specifications, pricing, amenities, coordinates, and gallery."
                   : "Fill in the details below to create a new listing. Fields marked with * are mandatory."}
               </p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => router.push("/admin/properties")}
-              className="px-5 py-2.5 rounded-lg border border-gray-300 bg-white text-nordic hover:bg-gray-50 transition-colors font-medium font-sf-pro text-sm cursor-pointer"
+              className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg border border-gray-300 bg-white text-nordic hover:bg-gray-50 transition-colors font-medium font-sf-pro text-sm cursor-pointer shadow-xs"
             >
               Cancel
             </button>
@@ -496,7 +527,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
               type="button"
               disabled={isPending || isUploading}
               onClick={handleSubmit}
-              className="px-5 py-2.5 rounded-lg bg-mosque hover:bg-nordic text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-sf-pro text-sm cursor-pointer disabled:opacity-50"
+              className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-mosque hover:bg-nordic text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-sf-pro text-sm cursor-pointer disabled:opacity-50"
             >
               <span className="material-icons text-sm">
                 {isPending ? "hourglass_empty" : "save"}
@@ -508,8 +539,10 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 : "Save Property"}
             </button>
           </div>
-        </header>
+        </div>
+      </div>
 
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Main 12-Column Grid Form matching code.html */}
         <form
           onSubmit={handleSubmit}
@@ -1002,29 +1035,48 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   </div>
                 </div>
 
-                {/* Map preview */}
-                <div className="relative h-48 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200 group">
-                  <img
-                    alt="Map preview of city streets"
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS55FY7gfArnlTpNsdabJk9nBO5uQJgOwIsl8beO34JRZ9dMmjLoIkTuTUO72Y9L5tUmQqTReQWebUWadAWwLusGmRQiIict5sqY--yRaOxuYpTzfR4vv4RKh1ex6oxY64e0kbSeMudNO6pv-gG0WzVWs-pDfvQm5IoTQ1mT-tAV49LDkXAHZl317M1-D7eZw3N8o2ExKWTgg6oMAXOFVnkApIqnb7TZHekwSw8pWQxpJV2EKI8EQKQbQXJaSbjN8gB1n8b-ueWj8"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="bg-white/90 text-nordic px-3 py-1.5 rounded shadow-sm backdrop-blur-sm text-xs font-bold font-sf-pro flex items-center gap-1">
-                      <span className="material-icons text-sm text-mosque">
-                        map
-                      </span>{" "}
-                      {lat && lng
-                        ? `${lat}, ${lng}`
-                        : location || "Preview"}
-                    </span>
-                  </div>
+                {/* Map preview or interactive Leaflet map */}
+                <div className="relative h-56 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                  {hasValidCoords ? (
+                    <div className="relative w-full h-full">
+                      <DynamicReactLeafletMap
+                        key={`${parsedLatNum}-${parsedLngNum}`}
+                        coordinates={{ lat: parsedLatNum, lng: parsedLngNum }}
+                        title={title.trim() || "Property Location"}
+                        location={location.trim() || `${parsedLatNum}, ${parsedLngNum}`}
+                      />
+                      <div className="absolute top-2 right-2 pointer-events-none z-[400]">
+                        <span className="bg-white/95 text-nordic px-2.5 py-1 rounded shadow-md backdrop-blur-sm text-[11px] font-semibold font-sf-pro flex items-center gap-1 border border-gray-100">
+                          <span className="material-icons text-xs text-mosque">
+                            place
+                          </span>
+                          {parsedLatNum.toFixed(4)}, {parsedLngNum.toFixed(4)}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-full group">
+                      <img
+                        alt="Map preview placeholder"
+                        className="w-full h-full object-cover opacity-75 group-hover:opacity-90 transition-all duration-300"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS55FY7gfArnlTpNsdabJk9nBO5uQJgOwIsl8beO34JRZ9dMmjLoIkTuTUO72Y9L5tUmQqTReQWebUWadAWwLusGmRQiIict5sqY--yRaOxuYpTzfR4vv4RKh1ex6oxY64e0kbSeMudNO6pv-gG0WzVWs-pDfvQm5IoTQ1mT-tAV49LDkXAHZl317M1-D7eZw3N8o2ExKWTgg6oMAXOFVnkApIqnb7TZHekwSw8pWQxpJV2EKI8EQKQbQXJaSbjN8gB1n8b-ueWj8"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center p-4">
+                        <span className="bg-white/95 text-nordic px-3 py-1.5 rounded-lg shadow-sm backdrop-blur-sm text-xs font-medium font-sf-pro flex items-center gap-1.5 border border-gray-100 text-center">
+                          <span className="material-icons text-sm text-mosque">
+                            add_location_alt
+                          </span>
+                          Ingresa latitud y longitud para ver el mapa
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Card 5: Details (sticky top-24) */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+            {/* Card 5: Details (sticky top-40) */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden sticky top-40">
               <div className="px-6 py-4 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
                 <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic">
                   <span className="material-icons text-lg">straighten</span>
