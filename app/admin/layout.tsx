@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Metadata } from "next";
 import { AdminNav } from "@/components/admin/AdminNav";
 
@@ -15,7 +15,13 @@ export default function AdminLayout({
 }) {
   return (
     <div className="bg-background-light dark:bg-background-dark text-nordic dark:text-gray-100 font-display min-h-screen flex flex-col antialiased">
-      <AdminNav />
+      <Suspense
+        fallback={
+          <header className="sticky top-0 z-50 h-16 bg-card-white dark:bg-[#152e2a] border-b border-nordic/5 animate-pulse" />
+        }
+      >
+        <AdminNav />
+      </Suspense>
       <div className="flex-grow flex flex-col">{children}</div>
     </div>
   );

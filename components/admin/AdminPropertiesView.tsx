@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition, useMemo } from "react";
+import React, { useState, useTransition, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Property } from "@/types/property";
 import { setPropertyFeaturedAction, deletePropertyAction } from "@/app/actions/properties";
@@ -139,10 +139,10 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Merge Database properties with template properties
-  const [propertyList, setPropertyList] = useState<PropertyItemDisplay[]>(() => {
-    if (initialProperties.length > 0) {
-      const mappedDb: PropertyItemDisplay[] = initialProperties.map((p) => {
+  // Helper to map Database properties to display items
+  const mapPropertiesToDisplay = (props: Property[]): PropertyItemDisplay[] => {
+    if (props.length > 0) {
+      const mappedDb: PropertyItemDisplay[] = props.map((p) => {
         const estMonthly = Math.round(p.price * 0.004);
         return {
           id: p.id,
@@ -151,7 +151,7 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
           location: p.location,
           beds: p.beds,
           baths: p.baths,
-          sqft: `${p.sqm || 2000} sqft`,
+          sqft: `${p.sqm || 2000} m²`,
           price: p.price,
           formattedPrice:
             p.formattedPrice ||
@@ -174,7 +174,17 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
       return [...mappedDb, ...remainingTemplates];
     }
     return TEMPLATE_PROPERTIES;
-  });
+  };
+
+  // Merge Database properties with template properties
+  const [propertyList, setPropertyList] = useState<PropertyItemDisplay[]>(() =>
+    mapPropertiesToDisplay(initialProperties)
+  );
+
+  // Synchronize state when initialProperties prop updates (e.g., after navigation or router.refresh)
+  useEffect(() => {
+    setPropertyList(mapPropertiesToDisplay(initialProperties));
+  }, [initialProperties]);
 
   // Filter logic
   const filteredProperties = useMemo(() => {
