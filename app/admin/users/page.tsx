@@ -29,8 +29,7 @@ async function UsersContent() {
   );
 }
 
-export default async function AdminUsersPage() {
-  await connection();
+export default function AdminUsersPage() {
   return (
     <Suspense
       fallback={

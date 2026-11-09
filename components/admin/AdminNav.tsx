@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 
 interface AdminNavProps {
@@ -17,6 +17,9 @@ export const AdminNav: React.FC<AdminNavProps> = ({
   userAvatar: initialAvatar,
 }) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const [profileOpen, setProfileOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(initialEmail || null);
   const [name, setName] = useState<string | null>(initialName || null);
@@ -25,7 +28,9 @@ export const AdminNav: React.FC<AdminNavProps> = ({
   useEffect(() => {
     async function loadUser() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           setEmail(user.email || null);
           const metaName =
@@ -44,6 +49,33 @@ export const AdminNav: React.FC<AdminNavProps> = ({
     }
   }, [initialEmail]);
 
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    setProfileOpen(false);
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn("Sign out error:", err);
+    }
+    router.push("/login");
+    router.refresh();
+  };
+
   const isUsers = pathname.startsWith("/admin/users");
   const isProperties =
     pathname.startsWith("/admin/properties") || pathname === "/admin";
@@ -56,9 +88,11 @@ export const AdminNav: React.FC<AdminNavProps> = ({
       <div className="max-w-7xl mx-auto flex items-center justify-between h-16">
         {/* Brand & Nav items */}
         <div className="flex items-center gap-10">
+          {/* Logo & Company Name links to public home page */}
           <Link
-            href="/admin/properties"
+            href="/"
             className="flex-shrink-0 flex items-center gap-2 group cursor-pointer focus:outline-none"
+            title="Ir a la página principal"
           >
             <span className="material-symbols-outlined text-primary text-2xl transition-transform duration-300 group-hover:scale-110">
               apartment
@@ -68,6 +102,7 @@ export const AdminNav: React.FC<AdminNavProps> = ({
             </span>
           </Link>
 
+          {/* Navigation Links (Listings & Users) */}
           <div className="hidden md:flex space-x-8">
             <Link
               href="/admin/properties"
@@ -88,13 +123,6 @@ export const AdminNav: React.FC<AdminNavProps> = ({
               }`}
             >
               Users
-            </Link>
-            <Link
-              href="/"
-              className="text-nordic/60 dark:text-gray-400 hover:text-primary px-1 py-2 text-sm font-medium transition-colors flex items-center gap-1"
-            >
-              <span>Public Site</span>
-              <span className="material-icons text-xs">open_in_new</span>
             </Link>
           </div>
         </div>
@@ -120,21 +148,25 @@ export const AdminNav: React.FC<AdminNavProps> = ({
             <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#152e2a]" />
           </button>
 
-          {/* User Profile */}
-          <div className="relative flex items-center gap-3 pl-3 sm:pl-4 border-l border-nordic/10 dark:border-gray-700">
+          {/* User Profile Button with Dropdown & Sign Out */}
+          <div
+            ref={dropdownRef}
+            className="relative flex items-center gap-3 pl-3 sm:pl-4 border-l border-nordic/10 dark:border-gray-700"
+          >
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-3 cursor-pointer focus:outline-none"
+              className="flex items-center gap-3 cursor-pointer focus:outline-none group"
+              title="Opciones de perfil"
             >
               <div className="hidden sm:flex flex-col items-end">
-                <span className="text-sm font-semibold text-nordic dark:text-white truncate max-w-[130px]">
+                <span className="text-sm font-semibold text-nordic dark:text-white truncate max-w-[130px] group-hover:text-primary transition-colors">
                   {name || (email ? email.split("@")[0] : "Alex Morgan")}
                 </span>
                 <span className="text-xs text-nordic/60 dark:text-gray-400">
                   Premium Admin
                 </span>
               </div>
-              <div className="h-9 w-9 rounded-full bg-nordic/10 overflow-hidden ring-2 ring-white dark:ring-primary/20 border border-nordic/10">
+              <div className="h-9 w-9 rounded-full bg-nordic/10 overflow-hidden ring-2 ring-white dark:ring-primary/20 border border-nordic/10 transition-transform group-hover:scale-105">
                 <img
                   alt="Admin user avatar"
                   className="h-full w-full object-cover"
@@ -145,36 +177,51 @@ export const AdminNav: React.FC<AdminNavProps> = ({
 
             {/* Profile Dropdown */}
             {profileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-white dark:bg-[#152e2a] shadow-dropdown border border-nordic/10 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="px-4 py-2 border-b border-nordic/5">
-                  <p className="text-xs text-nordic/50">Signed in as</p>
+              <div className="absolute right-0 top-full mt-2 w-60 rounded-xl bg-white dark:bg-[#152e2a] shadow-dropdown border border-nordic/10 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 py-2.5 border-b border-nordic/10 dark:border-gray-700">
+                  <p className="text-xs text-nordic/50 dark:text-gray-400">
+                    Signed in as
+                  </p>
                   <p className="text-sm font-semibold text-nordic dark:text-white truncate">
                     {email || "admin@luxeestate.com"}
                   </p>
                 </div>
+
                 <div className="py-1">
                   <Link
                     href="/admin/properties"
                     onClick={() => setProfileOpen(false)}
-                    className="block px-4 py-2 text-xs font-medium text-nordic/80 hover:bg-primary/5 hover:text-primary transition-colors"
+                    className="block px-4 py-2 text-xs font-medium text-nordic/80 dark:text-gray-300 hover:bg-primary/5 hover:text-primary transition-colors"
                   >
                     Manage Properties
                   </Link>
                   <Link
                     href="/admin/users"
                     onClick={() => setProfileOpen(false)}
-                    className="block px-4 py-2 text-xs font-medium text-nordic/80 hover:bg-primary/5 hover:text-primary transition-colors"
+                    className="block px-4 py-2 text-xs font-medium text-nordic/80 dark:text-gray-300 hover:bg-primary/5 hover:text-primary transition-colors"
                   >
                     User Directory
                   </Link>
                   <Link
                     href="/"
                     onClick={() => setProfileOpen(false)}
-                    className="block px-4 py-2 text-xs font-medium text-nordic/80 hover:bg-primary/5 hover:text-primary transition-colors"
+                    className="block px-4 py-2 text-xs font-medium text-nordic/80 dark:text-gray-300 hover:bg-primary/5 hover:text-primary transition-colors"
                   >
-                    Return to Public Portal
+                    Public Home Page
                   </Link>
                 </div>
+
+                <div className="border-t border-nordic/10 dark:border-gray-700 my-1" />
+
+                {/* Sign Out Button */}
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="w-full text-left px-4 py-2.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <span className="material-icons text-base">logout</span>
+                  <span>Cerrar sesión</span>
+                </button>
               </div>
             )}
           </div>

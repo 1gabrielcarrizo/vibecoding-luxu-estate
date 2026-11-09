@@ -24,8 +24,7 @@ async function PropertiesContent() {
   return <AdminPropertiesView initialProperties={properties} />;
 }
 
-export default async function AdminPropertiesPage() {
-  await connection();
+export default function AdminPropertiesPage() {
   return (
     <Suspense
       fallback={
