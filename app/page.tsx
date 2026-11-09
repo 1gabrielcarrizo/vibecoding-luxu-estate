@@ -20,9 +20,6 @@ interface PageProps {
   }>;
 }
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 async function HomeContent({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page || "1", 10) || 1);

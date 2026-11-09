@@ -19,9 +19,6 @@ interface PropertyPageProps {
   }>;
 }
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 /**
  * Static params generation for ISR / static pre-rendering
  */
@@ -93,15 +90,15 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
     property.images && property.images.length > 0
       ? property.images
       : [
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-        ];
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      ];
 
   const badges =
     property.badges && property.badges.length > 0
       ? property.badges
       : property.badge
-      ? [property.badge]
-      : ["Premium", "New"];
+        ? [property.badge]
+        : ["Premium", "New"];
 
   return (
     <div className="min-h-screen bg-clear-day text-nordic selection:bg-mosque/20 font-display flex flex-col">
