@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
+import { connection } from "next/server";
 import { verifyIsAdmin } from "@/app/actions/roles";
 import { getAllPropertiesForAdmin } from "@/lib/supabase/properties";
 import { AdminPropertiesView } from "@/components/admin/AdminPropertiesView";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 };
 
 async function PropertiesContent() {
+  await connection();
   const { isAdmin } = await verifyIsAdmin();
 
   if (!isAdmin) {
@@ -22,7 +24,8 @@ async function PropertiesContent() {
   return <AdminPropertiesView initialProperties={properties} />;
 }
 
-export default function AdminPropertiesPage() {
+export default async function AdminPropertiesPage() {
+  await connection();
   return (
     <Suspense
       fallback={
@@ -41,4 +44,3 @@ export default function AdminPropertiesPage() {
     </Suspense>
   );
 }
-

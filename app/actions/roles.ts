@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { UserRole, UserRoleRow } from "@/types/database.types";
 import { revalidatePath } from "next/cache";
+import { connection } from "next/server";
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
   .split(",")
@@ -17,6 +18,11 @@ export async function verifyIsAdmin(): Promise<{
   userId: string | null;
   userEmail: string | null;
 }> {
+  try {
+    await connection();
+  } catch {
+    // Graceful fallback if connection() is called outside request scope
+  }
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },

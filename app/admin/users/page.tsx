@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
+import { connection } from "next/server";
 import { verifyIsAdmin, getAdminUsersAction } from "@/app/actions/roles";
 import { AdminUsersView } from "@/components/admin/AdminUsersView";
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 async function UsersContent() {
+  await connection();
   const { isAdmin, userId, userEmail } = await verifyIsAdmin();
 
   if (!isAdmin) {
@@ -27,7 +29,8 @@ async function UsersContent() {
   );
 }
 
-export default function AdminUsersPage() {
+export default async function AdminUsersPage() {
+  await connection();
   return (
     <Suspense
       fallback={
@@ -42,4 +45,3 @@ export default function AdminUsersPage() {
     </Suspense>
   );
 }
-
