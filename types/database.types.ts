@@ -33,6 +33,9 @@ export type Database = {
           amenities?: string[] | null;
           garage?: number | null;
           year_built?: number | null;
+          coordinates?: Json | null;
+          lat?: number | null;
+          lng?: number | null;
           created_at: string | null;
         };
         Insert: {
@@ -58,6 +61,9 @@ export type Database = {
           amenities?: string[] | null;
           garage?: number | null;
           year_built?: number | null;
+          coordinates?: Json | null;
+          lat?: number | null;
+          lng?: number | null;
           created_at?: string | null;
         };
         Update: {
@@ -83,6 +89,9 @@ export type Database = {
           amenities?: string[] | null;
           garage?: number | null;
           year_built?: number | null;
+          coordinates?: Json | null;
+          lat?: number | null;
+          lng?: number | null;
           created_at?: string | null;
         };
         Relationships: [];

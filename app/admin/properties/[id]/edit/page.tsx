@@ -26,8 +26,13 @@ export async function generateMetadata({
   };
 }
 
-async function EditPropertyContent({ id }: { id: string }) {
+async function EditPropertyContent({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   await connection();
+  const { id } = await params;
   const { isAdmin } = await verifyIsAdmin();
 
   if (!isAdmin) {
@@ -43,9 +48,7 @@ async function EditPropertyContent({ id }: { id: string }) {
   return <PropertyForm initialData={property} isEdit={true} />;
 }
 
-export default async function EditPropertyPage({ params }: EditPropertyPageProps) {
-  const { id } = await params;
-
+export default function EditPropertyPage({ params }: EditPropertyPageProps) {
   return (
     <Suspense
       fallback={
@@ -65,7 +68,7 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
         </div>
       }
     >
-      <EditPropertyContent id={id} />
+      <EditPropertyContent params={params} />
     </Suspense>
   );
 }

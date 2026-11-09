@@ -110,6 +110,19 @@ export function mapRowToProperty(row: PropertyRow): Property {
   const garage = row.garage != null ? Number(row.garage) : (matchingFallback?.garage ?? 2);
   const yearBuilt = row.year_built != null ? Number(row.year_built) : undefined;
 
+  const rawCoords =
+    row.lat != null && row.lng != null
+      ? { lat: Number(row.lat), lng: Number(row.lng) }
+      : row.coordinates && typeof row.coordinates === "object"
+      ? {
+          lat: Number((row.coordinates as any).lat) || 37.7749,
+          lng: Number((row.coordinates as any).lng) || -122.4194,
+        }
+      : (matchingFallback?.coordinates ?? {
+          lat: 37.7749,
+          lng: -122.4194,
+        });
+
   return {
     id: row.id,
     slug,
@@ -135,10 +148,7 @@ export function mapRowToProperty(row: PropertyRow): Property {
     description,
     amenities,
     agent: matchingFallback?.agent ?? defaultAgent,
-    coordinates: matchingFallback?.coordinates ?? {
-      lat: 37.7749,
-      lng: -122.4194,
-    },
+    coordinates: rawCoords,
     estimatedPayment: matchingFallback?.estimatedPayment ?? {
       monthly: monthlyEst,
       formattedMonthly: `$${monthlyEst.toLocaleString()}/mo`,
@@ -499,6 +509,9 @@ export interface PropertyInput {
   isFeatured?: boolean;
   badge?: string;
   priceSuffix?: string;
+  lat?: number;
+  lng?: number;
+  coordinates?: { lat: number; lng: number };
 }
 
 /**
@@ -569,6 +582,9 @@ export async function createProperty(input: PropertyInput): Promise<Property> {
     is_featured: !!input.isFeatured,
     description: input.description || null,
     amenities: input.amenities && input.amenities.length > 0 ? input.amenities : defaultAmenities,
+    lat: input.lat ?? input.coordinates?.lat ?? null,
+    lng: input.lng ?? input.coordinates?.lng ?? null,
+    coordinates: input.coordinates || (input.lat != null && input.lng != null ? { lat: input.lat, lng: input.lng } : null),
   };
 
   const { data, error } = await supabase
@@ -644,6 +660,19 @@ export async function updateProperty(
   }
   if (input.amenities !== undefined) {
     updateData.amenities = input.amenities;
+  }
+  if (input.lat !== undefined) {
+    updateData.lat = input.lat;
+  }
+  if (input.lng !== undefined) {
+    updateData.lng = input.lng;
+  }
+  if (input.coordinates !== undefined) {
+    updateData.coordinates = input.coordinates;
+    updateData.lat = input.coordinates?.lat ?? null;
+    updateData.lng = input.coordinates?.lng ?? null;
+  } else if (input.lat !== undefined && input.lng !== undefined) {
+    updateData.coordinates = { lat: input.lat, lng: input.lng };
   }
 
   const { data, error } = await supabase

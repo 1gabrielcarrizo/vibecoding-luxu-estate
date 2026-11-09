@@ -77,6 +77,18 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
   const [location, setLocation] = useState(
     initialData?.location || ""
   );
+  const [lat, setLat] = useState<string>(() => {
+    if (initialData?.coordinates?.lat != null) {
+      return initialData.coordinates.lat.toString();
+    }
+    return "";
+  });
+  const [lng, setLng] = useState<string>(() => {
+    if (initialData?.coordinates?.lng != null) {
+      return initialData.coordinates.lng.toString();
+    }
+    return "";
+  });
 
   // Details
   const [sqm, setSqm] = useState<string>(
@@ -304,7 +316,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     if (!price || cleanPrice === "") {
       newErrors.price = "Price is required.";
     } else if (isNaN(numericPrice) || numericPrice <= 0) {
-      newErrors.price = "Price must be a valid number greater than 0.";
+      newErrors.price = "Price must be greater than 0 (no negative or zero values).";
     }
 
     if (!location.trim()) {
@@ -355,6 +367,14 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
         ? "FEATURED"
         : "FOR SALE");
 
+    const parsedLat = lat.trim() !== "" ? parseFloat(lat) : undefined;
+    const parsedLng = lng.trim() !== "" ? parseFloat(lng) : undefined;
+    const hasCoordinates =
+      parsedLat !== undefined &&
+      parsedLng !== undefined &&
+      !isNaN(parsedLat) &&
+      !isNaN(parsedLng);
+
     const payload: PropertyInput = {
       title: title.trim(),
       location: location.trim(),
@@ -373,6 +393,11 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       amenities: selectedAmenities,
       isFeatured,
       badge: computedBadge,
+      lat: hasCoordinates ? parsedLat : undefined,
+      lng: hasCoordinates ? parsedLng : undefined,
+      coordinates: hasCoordinates
+        ? { lat: parsedLat!, lng: parsedLng! }
+        : undefined,
     };
 
     startTransition(async () => {
@@ -552,10 +577,35 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                         }`}
                         id="price"
                         value={price}
+                        min="0.01"
+                        step="any"
+                        onKeyDown={(e) => {
+                          if (e.key === "-" || e.key === "e" || e.key === "E") {
+                            e.preventDefault();
+                          }
+                        }}
                         onChange={(e) => {
-                          setPrice(e.target.value);
-                          if (errors.price)
+                          const val = e.target.value;
+                          if (val === "") {
+                            setPrice("");
+                            setErrors((prev) => ({
+                              ...prev,
+                              price: "Price is required.",
+                            }));
+                            return;
+                          }
+                          const num = parseFloat(val);
+                          if (num < 0) return;
+                          setPrice(val);
+                          if (num <= 0) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              price:
+                                "Price must be greater than 0 (no negative or zero values).",
+                            }));
+                          } else {
                             setErrors((prev) => ({ ...prev, price: "" }));
+                          }
                         }}
                         placeholder="0.00"
                         type="number"
@@ -913,6 +963,45 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     </p>
                   )}
                 </div>
+
+                {/* Latitude & Longitude inputs between Address and Map */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      className="block text-xs font-medium text-nordic mb-1 font-sf-pro"
+                      htmlFor="lat"
+                    >
+                      Latitude
+                    </label>
+                    <input
+                      className="w-full px-3 py-2 rounded-md border border-gray-200 bg-white text-nordic placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-xs font-sf-pro"
+                      id="lat"
+                      value={lat}
+                      onChange={(e) => setLat(e.target.value)}
+                      placeholder="e.g. 37.7749"
+                      type="number"
+                      step="any"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="block text-xs font-medium text-nordic mb-1 font-sf-pro"
+                      htmlFor="lng"
+                    >
+                      Longitude
+                    </label>
+                    <input
+                      className="w-full px-3 py-2 rounded-md border border-gray-200 bg-white text-nordic placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-xs font-sf-pro"
+                      id="lng"
+                      value={lng}
+                      onChange={(e) => setLng(e.target.value)}
+                      placeholder="e.g. -122.4194"
+                      type="number"
+                      step="any"
+                    />
+                  </div>
+                </div>
+
                 {/* Map preview */}
                 <div className="relative h-48 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200 group">
                   <img
@@ -925,7 +1014,9 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                       <span className="material-icons text-sm text-mosque">
                         map
                       </span>{" "}
-                      {location || "Preview"}
+                      {lat && lng
+                        ? `${lat}, ${lng}`
+                        : location || "Preview"}
                     </span>
                   </div>
                 </div>
