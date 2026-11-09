@@ -51,6 +51,7 @@ export interface Property {
   badge?: string;
   badges?: string[];
   isFeatured?: boolean;
+  isActive?: boolean;
   hideOnBreakpoint?: string;
   description?: string[];
   amenities?: string[];

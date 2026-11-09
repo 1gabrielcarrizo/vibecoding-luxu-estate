@@ -144,6 +144,9 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
   const [isFeatured, setIsFeatured] = useState<boolean>(
     initialData?.isFeatured ?? false
   );
+  const [isActive, setIsActive] = useState<boolean>(
+    initialData?.isActive !== undefined ? initialData.isActive : true
+  );
   const [badge, setBadge] = useState<string>(
     initialData?.badge || ""
   );
@@ -423,6 +426,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       description: description.trim(),
       amenities: selectedAmenities,
       isFeatured,
+      isActive,
       badge: computedBadge,
       lat: hasCoordinates ? parsedLat : undefined,
       lng: hasCoordinates ? parsedLng : undefined,
@@ -1275,7 +1279,35 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   <h3 className="text-sm font-bold text-nordic mb-3 font-sf-pro uppercase tracking-wider text-xs text-gray-500">
                     Listing Flags
                   </h3>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
+                    {/* Active / Inactive Status Switch */}
+                    <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/70 flex items-center justify-between">
+                      <div className="pr-2">
+                        <label className="text-sm font-semibold text-nordic block">
+                          Propiedad Activa
+                        </label>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {isActive
+                            ? "Visible en filtros de búsqueda y HomeScreen."
+                            : "Desactivada: Oculta para clientes, visible solo en administración."}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsActive(!isActive)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-mosque/30 flex-shrink-0 ${
+                          isActive ? "bg-mosque" : "bg-gray-300"
+                        }`}
+                        title={isActive ? "Desactivar propiedad" : "Activar propiedad"}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            isActive ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
                     <label className="flex items-center justify-between cursor-pointer">
                       <span className="text-sm font-medium text-nordic font-sf-pro">
                         Feature on Homepage

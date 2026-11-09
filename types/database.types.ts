@@ -28,6 +28,7 @@ export type Database = {
           image_alt: string;
           badge: string | null;
           is_featured: boolean | null;
+          is_active?: boolean | null;
           hide_on_breakpoint: string | null;
           description?: string | null;
           amenities?: string[] | null;
@@ -56,6 +57,7 @@ export type Database = {
           image_alt: string;
           badge?: string | null;
           is_featured?: boolean | null;
+          is_active?: boolean | null;
           hide_on_breakpoint?: string | null;
           description?: string | null;
           amenities?: string[] | null;
@@ -84,6 +86,7 @@ export type Database = {
           image_alt?: string;
           badge?: string | null;
           is_featured?: boolean | null;
+          is_active?: boolean | null;
           hide_on_breakpoint?: string | null;
           description?: string | null;
           amenities?: string[] | null;

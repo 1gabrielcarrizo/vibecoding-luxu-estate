@@ -6,7 +6,10 @@ import Link from "next/link";
 import { Property } from "@/types/property";
 import { UserRole, UserRoleRow } from "@/types/database.types";
 import { updateUserRoleAction, assignRoleByEmailAction } from "@/app/actions/roles";
-import { setPropertyFeaturedAction } from "@/app/actions/properties";
+import {
+  setPropertyFeaturedAction,
+  togglePropertyActiveAction,
+} from "@/app/actions/properties";
 
 interface AdminDashboardProps {
   initialProperties: Property[];
@@ -32,9 +35,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [propCategory, setPropCategory] = useState<string>("All");
   const [propType, setPropType] = useState<string>("All");
   const [propFeatured, setPropFeatured] = useState<string>("All");
+  const [propActive, setPropActive] = useState<string>("All");
   const [togglingPropertyId, setTogglingPropertyId] = useState<string | null>(
     null
   );
+  const [togglingActiveId, setTogglingActiveId] = useState<string | null>(null);
 
   // Users & roles state & filters
   const [users, setUsers] = useState<UserRoleRow[]>(initialUsers);
@@ -93,6 +98,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       showToast("error", "Error al cambiar el estado de destacada.");
     } finally {
       setTogglingPropertyId(null);
+    }
+  };
+
+  // Toggle property active status (soft delete / reactivate)
+  const handleToggleActive = async (
+    propertyId: string,
+    currentStatus: boolean
+  ) => {
+    const newStatus = !currentStatus;
+
+    if (!newStatus) {
+      const confirmed = confirm(
+        "¿Deseas desactivar esta propiedad?\n\nLa propiedad NO se eliminará de la base de datos, pero dejará de ser visible en filtros de búsqueda y HomeScreen."
+      );
+      if (!confirmed) return;
+    }
+
+    setTogglingActiveId(propertyId);
+
+    // Optimistic UI update
+    setProperties((prev) =>
+      prev.map((p) =>
+        p.id === propertyId ? { ...p, isActive: newStatus } : p
+      )
+    );
+
+    try {
+      const res = await togglePropertyActiveAction(propertyId, newStatus);
+      if (res.success) {
+        showToast(
+          "success",
+          `Propiedad ${newStatus ? "activada (visible al público)" : "desactivada (oculta para clientes)"}.`
+        );
+      } else {
+        // Revert optimistic update
+        setProperties((prev) =>
+          prev.map((p) =>
+            p.id === propertyId ? { ...p, isActive: currentStatus } : p
+          )
+        );
+        showToast("error", res.error || "Error al actualizar estado de la propiedad.");
+      }
+    } catch {
+      setProperties((prev) =>
+        prev.map((p) =>
+          p.id === propertyId ? { ...p, isActive: currentStatus } : p
+        )
+      );
+      showToast("error", "Error al cambiar el estado de la propiedad.");
+    } finally {
+      setTogglingActiveId(null);
     }
   };
 
@@ -167,7 +223,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       (propFeatured === "featured" && p.isFeatured) ||
       (propFeatured === "standard" && !p.isFeatured);
 
-    return matchesSearch && matchesCategory && matchesType && matchesFeatured;
+    const matchesActive =
+      propActive === "All" ||
+      (propActive === "active" && p.isActive !== false) ||
+      (propActive === "inactive" && p.isActive === false);
+
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesType &&
+      matchesFeatured &&
+      matchesActive
+    );
   });
 
   // Users Filtering
@@ -401,6 +468,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <option value="featured">Solo Destacadas</option>
                 <option value="standard">No Destacadas</option>
               </select>
+
+              {/* Active Filter */}
+              <select
+                value={propActive}
+                onChange={(e) => setPropActive(e.target.value)}
+                className="text-xs sm:text-sm bg-[#F4F9F9] border border-mosque/15 rounded-lg px-3 py-2 text-nordic focus:outline-none focus:ring-2 focus:ring-mosque/30 cursor-pointer"
+              >
+                <option value="All">Estado: Todas</option>
+                <option value="active">Solo Activas</option>
+                <option value="inactive">Solo Desactivadas</option>
+              </select>
             </div>
           </div>
 
@@ -415,6 +493,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <th className="py-3 px-4">Categoría</th>
                     <th className="py-3 px-4">Tipo</th>
                     <th className="py-3 px-4">Espacios</th>
+                    <th className="py-3 px-4 text-center">Estado</th>
                     <th className="py-3 px-4 text-center">Destacada</th>
                     <th className="py-3 px-4 text-right">Acciones</th>
                   </tr>
@@ -514,6 +593,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             </div>
                           </td>
 
+                          {/* Active Status Badge / Toggle */}
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                            <button
+                              type="button"
+                              disabled={togglingActiveId === property.id}
+                              onClick={() =>
+                                handleToggleActive(
+                                  property.id,
+                                  property.isActive !== false
+                                )
+                              }
+                              title={
+                                property.isActive !== false
+                                  ? "Desactivar (ocultar de clientes en búsqueda y Home)"
+                                  : "Activar (hacer visible al público)"
+                              }
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all ${
+                                property.isActive !== false
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                                  : "bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200"
+                              } ${togglingActiveId === property.id ? "opacity-50 pointer-events-none" : ""}`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  property.isActive !== false
+                                    ? "bg-emerald-600"
+                                    : "bg-gray-400"
+                                }`}
+                              />
+                              <span>
+                                {property.isActive !== false
+                                  ? "Activa"
+                                  : "Desactivada"}
+                              </span>
+                            </button>
+                          </td>
+
                           {/* Featured Toggle Switch */}
                           <td className="py-3.5 px-4 text-center whitespace-nowrap">
                             <button
@@ -545,6 +661,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           {/* Actions */}
                           <td className="py-3.5 px-4 text-right whitespace-nowrap">
                             <Link
+                              href={`/admin/properties/${property.id}/edit`}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-nordic/70 hover:text-nordic px-2 py-1.5 rounded-lg hover:bg-nordic/5 transition-colors cursor-pointer mr-1"
+                              title="Editar propiedad"
+                            >
+                              <span className="material-symbols-outlined text-sm">
+                                edit
+                              </span>
+                              <span>Editar</span>
+                            </Link>
+
+                            <Link
                               href={`/propiedades/${property.slug}`}
                               target="_blank"
                               className="inline-flex items-center gap-1 text-xs font-semibold text-mosque hover:text-mosque-light px-2.5 py-1.5 rounded-lg hover:bg-mosque/10 transition-colors cursor-pointer"
@@ -568,7 +695,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 Mostrando {filteredProperties.length} de {properties.length} propiedades
               </span>
               <span className="italic">
-                Los cambios en el switch &quot;Destacada&quot; se aplican en tiempo real.
+                Los cambios en los estados &quot;Activa/Desactivada&quot; y &quot;Destacada&quot; se aplican en tiempo real.
               </span>
             </div>
           </div>

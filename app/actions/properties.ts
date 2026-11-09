@@ -6,6 +6,9 @@ import {
   createProperty,
   updateProperty,
   deleteProperty,
+  deactivateProperty,
+  activateProperty,
+  togglePropertyActiveStatus,
   getPropertyById,
   PropertyInput,
 } from "@/lib/supabase/properties";
@@ -92,21 +95,67 @@ export async function updatePropertyAction(
 }
 
 /**
- * Next.js Server Action to delete a property listing
+ * Next.js Server Action to toggle the 'is_active' status of a property (soft delete / reactivate)
+ */
+export async function togglePropertyActiveAction(
+  propertyId: string,
+  isActive: boolean
+): Promise<{ success: boolean; property?: Property | null; error?: string }> {
+  try {
+    const updated = await togglePropertyActiveStatus(propertyId, isActive);
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/admin/properties");
+    if (updated?.slug) {
+      revalidatePath(`/propiedades/${updated.slug}`);
+    }
+    return { success: true, property: updated };
+  } catch (err: any) {
+    console.error("togglePropertyActiveAction error:", err);
+    return {
+      success: false,
+      error: err?.message || "Failed to update property active status.",
+    };
+  }
+}
+
+/**
+ * Next.js Server Action to deactivate a property (soft delete instead of hard delete)
+ */
+export async function deactivatePropertyAction(
+  id: string
+): Promise<{ success: boolean; property?: Property | null; error?: string }> {
+  return await togglePropertyActiveAction(id, false);
+}
+
+/**
+ * Next.js Server Action to activate a property
+ */
+export async function activatePropertyAction(
+  id: string
+): Promise<{ success: boolean; property?: Property | null; error?: string }> {
+  return await togglePropertyActiveAction(id, true);
+}
+
+/**
+ * Next.js Server Action to delete a property listing.
+ * In accordance with business rules, this deactivates the property instead of
+ * physically deleting it from the database.
  */
 export async function deletePropertyAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await deleteProperty(id);
+    await deactivateProperty(id);
     revalidatePath("/");
+    revalidatePath("/admin");
     revalidatePath("/admin/properties");
     return { success: true };
   } catch (err: any) {
     console.error("deletePropertyAction error:", err);
     return {
       success: false,
-      error: err?.message || "Failed to delete property listing.",
+      error: err?.message || "Failed to deactivate property listing.",
     };
   }
 }

@@ -3,7 +3,11 @@
 import React, { useState, useTransition, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Property } from "@/types/property";
-import { setPropertyFeaturedAction, deletePropertyAction } from "@/app/actions/properties";
+import {
+  setPropertyFeaturedAction,
+  deletePropertyAction,
+  togglePropertyActiveAction,
+} from "@/app/actions/properties";
 
 interface AdminPropertiesViewProps {
   initialProperties?: Property[];
@@ -20,9 +24,10 @@ interface PropertyItemDisplay {
   price: number;
   formattedPrice: string;
   monthly: string;
-  status: "Active" | "Pending" | "Sold";
+  status: "Active" | "Pending" | "Sold" | "Inactive";
   image: string;
   isFeatured?: boolean;
+  isActive?: boolean;
 }
 
 const TEMPLATE_PROPERTIES: PropertyItemDisplay[] = [
@@ -113,7 +118,7 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
 }) => {
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"All" | "Active" | "Pending" | "Sold">("All");
+  const [filterStatus, setFilterStatus] = useState<"All" | "Active" | "Inactive" | "Pending" | "Sold">("All");
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
@@ -144,6 +149,13 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
     if (props.length > 0) {
       const mappedDb: PropertyItemDisplay[] = props.map((p) => {
         const estMonthly = Math.round(p.price * 0.004);
+        const isActive = p.isActive !== false;
+        const status: "Active" | "Pending" | "Sold" | "Inactive" = !isActive
+          ? "Inactive"
+          : p.badge?.toUpperCase().includes("SOLD")
+          ? "Sold"
+          : "Active";
+
         return {
           id: p.id,
           slug: p.slug,
@@ -157,12 +169,13 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
             p.formattedPrice ||
             `$${p.price.toLocaleString("en-US")}`,
           monthly: `$${estMonthly.toLocaleString("en-US")}`,
-          status: p.type === "rent" ? "Active" : "Active",
+          status,
           image:
             p.images?.[0] ||
             p.imageUrl ||
             TEMPLATE_PROPERTIES[0].image,
           isFeatured: p.isFeatured,
+          isActive,
         };
       });
 
@@ -203,8 +216,8 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
 
   // Statistics calculation
   const totalCount = propertyList.length;
-  const activeCount = propertyList.filter((p) => p.status === "Active").length;
-  const pendingCount = propertyList.filter((p) => p.status === "Pending").length;
+  const activeCount = propertyList.filter((p) => p.isActive !== false && p.status !== "Inactive").length;
+  const inactiveCount = propertyList.filter((p) => p.isActive === false || p.status === "Inactive").length;
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredProperties.length / pageSize));
@@ -238,22 +251,72 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
     }
   };
 
-  // Delete property
-    const handleDeleteProperty = async (propertyId: string, title: string) => {
-      if (confirm(`Are you sure you want to delete "${title}"?`)) {
-        setPropertyList((prev) => prev.filter((p) => p.id !== propertyId));
-        try {
-          const res = await deletePropertyAction(propertyId);
-          if (res.success) {
-            showToast("success", `Property "${title}" deleted successfully.`);
-          } else {
-            showToast("error", res.error || "Failed to delete property from database.");
-          }
-        } catch {
-          showToast("success", `Property "${title}" removed.`);
-        }
+  // Toggle Active / Deactivate Status (Soft Delete instead of DB deletion)
+  const handleToggleActive = async (
+    propertyId: string,
+    currentActive?: boolean,
+    title?: string
+  ) => {
+    const nextActive = !currentActive;
+
+    if (!nextActive) {
+      const confirmed = confirm(
+        `¿Estás seguro de que deseas desactivar "${title || "esta propiedad"}"?\n\nLa propiedad NO se eliminará de la base de datos, pero dejará de mostrarse en los filtros de búsqueda y en HomeScreen.`
+      );
+      if (!confirmed) return;
+    }
+
+    // Optimistic UI update
+    setPropertyList((prev) =>
+      prev.map((p) =>
+        p.id === propertyId
+          ? {
+              ...p,
+              isActive: nextActive,
+              status: nextActive ? "Active" : "Inactive",
+            }
+          : p
+      )
+    );
+
+    try {
+      const res = await togglePropertyActiveAction(propertyId, nextActive);
+      if (res.success) {
+        showToast(
+          "success",
+          nextActive
+            ? `Propiedad "${title}" activada (visible para clientes).`
+            : `Propiedad "${title}" desactivada (oculta de búsquedas).`
+        );
+      } else {
+        showToast("error", res.error || "No se pudo actualizar el estado de la propiedad.");
+        // Revert
+        setPropertyList((prev) =>
+          prev.map((p) =>
+            p.id === propertyId
+              ? {
+                  ...p,
+                  isActive: currentActive,
+                  status: currentActive ? "Active" : "Inactive",
+                }
+              : p
+          )
+        );
       }
-    };
+    } catch {
+      showToast(
+        "success",
+        nextActive
+          ? `Propiedad "${title}" activada.`
+          : `Propiedad "${title}" desactivada.`
+      );
+    }
+  };
+
+  // Delete property triggers soft delete deactivation to prevent deleting from DB
+  const handleDeleteProperty = async (propertyId: string, title: string) => {
+    await handleToggleActive(propertyId, true, title);
+  };
 
     // Add property submit
     const handleAddPropertySubmit = (e: React.FormEvent) => {
@@ -374,7 +437,8 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
                 className="w-full px-3 py-2 text-sm rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
               >
                 <option value="All">All Statuses</option>
-                <option value="Active">Active Only</option>
+                <option value="Active">Active (Activas)</option>
+                <option value="Inactive">Inactive (Desactivadas)</option>
                 <option value="Pending">Pending Sale</option>
                 <option value="Sold">Sold</option>
               </select>
@@ -430,18 +494,18 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
         </div>
       </div>
 
-      {/* Card 3: Pending Sale */}
+      {/* Card 3: Inactive Properties (Desactivadas) */}
       <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Pending Sale
+            Inactive (Desactivadas)
           </p>
           <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
-            {pendingCount}
+            {inactiveCount}
           </p>
         </div>
-        <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
-          <span className="material-icons">pending</span>
+        <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400">
+          <span className="material-icons">visibility_off</span>
         </div>
       </div>
     </div>
@@ -525,7 +589,12 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
 
             {/* Status */}
             <div className="col-span-6 md:col-span-2">
-              {item.status === "Active" ? (
+              {item.isActive === false || item.status === "Inactive" ? (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5" />
+                  Desactivada
+                </span>
+              ) : item.status === "Active" ? (
                 <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-hint-green text-primary border border-primary/10">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5" />
                   Active
@@ -560,23 +629,35 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
               </button>
 
               {/* Edit */}
-                  <Link
+              <Link
                 href={`/admin/properties/${item.id}/edit`}
                 className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-hint-green/30 transition-all cursor-pointer"
                 title="Edit Property"
               >
                 <span className="material-icons text-xl">edit</span>
-            </Link>
+              </Link>
 
-            {/* Delete */}
-            <button
-              onClick={() => handleDeleteProperty(item.id, item.title)}
-              className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all cursor-pointer tooltip-trigger"
-              title="Delete Property"
-            >
-              <span className="material-icons text-xl">delete_outline</span>
-            </button>
-          </div>
+              {/* Activate / Deactivate (Evita eliminar de la base de datos) */}
+              <button
+                onClick={() =>
+                  handleToggleActive(item.id, item.isActive !== false, item.title)
+                }
+                className={`p-2 rounded-lg transition-all cursor-pointer ${
+                  item.isActive === false
+                    ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                    : "text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                }`}
+                title={
+                  item.isActive === false
+                    ? "Activar propiedad (mostrar en búsquedas y Home)"
+                    : "Desactivar propiedad (ocultar de búsquedas y Home)"
+                }
+              >
+                <span className="material-icons text-xl">
+                  {item.isActive === false ? "visibility" : "visibility_off"}
+                </span>
+              </button>
+            </div>
               </div>
             ))
           )}
