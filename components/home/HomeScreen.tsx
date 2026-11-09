@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition, useEffect, useMemo } from "react";
+import React, { useState, useTransition, useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/common/Navbar";
 import { HeroSection } from "@/components/home/HeroSection";
@@ -70,12 +70,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     useState<PaginationResult>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Track initial mount and last searched query for live search debouncing
+  const isFirstRender = useRef(true);
+  const lastSearchedQuery = useRef(initialQuery);
+
   // Sync state when props change (e.g. back/forward navigation or server re-render)
   useEffect(() => {
     setPagination(initialPagination);
     setSelectedCategory(initialCategory);
     setMarketTab(initialMarketTab);
     setSearchQuery(initialQuery);
+    lastSearchedQuery.current = initialQuery;
     setMinPrice(initialMinPrice);
     setMaxPrice(initialMaxPrice);
     setBeds(initialBeds || 0);
@@ -91,6 +96,45 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     initialBeds,
     initialBaths,
     initialAmenities,
+  ]);
+
+  // Debounced live search: shows properties as the user types without having to click "buscar"
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (searchQuery === lastSearchedQuery.current) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      lastSearchedQuery.current = searchQuery;
+      updateData(
+        1,
+        selectedCategory,
+        marketTab,
+        searchQuery,
+        minPrice,
+        maxPrice,
+        beds,
+        baths,
+        amenities,
+        false
+      );
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [
+    searchQuery,
+    selectedCategory,
+    marketTab,
+    minPrice,
+    maxPrice,
+    beds,
+    baths,
+    amenities,
   ]);
 
   // Count active advanced filters
@@ -222,6 +266,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   const handleSearchSubmit = () => {
+    lastSearchedQuery.current = searchQuery;
     updateData(
       1,
       selectedCategory,
@@ -340,6 +385,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           onSelectCategory={handleCategorySelect}
           onToggleFilters={() => setIsFilterModalOpen(true)}
           activeFilterCount={activeFilterCount}
+          isLoading={isLoading || isPending}
         />
 
         {/* Featured Collections Section: Only shown when no search filters are applied, and strictly max 2 properties */}

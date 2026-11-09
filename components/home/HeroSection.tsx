@@ -13,6 +13,7 @@ interface HeroSectionProps {
   onSelectCategory: (category: PropertyCategory) => void;
   onToggleFilters?: () => void;
   activeFilterCount?: number;
+  isLoading?: boolean;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -23,6 +24,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onSelectCategory,
   onToggleFilters,
   activeFilterCount = 0,
+  isLoading = false,
 }) => {
   const { t } = useTranslation();
 
@@ -50,18 +52,34 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* Search Bar */}
         <div className="relative group max-w-2xl mx-auto">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <span className="material-icons text-nordic-muted text-2xl group-focus-within:text-mosque transition-colors">
-              search
-            </span>
+            {isLoading ? (
+              <span className="material-icons text-mosque text-2xl animate-spin">
+                sync
+              </span>
+            ) : (
+              <span className="material-icons text-nordic-muted text-2xl group-focus-within:text-mosque transition-colors">
+                search
+              </span>
+            )}
           </div>
           <input
-            className="block w-full pl-12 pr-28 py-4 rounded-xl border-none bg-white text-nordic-dark shadow-soft placeholder-nordic-muted/60 focus:ring-2 focus:ring-mosque focus:bg-white transition-all text-lg outline-none"
+            className="block w-full pl-12 pr-32 py-4 rounded-xl border-none bg-white text-nordic-dark shadow-soft placeholder-nordic-muted/60 focus:ring-2 focus:ring-mosque focus:bg-white transition-all text-lg outline-none"
             placeholder={t("hero.searchPlaceholder")}
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             onKeyDown={handleKeyDown}
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => onSearchChange("")}
+              className="absolute inset-y-0 right-28 pr-2 flex items-center text-nordic-muted/60 hover:text-nordic-dark transition-colors cursor-pointer"
+              title="Limpiar búsqueda"
+            >
+              <span className="material-icons text-xl">close</span>
+            </button>
+          )}
           <button
             onClick={onSearchSubmit}
             type="button"

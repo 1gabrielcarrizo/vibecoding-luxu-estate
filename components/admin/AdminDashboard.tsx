@@ -108,13 +108,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   ) => {
     const newStatus = !currentStatus;
 
-    if (!newStatus) {
-      const confirmed = confirm(
-        "¿Deseas desactivar esta propiedad?\n\nLa propiedad NO se eliminará de la base de datos, pero dejará de ser visible en filtros de búsqueda y HomeScreen."
-      );
-      if (!confirmed) return;
-    }
-
     setTogglingActiveId(propertyId);
 
     // Optimistic UI update

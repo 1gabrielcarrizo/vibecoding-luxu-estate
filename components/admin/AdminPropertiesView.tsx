@@ -259,13 +259,6 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
   ) => {
     const nextActive = !currentActive;
 
-    if (!nextActive) {
-      const confirmed = confirm(
-        `¿Estás seguro de que deseas desactivar "${title || "esta propiedad"}"?\n\nLa propiedad NO se eliminará de la base de datos, pero dejará de mostrarse en los filtros de búsqueda y en HomeScreen.`
-      );
-      if (!confirmed) return;
-    }
-
     // Optimistic UI update
     setPropertyList((prev) =>
       prev.map((p) =>
