@@ -81,11 +81,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Hero Primary Image */}
       <div
         onClick={() => setIsLightboxOpen(true)}
-        className="relative aspect-[16/10] overflow-hidden rounded-xl shadow-sm group bg-slate-100 cursor-pointer"
+        className="relative aspect-[4/3] sm:aspect-[16/10] overflow-hidden rounded-xl shadow-sm group bg-slate-100 cursor-pointer"
       >
         <Image
           src={currentImage}
@@ -98,14 +98,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
         {/* Badges */}
         {badges && badges.length > 0 && (
-          <div className="absolute top-4 left-4 flex gap-2 z-10">
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
             {badges.map((b, i) => (
               <span
                 key={b}
                 className={
                   i === 0
-                    ? "bg-mosque text-white text-xs font-medium px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm"
-                    : "bg-white/90 backdrop-blur text-nordic text-xs font-medium px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm"
+                    ? "bg-mosque text-white text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider shadow-sm"
+                    : "bg-white/90 backdrop-blur text-nordic text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider shadow-sm"
                 }
               >
                 {getBadgeLabel(b)}
@@ -114,24 +114,24 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </div>
         )}
 
-        {/* Previous / Next on Hero (hover or tap) */}
+        {/* Previous / Next on Hero (always visible on mobile touch, hover on desktop) */}
         {safeImages.length > 1 && (
           <>
             <button
               type="button"
               onClick={handlePrev}
               aria-label={t("pagination.previous")}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+              className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
             >
-              <span className="material-icons text-xl">chevron_left</span>
+              <span className="material-icons text-lg sm:text-xl">chevron_left</span>
             </button>
             <button
               type="button"
               onClick={handleNext}
               aria-label={t("pagination.next")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
             >
-              <span className="material-icons text-xl">chevron_right</span>
+              <span className="material-icons text-lg sm:text-xl">chevron_right</span>
             </button>
           </>
         )}
@@ -143,7 +143,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             e.stopPropagation();
             setIsLightboxOpen(true);
           }}
-          className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-nordic px-4 py-2 rounded-lg text-sm font-medium shadow-lg backdrop-blur transition-all flex items-center gap-2 z-10 cursor-pointer"
+          className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 bg-white/90 hover:bg-white text-nordic px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium shadow-lg backdrop-blur transition-all flex items-center gap-1.5 sm:gap-2 z-10 cursor-pointer"
         >
           <span className="material-icons text-sm">grid_view</span>
           <span>{t("propertyDetail.galleryAllPhotos")}</span>
@@ -157,7 +157,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
       {/* Thumbnail Strip (1 to N images) */}
       {safeImages.length > 1 && (
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x">
+        <div className="flex gap-2.5 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x">
           {safeImages.map((imgUrl, idx) => {
             const isActive = idx === activeIndex;
             return (
@@ -165,7 +165,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 key={`${imgUrl}-${idx}`}
                 type="button"
                 onClick={() => setActiveIndex(idx)}
-                className={`flex-none w-44 sm:w-48 aspect-[4/3] rounded-lg overflow-hidden cursor-pointer relative snap-start transition-all ${
+                className={`flex-none w-24 sm:w-44 aspect-[4/3] rounded-lg overflow-hidden cursor-pointer relative snap-start transition-all ${
                   isActive
                     ? "ring-2 ring-mosque ring-offset-2 ring-offset-clear-day opacity-100"
                     : "opacity-70 hover:opacity-100"
@@ -175,7 +175,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   src={imgUrl}
                   alt={`${title} thumbnail ${idx + 1}`}
                   fill
-                  sizes="192px"
+                  sizes="(max-width: 640px) 96px, 176px"
                   className="object-cover"
                 />
               </button>
@@ -189,12 +189,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 sm:p-6 backdrop-blur-md"
+          className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-3 sm:p-6 backdrop-blur-md"
         >
           {/* Top Bar */}
-          <div className="flex items-center justify-between text-white pb-4">
-            <div>
-              <h3 className="text-lg font-semibold">{title}</h3>
+          <div className="flex items-center justify-between text-white pb-3 sm:pb-4 border-b border-white/10">
+            <div className="min-w-0 pr-4">
+              <h3 className="text-sm sm:text-lg font-semibold truncate">{title}</h3>
               <p className="text-xs text-white/60">
                 {t("propertyDetail.photoOf", {
                   current: activeIndex + 1,
@@ -205,14 +205,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <button
               onClick={() => setIsLightboxOpen(false)}
               aria-label={t("propertyDetail.closeViewer")}
-              className="p-2 rounded-full hover:bg-white/10 text-white transition-colors cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 text-white transition-colors cursor-pointer flex-shrink-0"
             >
-              <span className="material-icons text-2xl">close</span>
+              <span className="material-icons text-xl sm:text-2xl">close</span>
             </button>
           </div>
 
           {/* Main Photo Center */}
-          <div className="relative flex-1 w-full max-h-[75vh] flex items-center justify-center">
+          <div className="relative flex-1 w-full max-h-[75vh] flex items-center justify-center my-auto">
             <div className="relative w-full h-full max-w-5xl">
               <Image
                 src={currentImage}
@@ -230,17 +230,17 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   type="button"
                   onClick={handlePrev}
                   aria-label={t("pagination.previous")}
-                  className="absolute left-2 sm:left-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all cursor-pointer"
+                  className="absolute left-1 sm:left-6 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all cursor-pointer"
                 >
-                  <span className="material-icons text-2xl">chevron_left</span>
+                  <span className="material-icons text-xl sm:text-2xl">chevron_left</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleNext}
                   aria-label={t("pagination.next")}
-                  className="absolute right-2 sm:right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all cursor-pointer"
+                  className="absolute right-1 sm:right-6 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all cursor-pointer"
                 >
-                  <span className="material-icons text-2xl">chevron_right</span>
+                  <span className="material-icons text-xl sm:text-2xl">chevron_right</span>
                 </button>
               </>
             )}
@@ -248,12 +248,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
           {/* Bottom Thumbnail Strip in Lightbox */}
           {safeImages.length > 1 && (
-            <div className="pt-4 flex justify-center overflow-x-auto scrollbar-hide gap-2 max-w-4xl mx-auto">
+            <div className="pt-3 sm:pt-4 flex justify-center overflow-x-auto scrollbar-hide gap-1.5 sm:gap-2 max-w-4xl mx-auto">
               {safeImages.map((img, i) => (
                 <button
                   key={`lightbox-${img}-${i}`}
                   onClick={() => setActiveIndex(i)}
-                  className={`relative w-16 h-12 rounded-md overflow-hidden flex-shrink-0 transition-all cursor-pointer ${
+                  className={`relative w-12 h-9 sm:w-16 sm:h-12 rounded-md overflow-hidden flex-shrink-0 transition-all cursor-pointer ${
                     i === activeIndex
                       ? "ring-2 ring-white scale-105 opacity-100"
                       : "opacity-50 hover:opacity-80"

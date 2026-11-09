@@ -37,10 +37,10 @@ export const MarketSection: React.FC<MarketSectionProps> = ({
   return (
     <section>
       {/* Section Header */}
-      <div className="flex items-end justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-light text-nordic-dark">
+            <h2 className="text-xl sm:text-2xl font-light text-nordic-dark">
               {t("market.title")}
             </h2>
             {isLoading && (
@@ -49,13 +49,13 @@ export const MarketSection: React.FC<MarketSectionProps> = ({
               </span>
             )}
           </div>
-          <p className="text-nordic-muted mt-1 text-sm">
+          <p className="text-nordic-muted mt-1 text-xs sm:text-sm">
             {t("market.subtitle")}
           </p>
         </div>
 
-        {/* Filter Toggle */}
-        <div className="hidden md:flex bg-white p-1 rounded-lg border border-nordic-dark/5 shadow-xs">
+        {/* Filter Toggle - Accessible on all screen sizes */}
+        <div className="flex w-full sm:w-auto bg-white p-1 rounded-lg border border-nordic-dark/5 shadow-xs overflow-x-auto justify-start sm:justify-center">
           {tabs.map((tab) => {
             const isActive = activeTab === tab;
             return (
@@ -63,7 +63,7 @@ export const MarketSection: React.FC<MarketSectionProps> = ({
                 key={tab}
                 type="button"
                 onClick={() => onTabChange(tab)}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-initial px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer whitespace-nowrap text-center ${
                   isActive
                     ? "bg-nordic-dark text-white shadow-xs"
                     : "text-nordic-muted hover:text-nordic-dark"
@@ -83,11 +83,11 @@ export const MarketSection: React.FC<MarketSectionProps> = ({
         }`}
       >
         {properties.length === 0 ? (
-          <div className="text-center py-16 bg-white/50 rounded-xl border border-dashed border-nordic-dark/10">
-            <span className="material-icons text-4xl text-nordic-muted">
+          <div className="text-center py-12 sm:py-16 bg-white/50 rounded-xl border border-dashed border-nordic-dark/10">
+            <span className="material-icons text-3xl sm:text-4xl text-nordic-muted">
               search_off
             </span>
-            <p className="mt-2 text-nordic-muted font-medium">
+            <p className="mt-2 text-nordic-muted text-sm sm:text-base font-medium">
               {t("market.noProperties")}
             </p>
             <p className="mt-1 text-xs text-nordic-muted/70">
@@ -95,7 +95,7 @@ export const MarketSection: React.FC<MarketSectionProps> = ({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {properties.map((property) => (
               <PropertyCard
                 key={property.id}

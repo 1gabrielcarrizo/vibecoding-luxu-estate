@@ -21,6 +21,7 @@ export const AdminNav: React.FC<AdminNavProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(initialEmail || null);
   const [name, setName] = useState<string | null>(initialName || null);
   const [avatar, setAvatar] = useState<string | null>(initialAvatar || null);
@@ -128,7 +129,7 @@ export const AdminNav: React.FC<AdminNavProps> = ({
         </div>
 
         {/* Right Nav / Notifications & Profile */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Link
             href="/#properties"
             className="text-nordic/60 dark:text-gray-400 hover:text-primary transition-colors p-1"
@@ -151,11 +152,11 @@ export const AdminNav: React.FC<AdminNavProps> = ({
           {/* User Profile Button with Dropdown & Sign Out */}
           <div
             ref={dropdownRef}
-            className="relative flex items-center gap-3 pl-3 sm:pl-4 border-l border-nordic/10 dark:border-gray-700"
+            className="relative flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 border-l border-nordic/10 dark:border-gray-700"
           >
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-3 cursor-pointer focus:outline-none group"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer focus:outline-none group"
               title="Opciones de perfil"
             >
               <div className="hidden sm:flex flex-col items-end">
@@ -166,7 +167,7 @@ export const AdminNav: React.FC<AdminNavProps> = ({
                   Premium Admin
                 </span>
               </div>
-              <div className="h-9 w-9 rounded-full bg-nordic/10 overflow-hidden ring-2 ring-white dark:ring-primary/20 border border-nordic/10 transition-transform group-hover:scale-105">
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-nordic/10 overflow-hidden ring-2 ring-white dark:ring-primary/20 border border-nordic/10 transition-transform group-hover:scale-105">
                 <img
                   alt="Admin user avatar"
                   className="h-full w-full object-cover"
@@ -225,6 +226,60 @@ export const AdminNav: React.FC<AdminNavProps> = ({
               </div>
             )}
           </div>
+
+          {/* Mobile Hamburger Toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-1.5 rounded-lg text-nordic/70 dark:text-gray-300 hover:bg-nordic/5 cursor-pointer ml-1"
+            aria-label="Toggle navigation menu"
+          >
+            <span className="material-symbols-outlined text-2xl">
+              {mobileMenuOpen ? "close" : "menu"}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      <div
+        className={`md:hidden border-t border-nordic/10 dark:border-primary/20 bg-card-white dark:bg-[#152e2a] overflow-hidden transition-all duration-200 ${
+          mobileMenuOpen ? "max-h-64 py-3" : "max-h-0 py-0"
+        }`}
+      >
+        <div className="space-y-1 px-2">
+          <Link
+            href="/admin/properties"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isProperties
+                ? "bg-primary/10 text-primary font-semibold"
+                : "text-nordic/70 dark:text-gray-300 hover:bg-primary/5"
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">apartment</span>
+            <span>Listings (Propiedades)</span>
+          </Link>
+          <Link
+            href="/admin/users"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isUsers
+                ? "bg-primary/10 text-primary font-semibold"
+                : "text-nordic/70 dark:text-gray-300 hover:bg-primary/5"
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">manage_accounts</span>
+            <span>Users (Usuarios)</span>
+          </Link>
+          <Link
+            href="/"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-nordic/70 dark:text-gray-300 hover:bg-primary/5 transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">home</span>
+            <span>Ir al Sitio Web</span>
+          </Link>
         </div>
       </div>
     </nav>

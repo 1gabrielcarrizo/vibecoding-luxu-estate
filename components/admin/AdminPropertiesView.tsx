@@ -361,35 +361,38 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
         {/* Main Container */}
         <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
           {/* Header Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-nordic dark:text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-nordic dark:text-white tracking-tight">
                 My Properties
               </h1>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
                 Manage your portfolio and track performance.
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3">
               <button
                 onClick={() => setFilterDrawerOpen(!filterDrawerOpen)}
-                className={`bg-white dark:bg-[#152e2a] border border-gray-200 dark:border-primary/30 text-nordic dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-primary/10 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-2 cursor-pointer ${filterDrawerOpen || filterStatus !== "All" || searchQuery
+                className={`flex-1 sm:flex-initial bg-white dark:bg-[#152e2a] border border-gray-200 dark:border-primary/30 text-nordic dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-primary/10 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm inline-flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
+                  filterDrawerOpen || filterStatus !== "All" || searchQuery
                     ? "border-primary text-primary"
                     : ""
-                  }`}
+                }`}
               >
-                <span className="material-icons text-base">filter_list</span> Filter
+                <span className="material-icons text-base">filter_list</span>
+                <span>Filter</span>
               </button>
 
-            <Link
+              <Link
                 href="/admin/properties/new"
-                className="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-md shadow-primary/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center gap-2 cursor-pointer"
+                className="flex-1 sm:flex-initial bg-primary hover:bg-primary/90 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium shadow-md shadow-primary/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap"
               >
-                <span className="material-icons text-base">add</span> Add New Property
-            </Link>
+                <span className="material-icons text-base">add</span>
+                <span>Add Property</span>
+              </Link>
+            </div>
           </div>
-      </div>
 
         {/* Collapsible Filter Bar */ }
     {
@@ -530,19 +533,19 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
         paginatedProps.map((item) => (
           <div
             key={item.id}
-            className="group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 dark:border-primary/10 hover:bg-background-light dark:hover:bg-primary/5 transition-colors items-center"
+            className="group grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 dark:border-primary/10 hover:bg-background-light dark:hover:bg-primary/5 transition-colors items-center"
           >
             {/* Property Details */}
-            <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
-              <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+            <div className="col-span-12 md:col-span-6 flex gap-3 sm:gap-4 items-center">
+              <div className="relative h-16 w-20 sm:h-20 sm:w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
                 <img
                   alt={item.title}
                   src={item.image}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-nordic dark:text-white group-hover:text-primary transition-colors cursor-pointer">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base sm:text-lg font-bold text-nordic dark:text-white group-hover:text-primary transition-colors cursor-pointer truncate">
                   {item.slug ? (
                     <Link href={`/propiedades/${item.slug}`}>
                       {item.title}
@@ -551,10 +554,10 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
                     item.title
                   )}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                   {item.location}
                 </p>
-                <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 text-[11px] sm:text-xs text-gray-400 dark:text-gray-500">
                   <span className="flex items-center gap-1">
                     <span className="material-icons text-[14px]">bed</span>{" "}
                     {item.beds} Beds
@@ -574,14 +577,14 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
 
             {/* Price */}
             <div className="col-span-6 md:col-span-2">
-              <div className="text-base font-semibold text-nordic dark:text-gray-200">
+              <div className="text-sm sm:text-base font-semibold text-nordic dark:text-gray-200">
                 {item.formattedPrice}
               </div>
               <div className="text-xs text-gray-400">{item.monthly}</div>
             </div>
 
             {/* Status */}
-            <div className="col-span-6 md:col-span-2">
+            <div className="col-span-6 md:col-span-2 flex justify-end md:justify-start">
               {item.isActive === false || item.status === "Inactive" ? (
                 <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
                   <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5" />
@@ -606,7 +609,7 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
             </div>
 
             {/* Actions */}
-            <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-2">
+            <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-1.5 sm:gap-2 pt-2 md:pt-0 border-t md:border-0 border-gray-100 dark:border-primary/10">
               {/* Star / Feature */}
               <button
                 onClick={() => handleToggleFeatured(item.id, item.isFeatured)}
@@ -651,46 +654,46 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
                 </span>
               </button>
             </div>
-              </div>
-            ))
-          )}
+          </div>
+        ))
+      )}
 
-{/* Pagination */ }
-<div className="px-6 py-4 border-t border-gray-100 dark:border-primary/20 flex items-center justify-between bg-gray-50/50 dark:bg-primary/5">
-  <div className="text-sm text-gray-500 dark:text-gray-400">
-    Showing{" "}
-    <span className="font-medium text-nordic dark:text-white">
-      {filteredProperties.length > 0 ? startIndex + 1 : 0}
-    </span>{" "}
-    to{" "}
-    <span className="font-medium text-nordic dark:text-white">
-      {Math.min(startIndex + pageSize, filteredProperties.length)}
-    </span>{" "}
-    of{" "}
-    <span className="font-medium text-nordic dark:text-white">
-      {filteredProperties.length}
-    </span>{" "}
-    results
-  </div>
-  <div className="flex gap-2">
-    <button
-      type="button"
-      disabled={currentPage <= 1}
-      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-      className="px-3 py-1 text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
-    >
-      Previous
-    </button>
-    <button
-      type="button"
-      disabled={currentPage >= totalPages}
-      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-      className="px-3 py-1 text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
-    >
-      Next
-    </button>
-  </div>
-</div>
+      {/* Pagination */}
+      <div className="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gray-50/50 dark:bg-primary/5">
+        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
+          Showing{" "}
+          <span className="font-medium text-nordic dark:text-white">
+            {filteredProperties.length > 0 ? startIndex + 1 : 0}
+          </span>{" "}
+          to{" "}
+          <span className="font-medium text-nordic dark:text-white">
+            {Math.min(startIndex + pageSize, filteredProperties.length)}
+          </span>{" "}
+          of{" "}
+          <span className="font-medium text-nordic dark:text-white">
+            {filteredProperties.length}
+          </span>{" "}
+          results
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            disabled={currentPage <= 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            className="px-3 py-1.5 text-xs sm:text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            className="px-3 py-1.5 text-xs sm:text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
+          >
+            Next
+          </button>
+        </div>
+      </div>
         </div >
       </main >
 

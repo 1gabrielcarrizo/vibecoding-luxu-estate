@@ -20,11 +20,11 @@ export const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
   const { t, dict } = useTranslation();
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-sm border border-mosque/5">
-      <h2 className="text-lg font-semibold mb-6 text-nordic">
+    <div className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-mosque/5">
+      <h2 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-nordic">
         {t("propertyDetail.amenitiesTitle")}
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 sm:gap-y-4 gap-x-6 sm:gap-x-8">
         {amenities.map((amenity) => {
           const trimmed = (amenity || "").trim();
           let displayLabel = t(`amenitiesList.${trimmed}`);

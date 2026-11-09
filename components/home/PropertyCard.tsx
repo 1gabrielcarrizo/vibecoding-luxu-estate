@@ -131,12 +131,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       </div>
 
       {/* Details */}
-      <div className="p-4 flex flex-col flex-grow">
-        <div className="flex justify-between items-baseline mb-2">
-          <h3 className="font-bold text-lg text-nordic">
+      <div className="p-3.5 sm:p-4 flex flex-col flex-grow">
+        <div className="flex justify-between items-baseline mb-1.5 sm:mb-2">
+          <h3 className="font-bold text-base sm:text-lg text-nordic truncate">
             {property.formattedPrice}
             {property.priceSuffix && (
-              <span className="text-sm font-normal text-nordic-muted">
+              <span className="text-xs sm:text-sm font-normal text-nordic-muted">
                 {property.priceSuffix.includes("/mo") || property.priceSuffix.includes("/mes")
                   ? ` ${t("propertyDetail.perMonth")}`
                   : ` ${property.priceSuffix}`}
@@ -145,33 +145,33 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           </h3>
         </div>
 
-        <h4 className="text-nordic font-medium truncate mb-1 group-hover:text-mosque transition-colors">
+        <h4 className="text-nordic text-sm sm:text-base font-medium truncate mb-1 group-hover:text-mosque transition-colors">
           {displayTitle}
         </h4>
-        <p className="text-nordic-muted text-xs mb-4 flex items-center gap-1">
+        <p className="text-nordic-muted text-xs mb-3 sm:mb-4 flex items-center gap-1">
           <span className="material-icons text-xs text-mosque">place</span>
           <span className="truncate">{property.location}</span>
         </p>
 
         {/* Specs */}
-        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
-          <div className="flex items-center gap-1 text-nordic-muted text-xs">
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100 text-[11px] sm:text-xs">
+          <div className="flex items-center gap-1 text-nordic-muted">
             <span className="material-icons text-sm text-mosque/80">
               king_bed
             </span>{" "}
-            {property.beds} {t("propertyCard.beds")}
+            <span>{property.beds} {t("propertyCard.beds")}</span>
           </div>
-          <div className="flex items-center gap-1 text-nordic-muted text-xs">
+          <div className="flex items-center gap-1 text-nordic-muted">
             <span className="material-icons text-sm text-mosque/80">
               bathtub
             </span>{" "}
-            {property.baths} {t("propertyCard.baths")}
+            <span>{property.baths} {t("propertyCard.baths")}</span>
           </div>
-          <div className="flex items-center gap-1 text-nordic-muted text-xs">
+          <div className="flex items-center gap-1 text-nordic-muted">
             <span className="material-icons text-sm text-mosque/80">
               square_foot
             </span>{" "}
-            {property.sqm} {t("propertyCard.sqm")}
+            <span>{property.sqm} {t("propertyCard.sqm")}</span>
           </div>
         </div>
       </div>

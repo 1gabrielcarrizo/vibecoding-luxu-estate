@@ -24,24 +24,24 @@ export const PropertyBreadcrumb: React.FC<PropertyBreadcrumbProps> = ({
   return (
     <nav
       aria-label="Breadcrumb"
-      className="mb-6 flex items-center gap-2 text-xs text-nordic/60"
+      className="mb-4 sm:mb-6 flex items-center gap-1.5 sm:gap-2 text-xs text-nordic/60 overflow-x-auto scrollbar-hide py-1"
     >
       <Link
         href="/"
-        className="hover:text-mosque transition-colors flex items-center gap-1"
+        className="hover:text-mosque transition-colors flex items-center gap-1 flex-shrink-0"
       >
         <span className="material-icons text-sm">home</span>
         <span>{t("nav.home")}</span>
       </Link>
-      <span className="text-nordic/30">/</span>
+      <span className="text-nordic/30 flex-shrink-0">/</span>
       <Link
         href={`/?category=${category}`}
-        className="hover:text-mosque transition-colors"
+        className="hover:text-mosque transition-colors flex-shrink-0"
       >
         {categoryLabel}
       </Link>
-      <span className="text-nordic/30">/</span>
-      <span className="text-nordic font-medium truncate max-w-xs sm:max-w-md">
+      <span className="text-nordic/30 flex-shrink-0">/</span>
+      <span className="text-nordic font-medium truncate max-w-[150px] xs:max-w-xs sm:max-w-md flex-shrink">
         {displayTitle}
       </span>
     </nav>

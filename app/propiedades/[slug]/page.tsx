@@ -109,7 +109,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
       <Navbar isDetailPage={true} />
 
       {/* Main Content Container matching code.html */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full">
         {/* Breadcrumb Navigation */}
         <PropertyBreadcrumb
           category={property.category}
@@ -117,8 +117,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           slug={property.slug}
         />
 
-        {/* 12-Column Grid Layout matching code.html */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+        {/* 12-Column Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mb-8">
           {/* Top Left: 1 to N Images Gallery */}
           <div className="lg:col-span-8 space-y-4">
             <PropertyGallery
@@ -133,7 +133,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           <PropertySidebar property={property} />
 
           {/* Bottom Left: Features, About, Amenities, Mortgage */}
-          <div className="lg:col-span-8 lg:row-start-2 -mt-8 space-y-8">
+          <div className="lg:col-span-8 lg:row-start-2 lg:-mt-8 space-y-6 sm:space-y-8">
             {/* Features (Sqm, Beds, Baths, Garage) */}
             <PropertyFeatures
               sqm={property.sqm}

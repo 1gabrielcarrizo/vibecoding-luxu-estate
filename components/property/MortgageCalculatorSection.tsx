@@ -50,16 +50,16 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
 
   return (
     <>
-      <div className="bg-mosque/5 p-6 rounded-xl border border-mosque/10 flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-white rounded-full text-mosque shadow-sm flex items-center justify-center">
-            <span className="material-icons text-xl">calculate</span>
+      <div className="bg-mosque/5 p-4 sm:p-6 rounded-xl border border-mosque/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-6">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="p-2.5 sm:p-3 bg-white rounded-full text-mosque shadow-sm flex items-center justify-center flex-shrink-0">
+            <span className="material-icons text-lg sm:text-xl">calculate</span>
           </div>
           <div>
-            <h3 className="font-semibold text-nordic">
+            <h3 className="font-semibold text-nordic text-sm sm:text-base">
               {t("mortgage.estimatedPayment")}
             </h3>
-            <p className="text-sm text-nordic/60">
+            <p className="text-xs sm:text-sm text-nordic/60 mt-0.5">
               {t("mortgage.startingFrom")}{" "}
               <strong className="text-mosque font-bold">
                 {displayMonthly}
@@ -73,7 +73,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="whitespace-nowrap px-4 py-2 bg-white border border-nordic/10 rounded-lg text-sm font-semibold hover:border-mosque transition-colors text-nordic cursor-pointer shadow-xs hover:shadow"
+          className="w-full sm:w-auto text-center whitespace-nowrap px-4 py-2.5 bg-white border border-nordic/10 rounded-lg text-xs sm:text-sm font-semibold hover:border-mosque transition-colors text-nordic cursor-pointer shadow-xs hover:shadow"
         >
           {t("mortgage.calculate")}
         </button>
@@ -84,14 +84,14 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
         >
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-mosque/10 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-8 shadow-2xl border border-mosque/10 relative max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <span className="material-icons text-mosque">calculate</span>
-                <h3 className="text-xl font-bold text-nordic">
+                <h3 className="text-lg sm:text-xl font-bold text-nordic">
                   {t("mortgage.calculate")}
                 </h3>
               </div>
@@ -105,34 +105,34 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
             </div>
 
             {/* Monthly Result Card */}
-            <div className="my-6 p-5 bg-mosque/5 border border-mosque/15 rounded-xl text-center">
+            <div className="my-4 sm:my-6 p-4 sm:p-5 bg-mosque/5 border border-mosque/15 rounded-xl text-center">
               <span className="text-xs font-semibold uppercase tracking-wider text-nordic/60 block mb-1">
                 {t("mortgage.totalMonthly")}
               </span>
-              <span className="text-3xl font-bold text-mosque font-display">
+              <span className="text-2xl sm:text-3xl font-bold text-mosque font-display">
                 ${totalMonthly.toLocaleString("en-US")}
               </span>
-              <span className="text-sm text-nordic/60 font-medium ml-1">
+              <span className="text-xs sm:text-sm text-nordic/60 font-medium ml-1">
                 {t("propertyDetail.perMonth")}
               </span>
 
               {/* Breakdown */}
-              <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-mosque/10 text-xs">
+              <div className="grid grid-cols-3 gap-1 sm:gap-2 mt-4 pt-4 border-t border-mosque/10 text-[11px] sm:text-xs">
                 <div>
-                  <div className="text-nordic/50">{t("mortgage.principalInterest")}</div>
-                  <div className="font-semibold text-nordic mt-0.5">
+                  <div className="text-nordic/50 truncate">{t("mortgage.principalInterest")}</div>
+                  <div className="font-semibold text-nordic mt-0.5 truncate">
                     ${monthlyPrincipalAndInterest.toLocaleString("en-US")}
                   </div>
                 </div>
                 <div>
-                  <div className="text-nordic/50">{t("mortgage.propertyTax")}</div>
-                  <div className="font-semibold text-nordic mt-0.5">
+                  <div className="text-nordic/50 truncate">{t("mortgage.propertyTax")}</div>
+                  <div className="font-semibold text-nordic mt-0.5 truncate">
                     ${monthlyPropertyTax.toLocaleString("en-US")}
                   </div>
                 </div>
                 <div>
-                  <div className="text-nordic/50">{t("mortgage.insurance")}</div>
-                  <div className="font-semibold text-nordic mt-0.5">
+                  <div className="text-nordic/50 truncate">{t("mortgage.insurance")}</div>
+                  <div className="font-semibold text-nordic mt-0.5 truncate">
                     ${monthlyInsurance.toLocaleString("en-US")}
                   </div>
                 </div>
@@ -142,7 +142,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
             {/* Sliders and Controls */}
             <div className="space-y-4">
               <div>
-                <div className="flex justify-between text-sm mb-1">
+                <div className="flex justify-between text-xs sm:text-sm mb-1">
                   <label className="font-medium text-nordic">
                     {t("mortgage.homePrice")}
                   </label>
@@ -162,7 +162,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
               </div>
 
               <div>
-                <div className="flex justify-between text-sm mb-1">
+                <div className="flex justify-between text-xs sm:text-sm mb-1">
                   <label className="font-medium text-nordic">
                     {t("mortgage.downPayment")} ({downPercent}%)
                   </label>
@@ -181,9 +181,9 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-nordic mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-nordic mb-1">
                     {t("mortgage.interestRate")}
                   </label>
                   <input
@@ -197,7 +197,7 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-nordic mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-nordic mb-1">
                     {t("mortgage.loanTerm")}
                   </label>
                   <select
@@ -214,11 +214,11 @@ export const MortgageCalculatorSection: React.FC<MortgageCalculatorProps> = ({
             </div>
 
             {/* Close Button */}
-            <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
+            <div className="mt-5 sm:mt-6 pt-4 border-t border-gray-100 flex justify-end">
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="w-full bg-mosque hover:bg-primary-hover text-white py-3 rounded-lg font-medium transition-colors cursor-pointer"
+                className="w-full bg-mosque hover:bg-primary-hover text-white py-3 rounded-lg font-medium transition-colors cursor-pointer text-sm sm:text-base"
               >
                 {t("modals.close")}
               </button>

@@ -599,25 +599,25 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Main 12-Column Grid Form matching code.html */}
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start"
+          className="grid grid-cols-1 xl:grid-cols-12 gap-6 sm:gap-8 items-start pb-24 md:pb-8"
         >
           {/* Left Column (8 cols) */}
-          <div className="xl:col-span-8 space-y-8">
+          <div className="xl:col-span-8 space-y-6 sm:space-y-8">
             {/* Card 1: Basic Information */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="px-8 py-6 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
-                <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic">
+              <div className="px-5 sm:px-8 py-4 sm:py-6 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
+                <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic flex-shrink-0">
                   <span className="material-icons text-lg">info</span>
                 </div>
-                <h2 className="text-xl font-bold text-nordic">
+                <h2 className="text-lg sm:text-xl font-bold text-nordic">
                   Basic Information
                 </h2>
               </div>
-              <div className="p-8 space-y-6">
+              <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
                 <div className="group">
                   <label
                     className="block text-sm font-medium text-nordic mb-1.5 font-sf-pro"
@@ -647,7 +647,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   <div>
                     <label
                       className="block text-sm font-medium text-nordic mb-1.5 font-sf-pro"
@@ -786,14 +786,14 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
 
             {/* Card 2: Description */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="px-8 py-6 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
-                <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic">
+              <div className="px-5 sm:px-8 py-4 sm:py-6 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
+                <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic flex-shrink-0">
                   <span className="material-icons text-lg">description</span>
                 </div>
-                <h2 className="text-xl font-bold text-nordic">Description</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-nordic">Description</h2>
               </div>
-              <div className="p-8">
-                <div className="mb-3 flex gap-2 border-b border-gray-100 pb-2">
+              <div className="p-4 sm:p-8">
+                <div className="mb-3 flex gap-2 border-b border-gray-100 pb-2 overflow-x-auto">
                   <button
                     className="p-1.5 text-gray-400 hover:text-nordic hover:bg-gray-50 rounded transition-colors cursor-pointer"
                     type="button"
@@ -824,7 +824,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   </button>
                 </div>
                 <textarea
-                  className="w-full px-4 py-3 rounded-md border border-gray-200 bg-white text-nordic placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-base font-sf-pro leading-relaxed resize-y min-h-[200px]"
+                  className="w-full px-4 py-3 rounded-md border border-gray-200 bg-white text-nordic placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-base font-sf-pro leading-relaxed resize-y min-h-[180px] sm:min-h-[200px]"
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -839,24 +839,24 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
 
             {/* Card 3: Gallery (Supabase Bucket Integration with Drag and Drop) */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="px-8 py-6 border-b border-hint-green/30 flex justify-between items-center bg-gradient-to-r from-hint-green/10 to-transparent">
+              <div className="px-5 sm:px-8 py-4 sm:py-6 border-b border-hint-green/30 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic">
+                  <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic flex-shrink-0">
                     <span className="material-icons text-lg">image</span>
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-nordic">Gallery</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-nordic">Gallery</h2>
                     <p className="text-xs text-gray-400 mt-0.5">
                       Supabase Storage Bucket:{" "}
                       <span className="font-semibold text-mosque">properties</span>
                     </p>
                   </div>
                 </div>
-                <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded font-sf-pro">
+                <span className="self-start sm:self-auto text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded font-sf-pro">
                   JPG, PNG, WEBP
                 </span>
               </div>
-              <div className="p-8">
+              <div className="p-4 sm:p-8">
                 {/* Upload Dropzone with Drag and Drop functionality */}
                 <div
                   onClick={() => fileInputRef.current?.click()}
@@ -864,7 +864,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   onDragEnter={handleDragEnter}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`relative border-2 border-dashed rounded-xl p-10 text-center transition-all cursor-pointer group ${
+                  className={`relative border-2 border-dashed rounded-xl p-6 sm:p-10 text-center transition-all cursor-pointer group ${
                     isDragging
                       ? "border-mosque bg-hint-green/30 ring-4 ring-mosque/20 scale-[1.01]"
                       : errors.images
@@ -901,14 +901,14 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                       )}
                     </div>
                     <div className="space-y-1">
-                      <p className="text-base font-medium text-nordic font-sf-pro">
+                      <p className="text-sm sm:text-base font-medium text-nordic font-sf-pro">
                         {isUploading
                           ? "Uploading to Supabase..."
                           : isDragging
                           ? "Drop images right here!"
                           : "Click or drag images here to upload"}
                       </p>
-                      <p className="text-xs text-gray-400 font-sf-pro">
+                      <p className="text-xs text-gray-400 font-sf-pro max-w-sm mx-auto">
                         Max file size 5MB per image. Directly saved in Supabase bucket.
                       </p>
                     </div>
@@ -928,7 +928,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 )}
 
                 {/* Direct URL input alternative */}
-                <div className="mt-4 flex gap-2">
+                <div className="mt-4 flex flex-col sm:flex-row gap-2">
                   <input
                     type="url"
                     value={customImageUrl}
@@ -948,7 +948,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 {/* Thumbnails Grid matching code.html with reordering & main selection */}
                 {images.length > 0 && (
                   <div className="space-y-3 mt-6">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                       {images.map((imgUrl, index) => {
                         const isMain = index === 0;
                         const isDraggingCurrent = draggedThumbIndex === index;
@@ -1079,16 +1079,16 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
           </div>
 
           {/* Right Column (4 cols) */}
-          <div className="xl:col-span-4 space-y-8">
+          <div className="xl:col-span-4 space-y-6 sm:space-y-8">
             {/* Card 4: Location */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="px-6 py-4 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
-                <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic">
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
+                <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic flex-shrink-0">
                   <span className="material-icons text-lg">place</span>
                 </div>
-                <h2 className="text-lg font-bold text-nordic">Location</h2>
+                <h2 className="text-base sm:text-lg font-bold text-nordic">Location</h2>
               </div>
-              <div className="p-6 space-y-4">
+              <div className="p-4 sm:p-6 space-y-4">
                 <div>
                   <label
                     className="block text-sm font-medium text-nordic mb-1.5 font-sf-pro"
@@ -1120,7 +1120,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 </div>
 
                 {/* Latitude & Longitude inputs between Address and Map */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label
                       className="block text-xs font-medium text-nordic mb-1 font-sf-pro"
@@ -1158,7 +1158,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 </div>
 
                 {/* Map preview or interactive Leaflet map */}
-                <div className="relative z-0 [isolation:isolate] h-56 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                <div className="relative z-0 [isolation:isolate] h-48 sm:h-56 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                   {hasValidCoords ? (
                     <div className="relative w-full h-full">
                       <DynamicReactLeafletMap
@@ -1188,16 +1188,16 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
               </div>
             </div>
 
-            {/* Card 5: Details (sticky top-40) */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden sticky top-40">
-              <div className="px-6 py-4 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
-                <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic">
+            {/* Card 5: Details (xl:sticky xl:top-40) */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden xl:sticky xl:top-40">
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
+                <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic flex-shrink-0">
                   <span className="material-icons text-lg">straighten</span>
                 </div>
-                <h2 className="text-lg font-bold text-nordic">Details</h2>
+                <h2 className="text-base sm:text-lg font-bold text-nordic">Details</h2>
               </div>
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="group">
                     <label
                       className="text-xs text-gray-500 font-medium font-sf-pro mb-1 block"

@@ -23,26 +23,26 @@ export const FeaturedCollections: React.FC<FeaturedCollectionsProps> = ({
   if (displayedProperties.length === 0) return null;
 
   return (
-    <section className="mb-16">
-      <div className="flex items-end justify-between mb-8">
+    <section className="mb-12 sm:mb-16">
+      <div className="flex items-end justify-between mb-6 sm:mb-8">
         <div>
-          <h2 className="text-2xl font-light text-nordic-dark">
+          <h2 className="text-xl sm:text-2xl font-light text-nordic-dark">
             {t("featured.title")}
           </h2>
-          <p className="text-nordic-muted mt-1 text-sm">
+          <p className="text-nordic-muted mt-1 text-xs sm:text-sm">
             {t("featured.subtitle")}
           </p>
         </div>
         <button
           onClick={onViewAll}
-          className="hidden sm:flex items-center gap-1 text-sm font-medium text-mosque hover:opacity-70 transition-opacity cursor-pointer"
+          className="flex items-center gap-1 text-xs sm:text-sm font-medium text-mosque hover:opacity-70 transition-opacity cursor-pointer"
         >
-          {t("featured.viewAll")}{" "}
+          <span>{t("featured.viewAll")}</span>
           <span className="material-icons text-sm">arrow_forward</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {displayedProperties.map((property) => (
           <FeaturedCard
             key={property.id}

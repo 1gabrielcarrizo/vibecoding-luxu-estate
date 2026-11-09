@@ -95,19 +95,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Link
             href="/"
             onClick={() => onTabChange?.("Buy")}
-            className="flex-shrink-0 flex items-center gap-2 group cursor-pointer focus:outline-none"
+            className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 group cursor-pointer focus:outline-none"
             aria-label="Return to LuxeEstate home"
           >
-            <span className="material-symbols-outlined text-mosque text-3xl font-bold transition-transform duration-300 group-hover:scale-110">
+            <span className="material-symbols-outlined text-mosque text-2xl sm:text-3xl font-bold transition-transform duration-300 group-hover:scale-110">
               villa
             </span>
-            <span className="font-bold text-xl tracking-tight text-nordic">
+            <span className="font-bold text-lg sm:text-xl tracking-tight text-nordic">
               LuxeEstate
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center space-x-10">
+          <div className="hidden md:flex items-center space-x-8 lg:space-x-10">
             {navLinks.map((link) => {
               const isActive =
                 !isDetailPage &&
@@ -133,37 +133,39 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Right Action Icons & Profile */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Language Selector Dropdown */}
-            <LanguageSelector />
+          <div className="flex items-center gap-1 sm:gap-2.5">
+            {/* Language Selector Dropdown - hidden on small mobile, accessible in mobile menu */}
+            <div className="hidden sm:block">
+              <LanguageSelector />
+            </div>
 
             <button
               onClick={handleSearchAction}
               aria-label={t("nav.searchAria")}
-              className="p-2 text-nordic hover:text-mosque transition-colors rounded-full hover:bg-mosque/5 cursor-pointer"
+              className="p-1.5 sm:p-2 text-nordic hover:text-mosque transition-colors rounded-full hover:bg-mosque/5 cursor-pointer"
             >
-              <span className="material-symbols-outlined">search</span>
+              <span className="material-symbols-outlined text-xl sm:text-2xl">search</span>
             </button>
 
             <button
               aria-label={t("nav.notificationsAria")}
-              className="p-2 text-nordic hover:text-mosque transition-colors relative rounded-full hover:bg-mosque/5 cursor-pointer"
+              className="p-1.5 sm:p-2 text-nordic hover:text-mosque transition-colors relative rounded-full hover:bg-mosque/5 cursor-pointer"
             >
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-mosque rounded-full"></span>
+              <span className="material-symbols-outlined text-xl sm:text-2xl">notifications</span>
+              <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-2 h-2 bg-mosque rounded-full"></span>
             </button>
 
             {/* User Profile or Sign In Button */}
             {isLoading ? (
-              <div className="ml-1 sm:ml-2 w-9 h-9 rounded-full bg-mosque/10 animate-pulse border border-mosque/20" />
+              <div className="ml-1 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-mosque/10 animate-pulse border border-mosque/20" />
             ) : user ? (
-              <div className="relative ml-1 sm:ml-2" ref={dropdownRef}>
+              <div className="relative ml-0.5 sm:ml-1" ref={dropdownRef}>
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   aria-label={t("nav.profileAria")}
                   className="flex items-center gap-2 p-0.5 rounded-full hover:ring-2 hover:ring-mosque/30 transition-all cursor-pointer focus:outline-none"
                 >
-                  <div className="w-9 h-9 rounded-full bg-mosque/10 overflow-hidden border border-mosque/20 flex items-center justify-center text-nordic font-semibold">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-mosque/10 overflow-hidden border border-mosque/20 flex items-center justify-center text-nordic font-semibold">
                     {avatarUrl ? (
                       <img
                         alt={displayName || "User profile"}
@@ -171,7 +173,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         src={avatarUrl}
                       />
                     ) : (
-                      <span className="text-sm text-mosque">
+                      <span className="text-xs sm:text-sm text-mosque font-bold">
                         {displayName?.charAt(0).toUpperCase() || "U"}
                       </span>
                     )}
@@ -180,7 +182,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {/* Profile Popover Dropdown */}
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-white dark:bg-[#152e2a] shadow-lg border border-mosque/10 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-2 w-60 sm:w-64 rounded-xl bg-white dark:bg-[#152e2a] shadow-lg border border-mosque/10 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                     <div className="px-4 py-3 border-b border-mosque/10 flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-mosque/10 overflow-hidden border border-mosque/20 flex-shrink-0 flex items-center justify-center">
                         {avatarUrl ? (
@@ -246,22 +248,22 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <Link
                 href="/login"
-                className="ml-1 sm:ml-2 flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold text-mosque bg-mosque/10 hover:bg-mosque hover:text-white rounded-full transition-all border border-mosque/20 cursor-pointer"
+                className="ml-0.5 sm:ml-1 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-mosque bg-mosque/10 hover:bg-mosque hover:text-white rounded-full transition-all border border-mosque/20 cursor-pointer whitespace-nowrap"
               >
                 <span className="material-symbols-outlined text-base">
                   login
                 </span>
-                <span>{t("nav.signIn") || "Sign In"}</span>
+                <span className="hidden xs:inline">{t("nav.signIn") || "Sign In"}</span>
               </Link>
             )}
 
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-nordic hover:text-mosque p-2 rounded-md hover:bg-mosque/5 cursor-pointer"
+              className="md:hidden text-nordic hover:text-mosque p-1.5 sm:p-2 rounded-md hover:bg-mosque/5 cursor-pointer"
               aria-label={t("nav.toggleMenuAria")}
             >
-              <span className="material-symbols-outlined">
+              <span className="material-symbols-outlined text-2xl">
                 {mobileMenuOpen ? "close" : "menu"}
               </span>
             </button>

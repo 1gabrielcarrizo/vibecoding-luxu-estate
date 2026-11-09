@@ -431,7 +431,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <select
                 value={propType}
                 onChange={(e) => setPropType(e.target.value)}
-                className="text-xs sm:text-sm bg-[#F4F9F9] border border-mosque/15 rounded-lg px-3 py-2 text-nordic focus:outline-none focus:ring-2 focus:ring-mosque/30 cursor-pointer"
+                className="flex-1 sm:flex-initial min-w-[120px] text-xs sm:text-sm bg-[#F4F9F9] border border-mosque/15 rounded-lg px-3 py-2 text-nordic focus:outline-none focus:ring-2 focus:ring-mosque/30 cursor-pointer"
               >
                 <option value="All">Tipo: Todos</option>
                 <option value="sale">En Venta</option>
@@ -442,7 +442,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <select
                 value={propCategory}
                 onChange={(e) => setPropCategory(e.target.value)}
-                className="text-xs sm:text-sm bg-[#F4F9F9] border border-mosque/15 rounded-lg px-3 py-2 text-nordic focus:outline-none focus:ring-2 focus:ring-mosque/30 cursor-pointer"
+                className="flex-1 sm:flex-initial min-w-[130px] text-xs sm:text-sm bg-[#F4F9F9] border border-mosque/15 rounded-lg px-3 py-2 text-nordic focus:outline-none focus:ring-2 focus:ring-mosque/30 cursor-pointer"
               >
                 <option value="All">Categoría: Todas</option>
                 <option value="House">House</option>
@@ -455,7 +455,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <select
                 value={propFeatured}
                 onChange={(e) => setPropFeatured(e.target.value)}
-                className="text-xs sm:text-sm bg-[#F4F9F9] border border-mosque/15 rounded-lg px-3 py-2 text-nordic focus:outline-none focus:ring-2 focus:ring-mosque/30 cursor-pointer"
+                className="flex-1 sm:flex-initial min-w-[130px] text-xs sm:text-sm bg-[#F4F9F9] border border-mosque/15 rounded-lg px-3 py-2 text-nordic focus:outline-none focus:ring-2 focus:ring-mosque/30 cursor-pointer"
               >
                 <option value="All">Destacadas: Todas</option>
                 <option value="featured">Solo Destacadas</option>
@@ -466,7 +466,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <select
                 value={propActive}
                 onChange={(e) => setPropActive(e.target.value)}
-                className="text-xs sm:text-sm bg-[#F4F9F9] border border-mosque/15 rounded-lg px-3 py-2 text-nordic focus:outline-none focus:ring-2 focus:ring-mosque/30 cursor-pointer"
+                className="flex-1 sm:flex-initial min-w-[130px] text-xs sm:text-sm bg-[#F4F9F9] border border-mosque/15 rounded-lg px-3 py-2 text-nordic focus:outline-none focus:ring-2 focus:ring-mosque/30 cursor-pointer"
               >
                 <option value="All">Estado: Todas</option>
                 <option value="active">Solo Activas</option>
@@ -477,8 +477,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           {/* Properties Table */}
           <div className="bg-white rounded-xl border border-mosque/10 shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto scrollbar-hide">
+              <table className="w-full min-w-[700px] text-left border-collapse">
                 <thead>
                   <tr className="border-b border-mosque/10 bg-[#EEF6F6]/60 text-xs font-semibold text-nordic/70 uppercase tracking-wider">
                     <th className="py-3 px-4">Propiedad</th>
@@ -843,8 +843,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           {/* Users Table */}
           <div className="bg-white rounded-xl border border-mosque/10 shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto scrollbar-hide">
+              <table className="w-full min-w-[650px] text-left border-collapse">
                 <thead>
                   <tr className="border-b border-mosque/10 bg-[#EEF6F6]/60 text-xs font-semibold text-nordic/70 uppercase tracking-wider">
                     <th className="py-3 px-4">Usuario</th>

@@ -65,9 +65,9 @@ export const Pagination: React.FC<PaginationProps> = ({
   const pages = getPageNumbers();
 
   return (
-    <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-nordic-dark/10 pt-6">
+    <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-nordic-dark/10 pt-6">
       {/* Items count summary */}
-      <div className="text-sm text-nordic-muted">
+      <div className="text-xs sm:text-sm text-nordic-muted text-center sm:text-left">
         {t("pagination.showing")}{" "}
         <span className="font-medium text-nordic-dark">{startItem}</span>{" "}
         {t("pagination.to")}{" "}
@@ -80,14 +80,14 @@ export const Pagination: React.FC<PaginationProps> = ({
       {/* Pagination Controls */}
       <nav
         aria-label="Pagination"
-        className="inline-flex items-center gap-1.5 bg-white p-1.5 rounded-xl border border-nordic-dark/10 shadow-xs"
+        className="inline-flex items-center gap-1 sm:gap-1.5 bg-white p-1 sm:p-1.5 rounded-xl border border-nordic-dark/10 shadow-xs max-w-full overflow-x-auto"
       >
         {/* Previous Page Button */}
         <button
           type="button"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1 || isLoading}
-          className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-nordic-dark hover:bg-clear-day disabled:opacity-40 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-nordic-dark hover:bg-clear-day disabled:opacity-40 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed flex-shrink-0"
           title={t("pagination.previous")}
         >
           <span className="material-icons text-base">chevron_left</span>
@@ -95,13 +95,13 @@ export const Pagination: React.FC<PaginationProps> = ({
         </button>
 
         {/* Page numbers */}
-        <div className="flex items-center gap-1 px-1">
+        <div className="flex items-center gap-0.5 sm:gap-1 px-0.5 sm:px-1">
           {pages.map((p, idx) => {
             if (p === "...") {
               return (
                 <span
                   key={`ellipsis-${idx}`}
-                  className="px-2 py-1 text-sm text-nordic-muted select-none"
+                  className="px-1.5 sm:px-2 py-1 text-xs sm:text-sm text-nordic-muted select-none"
                 >
                   …
                 </span>
@@ -117,7 +117,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                 type="button"
                 onClick={() => onPageChange(pageNum)}
                 disabled={isLoading}
-                className={`min-w-8 h-8 px-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                className={`min-w-7 sm:min-w-8 h-7 sm:h-8 px-1.5 sm:px-2 rounded-lg text-xs sm:text-sm font-medium transition-all cursor-pointer flex-shrink-0 ${
                   isCurrent
                     ? "bg-nordic-dark text-white shadow-xs"
                     : "text-nordic-dark hover:bg-clear-day"
@@ -134,7 +134,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages || isLoading}
-          className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-nordic-dark hover:bg-clear-day disabled:opacity-40 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-nordic-dark hover:bg-clear-day disabled:opacity-40 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed flex-shrink-0"
           title={t("pagination.next")}
         >
           <span className="hidden sm:inline">{t("pagination.next")}</span>

@@ -7,9 +7,9 @@ export const PropertyFooter: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <footer className="bg-white border-t border-slate-200 mt-12 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="text-sm text-nordic/50">
+    <footer className="bg-white border-t border-slate-200 mt-8 sm:mt-12 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 text-center md:text-left">
+        <div className="text-xs sm:text-sm text-nordic/50">
           {t("footer.rights")}
         </div>
         <div className="flex gap-6">

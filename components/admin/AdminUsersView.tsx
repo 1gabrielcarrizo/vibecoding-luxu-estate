@@ -344,13 +344,13 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       )}
 
       {/* Header Section */}
-      <header className="w-full pt-8 pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <header className="w-full pt-6 sm:pt-8 pb-4 sm:pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-nordic dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-nordic dark:text-white">
               User Directory
             </h1>
-            <p className="text-nordic/60 dark:text-gray-400 mt-1 text-sm">
+            <p className="text-nordic/60 dark:text-gray-400 mt-0.5 sm:mt-1 text-xs sm:text-sm">
               Manage user access and roles for your properties.
             </p>
           </div>
@@ -387,7 +387,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         </div>
 
         {/* Tab Filters */}
-        <div className="mt-8 flex gap-6 border-b border-nordic/10 overflow-x-auto">
+        <div className="mt-6 sm:mt-8 flex gap-4 sm:gap-6 border-b border-nordic/10 overflow-x-auto scrollbar-hide">
           {(["All Users", "Agents", "Brokers", "Admins"] as const).map(
             (tab) => {
               const isActive = activeTab === tab;
@@ -398,7 +398,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                     setActiveTab(tab);
                     setCurrentPage(1);
                   }}
-                  className={`pb-3 text-sm transition-colors cursor-pointer whitespace-nowrap ${
+                  className={`pb-3 text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap ${
                     isActive
                       ? "font-semibold text-primary border-b-2 border-primary"
                       : "font-medium text-nordic/60 hover:text-nordic"
@@ -413,7 +413,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-grow px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pb-12 space-y-4">
+      <main className="flex-grow px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pb-12 space-y-3 sm:space-y-4">
         {/* Table Header (hidden on mobile) */}
         <div className="hidden md:grid grid-cols-12 gap-4 px-6 text-xs font-semibold uppercase tracking-wider text-nordic/50 mb-2">
           <div className="col-span-4">User Details</div>
@@ -424,11 +424,11 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
         {/* User Cards List */}
         {paginatedUsers.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700">
-            <span className="material-icons text-4xl text-nordic/30 mb-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-8 sm:p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700">
+            <span className="material-icons text-3xl sm:text-4xl text-nordic/30 mb-2">
               people_outline
             </span>
-            <p className="text-base font-semibold text-nordic dark:text-white">
+            <p className="text-sm sm:text-base font-semibold text-nordic dark:text-white">
               No users found
             </p>
             <p className="text-xs text-nordic/60 dark:text-gray-400 mt-1">
@@ -444,7 +444,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
             return (
               <div
                 key={user.id}
-                className={`user-card group relative rounded-xl p-5 shadow-sm flex flex-col md:grid md:grid-cols-12 gap-4 items-center ${
+                className={`user-card group relative rounded-xl p-4 sm:p-5 shadow-sm flex flex-col md:grid md:grid-cols-12 gap-3 sm:gap-4 items-stretch md:items-center ${
                   isHighlighted
                     ? "bg-active-green dark:bg-primary/20 border border-transparent hover:shadow-soft"
                     : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:bg-active-green dark:hover:bg-primary/20"

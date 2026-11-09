@@ -42,12 +42,12 @@ export const PropertyAbout: React.FC<PropertyAboutProps> = ({
   const visibleParagraphs = isExpanded ? paragraphs : paragraphs.slice(0, 2);
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-sm border border-mosque/5">
-      <h2 className="text-lg font-semibold mb-4 text-nordic">
+    <div className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-mosque/5">
+      <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-nordic">
         {t("propertyDetail.aboutTitle")}
       </h2>
 
-      <div className="prose prose-slate max-w-none text-nordic/70 leading-relaxed space-y-4">
+      <div className="prose prose-slate max-w-none text-nordic/70 leading-relaxed space-y-3 sm:space-y-4 text-sm sm:text-base">
         {visibleParagraphs.map((para, i) => (
           <p key={i}>{para}</p>
         ))}

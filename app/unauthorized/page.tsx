@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export default function UnauthorizedPage() {
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center p-6 text-nordic">
-      <div className="w-full max-w-md bg-surface dark:bg-[#152e2a] rounded-2xl shadow-xl border border-mosque/15 p-8 text-center backdrop-blur-sm">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-600 mb-6">
-          <span className="material-symbols-outlined text-4xl">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center p-4 sm:p-6 text-nordic">
+      <div className="w-full max-w-md bg-surface dark:bg-[#152e2a] rounded-2xl shadow-xl border border-mosque/15 p-6 sm:p-8 text-center backdrop-blur-sm">
+        <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/10 text-amber-600 mb-6">
+          <span className="material-symbols-outlined text-3xl sm:text-4xl">
             lock_person
           </span>
         </div>
