@@ -74,10 +74,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <button
               type="button"
               onClick={() => onSearchChange("")}
-              className="absolute inset-y-0 right-20 sm:right-28 pr-1 flex items-center text-nordic-muted/60 hover:text-nordic-dark transition-colors cursor-pointer"
+              className="absolute top-1/2 -translate-y-1/2 right-20 sm:right-28 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-nordic-muted/70 hover:text-nordic-dark flex items-center justify-center transition-colors cursor-pointer"
               title="Limpiar búsqueda"
             >
-              <span className="material-icons text-lg sm:text-xl">close</span>
+              <span className="material-icons text-sm sm:text-base leading-none select-none flex items-center justify-center">
+                close
+              </span>
             </button>
           )}
           <button

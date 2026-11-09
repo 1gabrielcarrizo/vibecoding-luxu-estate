@@ -22,6 +22,26 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const displayTitle = slug ? getLocalizedTitle(slug, locale, title) : title;
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [copiedToast, setCopiedToast] = useState(false);
+
+  const handleShare = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (typeof window !== "undefined") {
+      if (navigator.share) {
+        navigator
+          .share({
+            title: displayTitle,
+            url: window.location.href,
+          })
+          .catch(() => {});
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        setCopiedToast(true);
+        setTimeout(() => setCopiedToast(false), 2500);
+      }
+    }
+  };
 
   const safeImages = images.length > 0 ? images : ["/placeholder.jpg"];
   const currentImage = safeImages[activeIndex] || safeImages[0];
@@ -114,6 +134,44 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </div>
         )}
 
+        {/* Top-Right Action Buttons: Favorite (Heart) & Share */}
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 z-10">
+          {copiedToast && (
+            <span className="bg-black/75 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm animate-in fade-in duration-200 shadow-sm font-medium">
+              Enlace copiado!
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label="Compartir propiedad"
+            title="Compartir propiedad"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white text-nordic hover:text-mosque backdrop-blur-md flex items-center justify-center transition-all duration-200 z-10 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+          >
+            <span className="material-icons text-base sm:text-lg leading-none select-none flex items-center justify-center">
+              share
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsFavorite(!isFavorite);
+            }}
+            aria-label={t("propertyCard.favoriteAria") || "Guardar en favoritos"}
+            title={t("propertyCard.favoriteAria") || "Guardar en favoritos"}
+            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 z-10 cursor-pointer shadow-sm hover:scale-105 active:scale-95 ${
+              isFavorite
+                ? "bg-mosque text-white"
+                : "bg-white/90 text-nordic hover:bg-mosque hover:text-white"
+            }`}
+          >
+            <span className="material-icons text-base sm:text-lg leading-none select-none flex items-center justify-center">
+              {isFavorite ? "favorite" : "favorite_border"}
+            </span>
+          </button>
+        </div>
+
         {/* Previous / Next on Hero (always visible on mobile touch, hover on desktop) */}
         {safeImages.length > 1 && (
           <>
@@ -123,7 +181,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               aria-label={t("pagination.previous")}
               className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
             >
-              <span className="material-icons text-lg sm:text-xl">chevron_left</span>
+              <span className="material-icons text-lg sm:text-xl leading-none select-none flex items-center justify-center -translate-x-0.5">
+                chevron_left
+              </span>
             </button>
             <button
               type="button"
@@ -131,7 +191,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               aria-label={t("pagination.next")}
               className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
             >
-              <span className="material-icons text-lg sm:text-xl">chevron_right</span>
+              <span className="material-icons text-lg sm:text-xl leading-none select-none flex items-center justify-center translate-x-0.5">
+                chevron_right
+              </span>
             </button>
           </>
         )}
@@ -205,9 +267,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <button
               onClick={() => setIsLightboxOpen(false)}
               aria-label={t("propertyDetail.closeViewer")}
-              className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 text-white transition-colors cursor-pointer flex-shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full hover:bg-white/10 text-white flex items-center justify-center transition-colors cursor-pointer flex-shrink-0"
             >
-              <span className="material-icons text-xl sm:text-2xl">close</span>
+              <span className="material-icons text-xl sm:text-2xl leading-none select-none flex items-center justify-center">
+                close
+              </span>
             </button>
           </div>
 
@@ -230,17 +294,21 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   type="button"
                   onClick={handlePrev}
                   aria-label={t("pagination.previous")}
-                  className="absolute left-1 sm:left-6 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all cursor-pointer"
+                  className="absolute left-1 sm:left-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 hover:bg-white/30 text-white backdrop-blur flex items-center justify-center transition-all cursor-pointer shadow-md"
                 >
-                  <span className="material-icons text-xl sm:text-2xl">chevron_left</span>
+                  <span className="material-icons text-xl sm:text-2xl leading-none select-none flex items-center justify-center -translate-x-0.5">
+                    chevron_left
+                  </span>
                 </button>
                 <button
                   type="button"
                   onClick={handleNext}
                   aria-label={t("pagination.next")}
-                  className="absolute right-1 sm:right-6 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur transition-all cursor-pointer"
+                  className="absolute right-1 sm:right-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 hover:bg-white/30 text-white backdrop-blur flex items-center justify-center transition-all cursor-pointer shadow-md"
                 >
-                  <span className="material-icons text-xl sm:text-2xl">chevron_right</span>
+                  <span className="material-icons text-xl sm:text-2xl leading-none select-none flex items-center justify-center translate-x-0.5">
+                    chevron_right
+                  </span>
                 </button>
               </>
             )}

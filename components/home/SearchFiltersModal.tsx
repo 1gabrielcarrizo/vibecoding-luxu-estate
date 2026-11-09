@@ -274,10 +274,12 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
           <button
             onClick={onClose}
             type="button"
-            className="p-1.5 sm:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400 cursor-pointer"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors text-gray-500 dark:text-gray-400 cursor-pointer flex-shrink-0"
             aria-label={t("modals.close")}
           >
-            <span className="material-icons">close</span>
+            <span className="material-icons text-lg sm:text-xl leading-none select-none flex items-center justify-center">
+              close
+            </span>
           </button>
         </header>
 

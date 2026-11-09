@@ -142,17 +142,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={handleSearchAction}
               aria-label={t("nav.searchAria")}
-              className="p-1.5 sm:p-2 text-nordic hover:text-mosque transition-colors rounded-full hover:bg-mosque/5 cursor-pointer"
+              className="w-9 h-9 sm:w-10 sm:h-10 text-nordic hover:text-mosque transition-colors rounded-full hover:bg-mosque/5 flex items-center justify-center cursor-pointer flex-shrink-0"
             >
-              <span className="material-symbols-outlined text-xl sm:text-2xl">search</span>
+              <span className="material-symbols-outlined text-xl sm:text-2xl leading-none select-none flex items-center justify-center">
+                search
+              </span>
             </button>
 
             <button
               aria-label={t("nav.notificationsAria")}
-              className="p-1.5 sm:p-2 text-nordic hover:text-mosque transition-colors relative rounded-full hover:bg-mosque/5 cursor-pointer"
+              className="w-9 h-9 sm:w-10 sm:h-10 text-nordic hover:text-mosque transition-colors relative rounded-full hover:bg-mosque/5 flex items-center justify-center cursor-pointer flex-shrink-0"
             >
-              <span className="material-symbols-outlined text-xl sm:text-2xl">notifications</span>
-              <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-2 h-2 bg-mosque rounded-full"></span>
+              <span className="material-symbols-outlined text-xl sm:text-2xl leading-none select-none flex items-center justify-center">
+                notifications
+              </span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-mosque rounded-full"></span>
             </button>
 
             {/* User Profile or Sign In Button */}
@@ -260,10 +264,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-nordic hover:text-mosque p-1.5 sm:p-2 rounded-md hover:bg-mosque/5 cursor-pointer"
+              className="md:hidden text-nordic hover:text-mosque w-9 h-9 sm:w-10 sm:h-10 rounded-lg hover:bg-mosque/5 flex items-center justify-center cursor-pointer flex-shrink-0"
               aria-label={t("nav.toggleMenuAria")}
             >
-              <span className="material-symbols-outlined text-2xl">
+              <span className="material-symbols-outlined text-2xl leading-none select-none flex items-center justify-center">
                 {mobileMenuOpen ? "close" : "menu"}
               </span>
             </button>

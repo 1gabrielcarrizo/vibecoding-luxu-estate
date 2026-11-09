@@ -613,13 +613,14 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
               {/* Star / Feature */}
               <button
                 onClick={() => handleToggleFeatured(item.id, item.isFeatured)}
-                className={`p-2 rounded-lg transition-all cursor-pointer ${item.isFeatured
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                  item.isFeatured
                     ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20"
                     : "text-gray-400 hover:text-amber-500 hover:bg-hint-green/30"
-                  }`}
+                }`}
                 title={item.isFeatured ? "Featured Property" : "Feature on Homepage"}
               >
-                <span className="material-icons text-xl">
+                <span className="material-icons text-xl leading-none select-none flex items-center justify-center">
                   {item.isFeatured ? "star" : "star_border"}
                 </span>
               </button>
@@ -627,10 +628,12 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
               {/* Edit */}
               <Link
                 href={`/admin/properties/${item.id}/edit`}
-                className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-hint-green/30 transition-all cursor-pointer"
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-primary hover:bg-hint-green/30 transition-all cursor-pointer"
                 title="Edit Property"
               >
-                <span className="material-icons text-xl">edit</span>
+                <span className="material-icons text-xl leading-none select-none flex items-center justify-center">
+                  edit
+                </span>
               </Link>
 
               {/* Activate / Deactivate (Evita eliminar de la base de datos) */}
@@ -638,7 +641,7 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
                 onClick={() =>
                   handleToggleActive(item.id, item.isActive !== false, item.title)
                 }
-                className={`p-2 rounded-lg transition-all cursor-pointer ${
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                   item.isActive === false
                     ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
                     : "text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
@@ -649,7 +652,7 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
                     : "Desactivar propiedad (ocultar de búsquedas y Home)"
                 }
               >
-                <span className="material-icons text-xl">
+                <span className="material-icons text-xl leading-none select-none flex items-center justify-center">
                   {item.isActive === false ? "visibility" : "visibility_off"}
                 </span>
               </button>

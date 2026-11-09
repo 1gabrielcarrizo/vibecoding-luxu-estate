@@ -999,7 +999,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                                     title="Mover a la izquierda"
                                     className="w-6 h-6 rounded bg-white/90 hover:bg-white text-nordic flex items-center justify-center transition-colors cursor-pointer"
                                   >
-                                    <span className="material-icons text-[14px]">arrow_back</span>
+                                    <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">arrow_back</span>
                                   </button>
                                 )}
                                 {index < images.length - 1 && (
@@ -1012,7 +1012,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                                     title="Mover a la derecha"
                                     className="w-6 h-6 rounded bg-white/90 hover:bg-white text-nordic flex items-center justify-center transition-colors cursor-pointer"
                                   >
-                                    <span className="material-icons text-[14px]">arrow_forward</span>
+                                    <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">arrow_forward</span>
                                   </button>
                                 )}
                               </div>
@@ -1028,7 +1028,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                                     title="Definir como Portada Principal"
                                     className="w-6 h-6 rounded bg-amber-400 hover:bg-amber-300 text-nordic flex items-center justify-center transition-colors cursor-pointer"
                                   >
-                                    <span className="material-icons text-[14px]">star</span>
+                                    <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">star</span>
                                   </button>
                                 )}
                                 <button
@@ -1040,7 +1040,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                                   title="Eliminar imagen"
                                   className="w-6 h-6 rounded bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition-colors cursor-pointer"
                                 >
-                                  <span className="material-icons text-[14px]">delete</span>
+                                  <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">delete</span>
                                 </button>
                               </div>
                             </div>

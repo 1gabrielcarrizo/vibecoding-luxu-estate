@@ -73,16 +73,21 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-nordic/40 hover:text-nordic p-1 rounded-full hover:bg-gray-100 transition-colors cursor-pointer flex-shrink-0"
+            aria-label={t("modals.close")}
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full hover:bg-gray-100 text-nordic/40 hover:text-nordic flex items-center justify-center transition-colors cursor-pointer flex-shrink-0"
           >
-            <span className="material-icons">close</span>
+            <span className="material-icons text-lg sm:text-xl leading-none select-none flex items-center justify-center">
+              close
+            </span>
           </button>
         </div>
 
         {isSent ? (
           <div className="py-6 sm:py-8 text-center space-y-4">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-mosque/10 text-mosque rounded-full mx-auto flex items-center justify-center">
-              <span className="material-icons text-2xl sm:text-3xl">mark_email_read</span>
+              <span className="material-icons text-2xl sm:text-3xl leading-none select-none flex items-center justify-center">
+                mark_email_read
+              </span>
             </div>
             <h4 className="text-lg sm:text-xl font-semibold text-nordic">
               {t("modals.contactSuccessTitle")}
@@ -132,10 +137,13 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
               <div className="ml-auto flex gap-2 flex-shrink-0">
                 <a
                   href={`tel:${agent.phone || "+15553498201"}`}
-                  className="p-2 rounded-full bg-white text-mosque shadow-xs hover:bg-mosque hover:text-white transition-colors"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white text-mosque shadow-xs hover:bg-mosque hover:text-white flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer"
                   title={t("propertyDetail.callAgent")}
+                  aria-label={t("propertyDetail.callAgent")}
                 >
-                  <span className="material-icons text-sm">call</span>
+                  <span className="material-icons text-sm sm:text-base leading-none select-none flex items-center justify-center">
+                    call
+                  </span>
                 </a>
               </div>
             </div>

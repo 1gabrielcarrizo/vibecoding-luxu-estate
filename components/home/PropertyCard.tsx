@@ -109,13 +109,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           type="button"
           onClick={handleFavoriteClick}
           aria-label={t("propertyCard.favoriteAria")}
-          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-colors z-10 cursor-pointer ${
+          className={`absolute top-3 right-3 w-9 h-9 sm:w-10 sm:h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 z-10 cursor-pointer shadow-sm hover:scale-105 active:scale-95 ${
             isFavorite
               ? "bg-mosque text-white"
               : "bg-white/90 text-nordic hover:bg-mosque hover:text-white"
           }`}
         >
-          <span className="material-icons text-lg leading-none block">
+          <span className="material-icons text-lg sm:text-xl leading-none select-none flex items-center justify-center">
             {isFavorite ? "favorite" : "favorite_border"}
           </span>
         </button>

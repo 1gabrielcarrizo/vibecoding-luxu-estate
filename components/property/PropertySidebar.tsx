@@ -94,24 +94,28 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
                 <span className="truncate">{roleText}</span>
               </div>
             </div>
-            <div className="ml-auto flex gap-1.5 sm:gap-2 flex-shrink-0">
+            <div className="ml-auto flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 title={t("propertyDetail.whatsappChat")}
                 aria-label={t("propertyDetail.whatsappChat")}
-                className="p-2 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors cursor-pointer"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center flex-shrink-0 shadow-xs hover:shadow-sm"
               >
-                <span className="material-icons text-sm">chat</span>
+                <span className="material-icons text-base sm:text-lg leading-none select-none flex items-center justify-center">
+                  chat
+                </span>
               </a>
               <a
                 href={`tel:${agent.phone || "+15553498201"}`}
                 title={t("propertyDetail.callAgent")}
                 aria-label={t("propertyDetail.callAgent")}
-                className="p-2 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors cursor-pointer"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center flex-shrink-0 shadow-xs hover:shadow-sm"
               >
-                <span className="material-icons text-sm">call</span>
+                <span className="material-icons text-base sm:text-lg leading-none select-none flex items-center justify-center">
+                  call
+                </span>
               </a>
             </div>
           </div>

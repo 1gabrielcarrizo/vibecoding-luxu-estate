@@ -132,18 +132,20 @@ export const AdminNav: React.FC<AdminNavProps> = ({
         <div className="flex items-center gap-2 sm:gap-4">
           <Link
             href="/#properties"
-            className="text-nordic/60 dark:text-gray-400 hover:text-primary transition-colors p-1"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-nordic/60 dark:text-gray-400 hover:text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             title="Search listings"
           >
-            <span className="material-symbols-outlined text-xl">search</span>
+            <span className="material-symbols-outlined text-xl leading-none select-none flex items-center justify-center">
+              search
+            </span>
           </Link>
 
           <button
             type="button"
-            className="text-nordic/60 dark:text-gray-400 hover:text-primary transition-colors relative p-1 cursor-pointer"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-nordic/60 dark:text-gray-400 hover:text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors relative cursor-pointer"
             title="Notifications"
           >
-            <span className="material-symbols-outlined text-xl">
+            <span className="material-symbols-outlined text-xl leading-none select-none flex items-center justify-center">
               notifications
             </span>
             <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#152e2a]" />
