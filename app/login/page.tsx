@@ -37,7 +37,10 @@ function LoginContent() {
       setLoadingProvider("google");
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
-      const redirectTarget = `${origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`;
+      const redirectTarget =
+        nextUrl && nextUrl !== "/"
+          ? `${origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`
+          : `${origin}/auth/callback`;
 
       const { error } = await signInWithGoogle(redirectTarget);
       if (error) {
@@ -56,7 +59,10 @@ function LoginContent() {
       setLoadingProvider("github");
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
-      const redirectTarget = `${origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`;
+      const redirectTarget =
+        nextUrl && nextUrl !== "/"
+          ? `${origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`
+          : `${origin}/auth/callback`;
 
       const { error } = await signInWithGithub(redirectTarget);
       if (error) {
