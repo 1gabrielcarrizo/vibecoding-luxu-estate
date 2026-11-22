@@ -34,6 +34,8 @@ export async function setPropertyFeaturedAction(
 ) {
   const updated = await setPropertyFeaturedStatus(propertyId, isFeatured);
   revalidatePath("/");
+  revalidatePath("/favorites");
+  revalidatePath("/profile");
   revalidatePath("/admin/properties");
   return updated;
 }
@@ -56,6 +58,8 @@ export async function createPropertyAction(
   try {
     const created = await createProperty(data);
     revalidatePath("/");
+    revalidatePath("/favorites");
+    revalidatePath("/profile");
     revalidatePath("/admin/properties");
     if (created.slug) {
       revalidatePath(`/propiedades/${created.slug}`);
@@ -80,6 +84,8 @@ export async function updatePropertyAction(
   try {
     const updated = await updateProperty(id, data);
     revalidatePath("/");
+    revalidatePath("/favorites");
+    revalidatePath("/profile");
     revalidatePath("/admin/properties");
     if (updated.slug) {
       revalidatePath(`/propiedades/${updated.slug}`);
@@ -104,6 +110,8 @@ export async function togglePropertyActiveAction(
   try {
     const updated = await togglePropertyActiveStatus(propertyId, isActive);
     revalidatePath("/");
+    revalidatePath("/favorites");
+    revalidatePath("/profile");
     revalidatePath("/admin");
     revalidatePath("/admin/properties");
     if (updated?.slug) {

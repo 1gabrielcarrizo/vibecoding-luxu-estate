@@ -407,7 +407,11 @@
     "agentMessageTitle": "Message envoyé au conseiller",
     "agentMessageBody": "Votre demande concernant {title} a été transmise à {agent}.",
     "sellRequestTitle": "Demande d'estimation envoyée",
-    "sellRequestMessage": "Nous avons bien reçu votre demande pour {type} à {location}. Un conseiller vous contactera rapidement."
+    "sellRequestMessage": "Nous avons bien reçu votre demande pour {type} à {location}. Un conseiller vous contactera rapidement.",
+    "priceDropTitle": "Baisse de prix sur un favori !",
+    "priceDropMessage": "{title} est passé de {oldPrice} à {newPrice}.",
+    "newPropertyTitle": "Nouvelle propriété disponible",
+    "newPropertyMessage": "{title} à {location} ({price})."
   },
   "sellModal": {
     "title": "Vendre ou Louer votre Bien",

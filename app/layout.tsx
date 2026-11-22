@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/supabase/AuthContext";
 import { FavoritesProvider } from "@/lib/favorites/FavoritesContext";
 import { VisitsProvider } from "@/lib/visits/VisitsContext";
 import { NotificationsProvider } from "@/lib/notifications/NotificationsContext";
+import { RealtimeAlertsBridge } from "@/components/common/RealtimeAlertsBridge";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -64,7 +65,10 @@ export default function RootLayout({
           <AuthProvider>
             <FavoritesProvider>
               <VisitsProvider>
-                <NotificationsProvider>{children}</NotificationsProvider>
+                <NotificationsProvider>
+                  <RealtimeAlertsBridge />
+                  {children}
+                </NotificationsProvider>
               </VisitsProvider>
             </FavoritesProvider>
           </AuthProvider>

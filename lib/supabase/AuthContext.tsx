@@ -158,6 +158,48 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [fetchUserRole]);
 
+  // Real-time role synchronization when an admin updates this user's role
+  useEffect(() => {
+    if (!user?.id || typeof window === "undefined") return;
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    try {
+      channel = supabase
+        .channel(`rt-own-role-${user.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "user_roles",
+            filter: `id=eq.${user.id}`,
+          },
+          (payload) => {
+            const nextRole = (payload.new as { role?: UserRole } | undefined)
+              ?.role;
+            if (nextRole) {
+              setRole(nextRole);
+            } else {
+              fetchUserRole(user);
+            }
+          }
+        )
+        .subscribe();
+    } catch {
+      // Fail-safe: keep working without realtime
+    }
+
+    return () => {
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch {
+          // ignore cleanup errors
+        }
+      }
+    };
+  }, [user, fetchUserRole]);
+
   const signInWithGoogle = async (redirectToUrl?: string) => {
     const origin =
       typeof window !== "undefined"

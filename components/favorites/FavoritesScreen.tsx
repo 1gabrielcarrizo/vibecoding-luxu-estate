@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Property } from "@/types/property";
 import { Navbar } from "@/components/common/Navbar";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { useFavorites } from "@/lib/favorites/FavoritesContext";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
+import { useRealtimeTableSync } from "@/lib/supabase/useRealtimeSync";
 import { FavoritePropertyCard } from "./FavoritePropertyCard";
 import { FavoritesSkeleton } from "./FavoritesSkeleton";
 
@@ -20,8 +22,19 @@ interface FavoritesScreenProps {
 export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
   allProperties,
 }) => {
+  const router = useRouter();
   const { t, locale } = useTranslation();
   const { favorites, isHydrated, removeFavorite, addFavorite } = useFavorites();
+
+  const handleRealtimeRefresh = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
+  useRealtimeTableSync({
+    table: "properties",
+    debounceMs: 400,
+    onEvent: handleRealtimeRefresh,
+  });
 
   const [sortBy, setSortBy] = useState<SortOption>("date_desc");
   const [isSortOpen, setIsSortOpen] = useState(false);

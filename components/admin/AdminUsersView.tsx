@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useTransition, useMemo, useEffect } from "react";
+import React, { useState, useTransition, useMemo, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { UserRole, UserRoleRow } from "@/types/database.types";
 import {
   updateUserRoleAction,
   assignRoleByEmailAction,
 } from "@/app/actions/roles";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { useRealtimeTableSync } from "@/lib/supabase/useRealtimeSync";
 
 interface DirectoryUserItem {
   id: string;
@@ -100,6 +102,7 @@ interface AdminUsersViewProps {
 export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   initialUsers = [],
 }) => {
+  const router = useRouter();
   const { t } = useTranslation();
 
   // State
@@ -158,8 +161,39 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isAddUserModalOpen]);
 
-  // Merge database users with template users
-  const [userList, setUserList] = useState<DirectoryUserItem[]>(() => {
+  const [userOverrides, setUserOverrides] = useState<
+    Record<string, Partial<DirectoryUserItem>>
+  >({});
+  const [addedUsers, setAddedUsers] = useState<DirectoryUserItem[]>([]);
+
+  // Real-time synchronization across admin sessions when user_roles changes
+  const handleRealtimeUserRolesChange = useCallback(
+    (payload: { new?: Record<string, unknown>; old?: Record<string, unknown> }) => {
+      const changedDbId =
+        (typeof payload.new?.id === "string" && payload.new.id) ||
+        (typeof payload.old?.id === "string" && payload.old.id) ||
+        null;
+
+      if (changedDbId) {
+        setUserOverrides((prev) => {
+          const next = { ...prev };
+          delete next[changedDbId];
+          return next;
+        });
+      }
+      router.refresh();
+    },
+    [router]
+  );
+
+  useRealtimeTableSync({
+    table: "user_roles",
+    debounceMs: 350,
+    onEvent: handleRealtimeUserRolesChange,
+  });
+
+  // Merge database users with template users + optimistic local overrides
+  const userList = useMemo<DirectoryUserItem[]>(() => {
     const mappedDbUsers: DirectoryUserItem[] = initialUsers.map((u, idx) => {
       const email = u.email || "user@example.com";
       const shortId = u.id.slice(0, 4).toUpperCase();
@@ -185,18 +219,30 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       };
     });
 
-    if (mappedDbUsers.length > 0) {
-      const existingEmails = new Set(
-        mappedDbUsers.map((u) => u.email.toLowerCase())
-      );
-      const remainingTemplates = TEMPLATE_USERS.filter(
-        (tmpl) => !existingEmails.has(tmpl.email.toLowerCase())
-      );
-      return [...mappedDbUsers, ...remainingTemplates];
-    }
+    const baseList =
+      mappedDbUsers.length > 0
+        ? [
+            ...mappedDbUsers,
+            ...TEMPLATE_USERS.filter(
+              (tmpl) =>
+                !mappedDbUsers.some(
+                  (u) => u.email.toLowerCase() === tmpl.email.toLowerCase()
+                )
+            ),
+          ]
+        : TEMPLATE_USERS;
 
-    return TEMPLATE_USERS;
-  });
+    const existingEmails = new Set(baseList.map((u) => u.email.toLowerCase()));
+    const merged = [
+      ...addedUsers.filter((u) => !existingEmails.has(u.email.toLowerCase())),
+      ...baseList,
+    ];
+
+    return merged.map((u) => {
+      const key = u.dbId || u.id;
+      return userOverrides[key] ? { ...u, ...userOverrides[key] } : u;
+    });
+  }, [initialUsers, addedUsers, userOverrides]);
 
   const getRoleDisplayLabel = (role: string): string => {
     if (role === "admin") return t("admin.users.roles.admin");
@@ -248,18 +294,15 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
           ? "user"
           : "agent";
 
-    setUserList((prev) =>
-      prev.map((u) => {
-        if (u.id === targetUser.id) {
-          return {
-            ...u,
-            role: chosenRole,
-            status: chosenRole === "suspended" ? "Inactive" : u.status,
-          };
-        }
-        return u;
-      })
-    );
+    const overrideKey = targetUser.dbId || targetUser.id;
+    setUserOverrides((prev) => ({
+      ...prev,
+      [overrideKey]: {
+        ...prev[overrideKey],
+        role: chosenRole,
+        status: chosenRole === "suspended" ? "Inactive" : targetUser.status,
+      },
+    }));
 
     const localizedRole = getRoleDisplayLabel(chosenRole);
 
@@ -323,7 +366,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
         const newId = `USR-${Math.floor(1000 + Math.random() * 9000)}`;
         const namePart = newEmail.split("@")[0];
-        setUserList((prev) => [
+        setAddedUsers((prev) => [
           {
             id: newId,
             name: namePart.charAt(0).toUpperCase() + namePart.slice(1),

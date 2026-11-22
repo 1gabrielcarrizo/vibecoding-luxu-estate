@@ -12,6 +12,7 @@ import { MortgageCalculatorSection } from "@/components/property/MortgageCalcula
 import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { PropertyJsonLd } from "@/components/property/PropertyJsonLd";
 import { PropertyBreadcrumb } from "@/components/property/PropertyBreadcrumb";
+import { PropertyRealtimeListener } from "@/components/property/PropertyRealtimeListener";
 
 interface PropertyPageProps {
   params: Promise<{
@@ -102,6 +103,9 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
   return (
     <div className="min-h-screen bg-clear-day text-nordic selection:bg-mosque/20 font-display flex flex-col">
+      {/* Real-time updates for this property */}
+      <PropertyRealtimeListener propertyId={property.id} />
+
       {/* Schema.org Structured Data */}
       <PropertyJsonLd property={property} />
 

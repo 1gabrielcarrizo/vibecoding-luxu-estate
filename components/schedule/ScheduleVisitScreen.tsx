@@ -9,6 +9,7 @@ import { defaultAgent } from "@/data/mockData";
 import { Navbar } from "@/components/common/Navbar";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { ContactAgentModal } from "@/components/property/ContactAgentModal";
+import { PropertyRealtimeListener } from "@/components/property/PropertyRealtimeListener";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/lib/supabase/AuthContext";
 import { useVisits } from "@/lib/visits/VisitsContext";
@@ -303,6 +304,7 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
 
   return (
     <div className="bg-clear-day min-h-screen flex flex-col antialiased selection:bg-mosque/20 selection:text-mosque font-display text-nordic">
+      <PropertyRealtimeListener propertyId={property.id} />
       <Navbar isDetailPage={true} />
 
       <main className="flex-grow flex flex-col items-center py-8 px-4 md:px-8">

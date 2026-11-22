@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Property } from "@/types/property";
 import {
   setPropertyFeaturedAction,
@@ -9,6 +10,7 @@ import {
 } from "@/app/actions/properties";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
+import { useRealtimeTableSync } from "@/lib/supabase/useRealtimeSync";
 
 interface AdminPropertiesViewProps {
   initialProperties?: Property[];
@@ -156,6 +158,7 @@ function mapPropertiesToDisplay(props: Property[]): PropertyItemDisplay[] {
 export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
   initialProperties = [],
 }) => {
+  const router = useRouter();
   const { t, locale } = useTranslation();
 
   // Filters & Search
@@ -181,6 +184,33 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
   const [overrides, setOverrides] = useState<
     Record<string, Partial<PropertyItemDisplay>>
   >({});
+
+  // Real-time synchronization across admin sessions when any property changes
+  const handleRealtimePropertyChange = useCallback(
+    (payload: { new?: Record<string, unknown>; old?: Record<string, unknown> }) => {
+      const changedId =
+        (typeof payload.new?.id === "string" && payload.new.id) ||
+        (typeof payload.old?.id === "string" && payload.old.id) ||
+        null;
+
+      if (changedId) {
+        setOverrides((prev) => {
+          if (!(changedId in prev)) return prev;
+          const next = { ...prev };
+          delete next[changedId];
+          return next;
+        });
+      }
+      router.refresh();
+    },
+    [router]
+  );
+
+  useRealtimeTableSync({
+    table: "properties",
+    debounceMs: 350,
+    onEvent: handleRealtimePropertyChange,
+  });
 
   const propertyList = useMemo(() => {
     const base = mapPropertiesToDisplay(initialProperties);

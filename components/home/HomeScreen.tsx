@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition, useEffect, useMemo, useRef } from "react";
+import React, { useState, useTransition, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/common/Navbar";
 import { HeroSection } from "@/components/home/HeroSection";
@@ -11,6 +11,7 @@ import { PaginationResult } from "@/types/pagination";
 import { fetchPropertiesAction } from "@/app/actions/properties";
 import { SearchFiltersModal, FilterState } from "@/components/home/SearchFiltersModal";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
+import { useRealtimeTableSync } from "@/lib/supabase/useRealtimeSync";
 
 interface HomeScreenProps {
   initialFeaturedProperties: Property[];
@@ -91,6 +92,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       router.replace(qs ? `/?${qs}` : "/", { scroll: false });
     }
   }, [searchParams, router]);
+
+  // Real-time synchronization when any property is created, edited, featured, or deactivated
+  const handleRealtimePropertiesChange = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
+  useRealtimeTableSync({
+    table: "properties",
+    debounceMs: 400,
+    onEvent: handleRealtimePropertiesChange,
+  });
 
   // Sync state when props change (e.g. back/forward navigation or server re-render)
   useEffect(() => {

@@ -13,6 +13,7 @@ import { useVisits, ScheduledVisit } from "@/lib/visits/VisitsContext";
 import { useNotifications } from "@/lib/notifications/NotificationsContext";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
+import { useRealtimeTableSync } from "@/lib/supabase/useRealtimeSync";
 
 type ProfileTab = "saved" | "visits" | "settings";
 
@@ -114,6 +115,16 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
     removeVisit,
   } = useVisits();
   const { addNotification } = useNotifications();
+
+  const handleRealtimeRefresh = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
+  useRealtimeTableSync({
+    table: "properties",
+    debounceMs: 400,
+    onEvent: handleRealtimeRefresh,
+  });
 
   const tabFromUrl = searchParams.get("tab");
   const urlTab: ProfileTab =

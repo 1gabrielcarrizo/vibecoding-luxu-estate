@@ -407,7 +407,11 @@
     "agentMessageTitle": "Mensaje enviado al asesor",
     "agentMessageBody": "Tu consulta sobre {title} fue enviada a {agent}.",
     "sellRequestTitle": "Solicitud de tasación enviada",
-    "sellRequestMessage": "Recibimos tu solicitud para {type} en {location}. Un asesor te contactará pronto."
+    "sellRequestMessage": "Recibimos tu solicitud para {type} en {location}. Un asesor te contactará pronto.",
+    "priceDropTitle": "¡Bajada de precio en favorito!",
+    "priceDropMessage": "{title} bajó de {oldPrice} a {newPrice}.",
+    "newPropertyTitle": "Nueva propiedad disponible",
+    "newPropertyMessage": "{title} en {location} ({price})."
   },
   "sellModal": {
     "title": "Vende o Alquila tu Propiedad",

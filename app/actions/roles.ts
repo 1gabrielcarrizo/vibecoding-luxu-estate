@@ -151,6 +151,7 @@ export async function updateUserRoleAction(
     }
 
     revalidatePath("/admin");
+    revalidatePath("/admin/users");
     return { success: true };
   } catch (err: any) {
     console.error("Unexpected error in updateUserRoleAction:", err);

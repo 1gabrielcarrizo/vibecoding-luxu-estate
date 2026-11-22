@@ -407,7 +407,11 @@
     "agentMessageTitle": "Message sent to advisor",
     "agentMessageBody": "Your inquiry about {title} was delivered to {agent}.",
     "sellRequestTitle": "Valuation request received",
-    "sellRequestMessage": "We received your {type} listing request in {location}. An advisor will contact you soon."
+    "sellRequestMessage": "We received your {type} listing request in {location}. An advisor will contact you soon.",
+    "priceDropTitle": "Price drop on saved home!",
+    "priceDropMessage": "{title} dropped from {oldPrice} to {newPrice}.",
+    "newPropertyTitle": "New property available",
+    "newPropertyMessage": "{title} in {location} ({price})."
   },
   "sellModal": {
     "title": "Sell or Lease Your Property",
