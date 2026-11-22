@@ -237,6 +237,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                     <div className="py-1">
                       <Link
+                        href="/profile"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-nordic hover:bg-mosque/5 hover:text-mosque flex items-center gap-2 cursor-pointer transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-lg text-mosque">
+                          person
+                        </span>
+                        <span>{t("nav.myProfile")}</span>
+                      </Link>
+                      <Link
                         href="/favorites"
                         onClick={() => setProfileDropdownOpen(false)}
                         className="w-full text-left px-4 py-2 text-sm text-nordic hover:bg-mosque/5 hover:text-mosque flex items-center justify-between gap-2 cursor-pointer transition-colors"
@@ -365,6 +375,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </p>
                   </div>
                 </div>
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-left px-3 py-2 text-sm text-nordic font-medium hover:bg-mosque/5 hover:text-mosque rounded-md flex items-center gap-2 cursor-pointer mb-1"
+                >
+                  <span className="material-symbols-outlined text-lg text-mosque">
+                    person
+                  </span>
+                  <span>{t("nav.myProfile")}</span>
+                </Link>
                 {isAdmin && (
                   <Link
                     href="/admin"

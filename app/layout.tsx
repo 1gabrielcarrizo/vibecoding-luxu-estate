@@ -3,6 +3,7 @@ import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { AuthProvider } from "@/lib/supabase/AuthContext";
 import { FavoritesProvider } from "@/lib/favorites/FavoritesContext";
+import { VisitsProvider } from "@/lib/visits/VisitsContext";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -60,7 +61,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background-light text-nordic-dark font-display antialiased selection:bg-mosque selection:text-white">
         <LanguageProvider>
           <AuthProvider>
-            <FavoritesProvider>{children}</FavoritesProvider>
+            <FavoritesProvider>
+              <VisitsProvider>{children}</VisitsProvider>
+            </FavoritesProvider>
           </AuthProvider>
         </LanguageProvider>
       </body>

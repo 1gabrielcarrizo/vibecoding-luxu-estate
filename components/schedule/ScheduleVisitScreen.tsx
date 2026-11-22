@@ -11,6 +11,7 @@ import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { ContactAgentModal } from "@/components/property/ContactAgentModal";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/lib/supabase/AuthContext";
+import { useVisits } from "@/lib/visits/VisitsContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
 
 interface ScheduleVisitScreenProps {
@@ -53,6 +54,7 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
   const router = useRouter();
   const { t, locale } = useTranslation();
   const { displayName } = useAuth();
+  const { addVisit } = useVisits();
 
   const today = useMemo(() => parseIsoDate(initialTodayIso), [initialTodayIso]);
   const defaultSelected = useMemo(() => addDays(today, 1), [today]);
@@ -222,6 +224,19 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
 
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
+    addVisit({
+      propertyId: property.id,
+      propertySlug: property.slug,
+      propertyTitle: property.title,
+      propertyLocation: property.location,
+      propertyImage: primaryImage,
+      agentName: agent.name,
+      dateIso: selectedIso,
+      timeSlot: selectedTime,
+      message: message.trim() || undefined,
+      lat: property.coordinates?.lat,
+      lng: property.coordinates?.lng,
+    });
     setIsConfirmed(true);
   };
 
