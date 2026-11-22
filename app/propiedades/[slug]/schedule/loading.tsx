@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/common/Navbar";
+import { PropertyFooter } from "@/components/property/PropertyFooter";
 
 export default function ScheduleVisitLoading() {
   return (
@@ -41,6 +42,7 @@ export default function ScheduleVisitLoading() {
           </div>
         </div>
       </main>
+      <PropertyFooter />
     </div>
   );
 }

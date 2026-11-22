@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Property } from "@/types/property";
 import { defaultAgent } from "@/data/mockData";
 import { Navbar } from "@/components/common/Navbar";
+import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { ContactAgentModal } from "@/components/property/ContactAgentModal";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/lib/supabase/AuthContext";
@@ -680,23 +681,7 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
         </div>
       </main>
 
-      {/* Minimalist Centered Footer matching schedule_visit_screen/code.html */}
-      <footer className="py-8 text-center text-nordic/40 text-xs">
-        <div className="flex items-center justify-center gap-4 mb-4">
-          <Link className="hover:text-mosque transition-colors" href="#">
-            {t("footer.privacy")}
-          </Link>
-          <span className="w-1 h-1 bg-slate-300 rounded-full" />
-          <Link className="hover:text-mosque transition-colors" href="#">
-            {t("footer.terms")}
-          </Link>
-          <span className="w-1 h-1 bg-slate-300 rounded-full" />
-          <Link className="hover:text-mosque transition-colors" href="#">
-            {t("scheduleVisit.support")}
-          </Link>
-        </div>
-        <p>{t("footer.rights")}</p>
-      </footer>
+      <PropertyFooter />
 
       {/* Agent Contact Modal from the left panel chat button */}
       <ContactAgentModal
