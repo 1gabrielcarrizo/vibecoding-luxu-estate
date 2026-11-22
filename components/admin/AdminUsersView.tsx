@@ -1,8 +1,12 @@
 "use client";
 
-import React, { useState, useTransition, useMemo } from "react";
+import React, { useState, useTransition, useMemo, useEffect } from "react";
 import { UserRole, UserRoleRow } from "@/types/database.types";
-import { updateUserRoleAction, assignRoleByEmailAction } from "@/app/actions/roles";
+import {
+  updateUserRoleAction,
+  assignRoleByEmailAction,
+} from "@/app/actions/roles";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface DirectoryUserItem {
   id: string;
@@ -10,12 +14,11 @@ interface DirectoryUserItem {
   name: string;
   email: string;
   avatar: string;
-  role: "admin" | "broker" | "agent" | "user" | string;
-  roleLabel: string;
+  role: "admin" | "broker" | "agent" | "user" | "suspended" | string;
   status: "Active" | "Away" | "Inactive";
   statusDot?: "green" | "yellow";
   propertiesCount: string | number;
-  secondaryStatLabel: string;
+  secondaryStatKey: "salesYtd" | "accessLevel" | "lastLogin";
   secondaryStatValue: string;
   isHighlighted?: boolean;
   isGrayscale?: boolean;
@@ -29,11 +32,10 @@ const TEMPLATE_USERS: DirectoryUserItem[] = [
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuC56qX3A4ZIRCJqxha17327kptmQpANrrIT6CLj09DTQ7ZLjB0fF9cMlC1MCJKAs3hr5oUDilNrCcdzUdLAZtwX25YQblIBzVpUSa4XfyFc_WJDGvW0T1svVr884aNmze31Cl_2UkKik03EROGXyke1i6PuTAZaAtf8yMN8xLPJIAdQ5Gc1m_SqkCpADlwXPZ8fL-BWzj4Ck3PpZ1GjAGsyq9Ul9L3SmH_UnJzI-NbipFCmtQI2JJiB0TiUhogRjIBNn8TCUkubVhs",
     role: "broker",
-    roleLabel: "Senior Broker",
     status: "Active",
     statusDot: "green",
     propertiesCount: "24",
-    secondaryStatLabel: "Sales (YTD)",
+    secondaryStatKey: "salesYtd",
     secondaryStatValue: "$4.2M",
     isHighlighted: true,
   },
@@ -44,10 +46,9 @@ const TEMPLATE_USERS: DirectoryUserItem[] = [
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuD6y5hdg1R7gLFSihyqty_LGTd8uQTZHpyo_det0XoV6ak0U5H9xxuTlfFTXPP3vX9dhpeIETDGBcowSSiDyHVTXQm_0Xv8KXRj-n2PLGHHBlmSsYSxlZPErAGQSycUYUlDT1FNqac9hxwpfwQ3MjO4tdj7q9Pmb8WHgzBaOMain4vzaZbThFi3Hg9-qkhofOnAi7hJ1JD3EgK6Zu5iWLE8NDph0Uhd8iHYZHNUfUzBfJN1E6NRB2EKwbx7MmgWloP-YysiRt4IfrE",
     role: "agent",
-    roleLabel: "Agent",
     status: "Away",
     propertiesCount: "8",
-    secondaryStatLabel: "Sales (YTD)",
+    secondaryStatKey: "salesYtd",
     secondaryStatValue: "$1.8M",
   },
   {
@@ -57,11 +58,10 @@ const TEMPLATE_USERS: DirectoryUserItem[] = [
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBxUenMO4Re0naHHGO3GB46gBwyGMA7GYH5XNQVi86xJtOVYUNoL1nn8Q65pwWZkyLQdR_vB2N8mOuxFtLT6blCwOerfNuVqSeqTpdrustLAO7-HYwjC_83sTmfBsuSmMXUPTAZub0b8Tgo2uGzoPZ2i98s_taTX232u4UPVO3NybNwYhzYw8FhvhRPAFvcI-QWnVtQO820Eex8lc8BoMd_fWRl3S6oU4opRnz9HCQOB15l5se_ousKRtbZcFE1JqcjKn1T1PrbGOE",
     role: "admin",
-    roleLabel: "Administrator",
     status: "Active",
     statusDot: "yellow",
     propertiesCount: "-",
-    secondaryStatLabel: "Access Level",
+    secondaryStatKey: "accessLevel",
     secondaryStatValue: "Level 5",
   },
   {
@@ -71,12 +71,11 @@ const TEMPLATE_USERS: DirectoryUserItem[] = [
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuB9R6zvnu8j58sG4eUwo-9f00NJRnaHJllOxtW7NfLtjJiAJS9xgpRhQlnDfEULT1ntyQ00kNW93vDfqmwYwX1RCQPYBbvhlrs2VOAtipQyTT3C6te7SH_slUUdDRloL7IVp9QUnB8Ivo76jM9GbGTSedRCNENz2EG_QljoMFfWvhKp0s43vQePPAzlx8RC8KtwYuwd8ToaZVZxa2XoxnstlCppJhDJRvw5Ou981GU62MElNMA1fzr6yjX_QN1QSgdX--GMTBTb22I",
     role: "user",
-    roleLabel: "Viewer",
     status: "Inactive",
     isGrayscale: true,
     propertiesCount: "0",
-    secondaryStatLabel: "Last Login",
-    secondaryStatValue: "2mo ago",
+    secondaryStatKey: "lastLogin",
+    secondaryStatValue: "2mo",
   },
   {
     id: "USR-9942",
@@ -85,10 +84,9 @@ const TEMPLATE_USERS: DirectoryUserItem[] = [
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAg2jyeiLRo7sss3zX5bvvLWpJNUabZqBCz9HIWx2jcHtvG5KfoaquiQRmwZWTLpD4Rr3jS3iRzWjTa0VLibUkWK_MxV6fzcMISmS1SEsNldZilln2O3A6992ZnLgEiD8ASlQ1cFmc-XvY1X7sK_3pBGUWYHWWutX34hxrAZ-HsCMlmBgatcSpPiTXo4ICkrQ7uSf490A6Bxx60h1ac_QZQl46jo1CciIMS6fFu2O2ZozSmTaFlwiOWhN1vo5n4gXQ0gjh785OlBLQ",
     role: "agent",
-    roleLabel: "Agent",
     status: "Active",
     propertiesCount: "14",
-    secondaryStatLabel: "Sales (YTD)",
+    secondaryStatKey: "salesYtd",
     secondaryStatValue: "$3.1M",
   },
 ];
@@ -101,8 +99,9 @@ interface AdminUsersViewProps {
 
 export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   initialUsers = [],
-  currentUserId,
 }) => {
+  const { t } = useTranslation();
+
   // State
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<
@@ -129,9 +128,38 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
     setTimeout(() => setToast(null), 4000);
   };
 
+  // Close role dropdown on outside click or Escape
+  useEffect(() => {
+    if (!openDropdownId) return;
+    const handlePointerDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest("[data-role-dropdown]")) {
+        setOpenDropdownId(null);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenDropdownId(null);
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [openDropdownId]);
+
+  // Close Add User modal on Escape
+  useEffect(() => {
+    if (!isAddUserModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsAddUserModalOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isAddUserModalOpen]);
+
   // Merge database users with template users
   const [userList, setUserList] = useState<DirectoryUserItem[]>(() => {
-    // Map database users
     const mappedDbUsers: DirectoryUserItem[] = initialUsers.map((u, idx) => {
       const email = u.email || "user@example.com";
       const shortId = u.id.slice(0, 4).toUpperCase();
@@ -145,33 +173,24 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         id: `USR-${shortId}`,
         dbId: u.id,
         name: capitalizedName || `User ${shortId}`,
-        email: email,
-        avatar:
-          TEMPLATE_USERS[idx % TEMPLATE_USERS.length].avatar,
+        email,
+        avatar: TEMPLATE_USERS[idx % TEMPLATE_USERS.length].avatar,
         role: u.role,
-        roleLabel:
-          u.role === "admin"
-            ? "Administrator"
-            : u.role === "agent"
-            ? "Agent"
-            : "Viewer",
         status: "Active",
         statusDot: u.role === "admin" ? "yellow" : "green",
         propertiesCount: u.role === "agent" ? 12 : "-",
-        secondaryStatLabel:
-          u.role === "admin" ? "Access Level" : "Sales (YTD)",
+        secondaryStatKey: u.role === "admin" ? "accessLevel" : "salesYtd",
         secondaryStatValue: u.role === "admin" ? "Level 5" : "$2.4M",
         isHighlighted: idx === 0,
       };
     });
 
-    // If there are real users in DB, merge with template users avoiding email duplicates
     if (mappedDbUsers.length > 0) {
       const existingEmails = new Set(
         mappedDbUsers.map((u) => u.email.toLowerCase())
       );
       const remainingTemplates = TEMPLATE_USERS.filter(
-        (t) => !existingEmails.has(t.email.toLowerCase())
+        (tmpl) => !existingEmails.has(tmpl.email.toLowerCase())
       );
       return [...mappedDbUsers, ...remainingTemplates];
     }
@@ -179,22 +198,28 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
     return TEMPLATE_USERS;
   });
 
+  const getRoleDisplayLabel = (role: string): string => {
+    if (role === "admin") return t("admin.users.roles.admin");
+    if (role === "broker") return t("admin.users.roles.broker");
+    if (role === "agent") return t("admin.users.roles.agent");
+    if (role === "suspended") return t("admin.users.roles.suspended");
+    return t("admin.users.roles.user");
+  };
+
   // Filtered users
   const filteredUsers = useMemo(() => {
     return userList.filter((user) => {
-      // Search filter
       const matchesSearch =
         searchQuery.trim() === "" ||
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.id.toLowerCase().includes(searchQuery.toLowerCase());
 
-      // Tab filter
       let matchesTab = true;
       if (activeTab === "Agents") {
         matchesTab = user.role === "agent";
       } else if (activeTab === "Brokers") {
-        matchesTab = user.role === "broker" || user.roleLabel.toLowerCase().includes("broker");
+        matchesTab = user.role === "broker";
       } else if (activeTab === "Admins") {
         matchesTab = user.role === "admin";
       }
@@ -207,10 +232,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   const totalUsers = filteredUsers.length;
   const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize));
   const startIndex = (currentPage - 1) * pageSize;
-  const paginatedUsers = filteredUsers.slice(
-    startIndex,
-    startIndex + pageSize
-  );
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + pageSize);
 
   // Role change handler
   const handleRoleChange = async (
@@ -219,31 +241,19 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   ) => {
     setOpenDropdownId(null);
 
-    // Map role to valid DB UserRole
     const dbRole: UserRole =
       chosenRole === "admin"
         ? "admin"
         : chosenRole === "user" || chosenRole === "suspended"
-        ? "user"
-        : "agent";
+          ? "user"
+          : "agent";
 
-    // Optimistic UI update
     setUserList((prev) =>
       prev.map((u) => {
         if (u.id === targetUser.id) {
           return {
             ...u,
             role: chosenRole,
-            roleLabel:
-              chosenRole === "admin"
-                ? "Administrator"
-                : chosenRole === "broker"
-                ? "Senior Broker"
-                : chosenRole === "agent"
-                ? "Agent"
-                : chosenRole === "suspended"
-                ? "Suspended"
-                : "Viewer",
             status: chosenRole === "suspended" ? "Inactive" : u.status,
           };
         }
@@ -251,25 +261,35 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       })
     );
 
-    // If target has a real Supabase DB id, execute Server Action
+    const localizedRole = getRoleDisplayLabel(chosenRole);
+
     if (targetUser.dbId) {
       try {
         const res = await updateUserRoleAction(targetUser.dbId, dbRole);
         if (res.success) {
           showToast(
             "success",
-            `Role updated for ${targetUser.name} to ${chosenRole}.`
+            t("admin.users.toastRoleUpdated", {
+              name: targetUser.name,
+              role: localizedRole,
+            })
           );
         } else {
-          showToast("error", res.error || "Failed to update role in database.");
+          showToast("error", res.error || t("admin.users.toastRoleError"));
         }
-      } catch (err: any) {
-        showToast("error", err?.message || "Error updating role.");
+      } catch (err: unknown) {
+        showToast(
+          "error",
+          err instanceof Error ? err.message : t("admin.users.toastRoleError")
+        );
       }
     } else {
       showToast(
         "success",
-        `Role for ${targetUser.name} changed to ${chosenRole}.`
+        t("admin.users.toastRoleUpdated", {
+          name: targetUser.name,
+          role: localizedRole,
+        })
       );
     }
   };
@@ -281,17 +301,26 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
     startAssignTransition(async () => {
       try {
+        const localizedRole = getRoleDisplayLabel(newRole);
         const res = await assignRoleByEmailAction(newEmail, newRole);
         if (res.success) {
-          showToast("success", `Role ${newRole} assigned to ${newEmail}`);
+          showToast(
+            "success",
+            t("admin.users.toastUserAssigned", {
+              role: localizedRole,
+              email: newEmail,
+            })
+          );
         } else {
           showToast(
             "success",
-            `User invitation registered for ${newEmail} as ${newRole}.`
+            t("admin.users.toastUserInvited", {
+              email: newEmail,
+              role: localizedRole,
+            })
           );
         }
 
-        // Add to local state as well
         const newId = `USR-${Math.floor(1000 + Math.random() * 9000)}`;
         const namePart = newEmail.split("@")[0];
         setUserList((prev) => [
@@ -302,16 +331,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
             avatar:
               "https://lh3.googleusercontent.com/aida-public/AB6AXuBhLuM9qNltZNxgIWPtC3dVxQ_JLFKXYB9d_klGFux_2JVOGtRlbV4GvpvdT4wqpsueZnXFQhKJe9MGGvM6rXQX15iv80mbEKxjmy4X14AZRqvp573ZlKYDN9bAb0ka7B-g5mkOCP6nRuKC9QsO02JVq6gqZeAo3-7dUurVhhgPJGeuL0Gk2Cp3Wnu5mVlUtpajB2wtx8uMoytbh78i9RmHYtJg52ZELl9XdIC9f5Kix_lFMFoi6Ru61ARrEGIrvgvz4ViiKhufTns",
             role: newRole,
-            roleLabel:
-              newRole === "admin"
-                ? "Administrator"
-                : newRole === "agent"
-                ? "Agent"
-                : "Viewer",
             status: "Active",
             statusDot: "green",
             propertiesCount: 0,
-            secondaryStatLabel: "Sales (YTD)",
+            secondaryStatKey: "salesYtd",
             secondaryStatValue: "$0",
           },
           ...prev,
@@ -319,8 +342,11 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
         setNewEmail("");
         setIsAddUserModalOpen(false);
-      } catch (err: any) {
-        showToast("error", err?.message || "Failed to add user.");
+      } catch (err: unknown) {
+        showToast(
+          "error",
+          err instanceof Error ? err.message : t("admin.users.toastAddError")
+        );
       }
     });
   };
@@ -348,10 +374,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-nordic dark:text-white">
-              User Directory
+              {t("admin.users.title")}
             </h1>
             <p className="text-nordic/60 dark:text-gray-400 mt-0.5 sm:mt-1 text-xs sm:text-sm">
-              Manage user access and roles for your properties.
+              {t("admin.users.subtitle")}
             </p>
           </div>
 
@@ -370,18 +396,19 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                placeholder="Search by name, email..."
+                placeholder={t("admin.users.searchPlaceholder")}
                 className="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-white dark:bg-gray-800 text-nordic dark:text-white shadow-soft placeholder-nordic/30 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm outline-none"
               />
             </div>
 
             {/* Add User Button */}
             <button
+              type="button"
               onClick={() => setIsAddUserModalOpen(true)}
               className="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-md shadow-primary/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
             >
               <span className="material-icons text-base">add</span>
-              Add User
+              {t("admin.users.addUser")}
             </button>
           </div>
         </div>
@@ -393,6 +420,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
               const isActive = activeTab === tab;
               return (
                 <button
+                  type="button"
                   key={tab}
                   onClick={() => {
                     setActiveTab(tab);
@@ -404,7 +432,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                       : "font-medium text-nordic/60 hover:text-nordic"
                   }`}
                 >
-                  {tab}
+                  {t(`admin.users.tabs.${tab}`)}
                 </button>
               );
             }
@@ -416,10 +444,12 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       <main className="flex-grow px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pb-12 space-y-3 sm:space-y-4">
         {/* Table Header (hidden on mobile) */}
         <div className="hidden md:grid grid-cols-12 gap-4 px-6 text-xs font-semibold uppercase tracking-wider text-nordic/50 mb-2">
-          <div className="col-span-4">User Details</div>
-          <div className="col-span-3">Role &amp; Status</div>
-          <div className="col-span-3">Performance</div>
-          <div className="col-span-2 text-right">Actions</div>
+          <div className="col-span-4">{t("admin.users.colDetails")}</div>
+          <div className="col-span-3">{t("admin.users.colRoleStatus")}</div>
+          <div className="col-span-3">{t("admin.users.colPerformance")}</div>
+          <div className="col-span-2 text-right">
+            {t("admin.users.colActions")}
+          </div>
         </div>
 
         {/* User Cards List */}
@@ -429,17 +459,23 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
               people_outline
             </span>
             <p className="text-sm sm:text-base font-semibold text-nordic dark:text-white">
-              No users found
+              {t("admin.users.noUsers")}
             </p>
             <p className="text-xs text-nordic/60 dark:text-gray-400 mt-1">
-              Try adjusting your search criteria or role filters.
+              {t("admin.users.noUsersSub")}
             </p>
           </div>
         ) : (
           paginatedUsers.map((user, idx) => {
             const isMenuOpen = openDropdownId === user.id;
             const isHighlighted =
-              user.isHighlighted || (activeTab === "All Users" && idx === 0 && currentPage === 1);
+              user.isHighlighted ||
+              (activeTab === "All Users" && idx === 0 && currentPage === 1);
+
+            const secondaryValue =
+              user.secondaryStatValue === "Level 5"
+                ? t("admin.users.stats.level5")
+                : user.secondaryStatValue;
 
             return (
               <div
@@ -454,7 +490,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                 <div className="col-span-12 md:col-span-4 flex items-center w-full">
                   <div className="relative flex-shrink-0">
                     <img
-                      alt={`Portrait of ${user.name}`}
+                      alt={user.name}
                       src={user.avatar}
                       className={`h-12 w-12 rounded-full object-cover ${
                         user.isGrayscale ? "grayscale" : ""
@@ -486,8 +522,8 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                         user.status === "Inactive"
                           ? "text-nordic/40 dark:text-gray-500"
                           : isHighlighted
-                          ? "text-nordic/70 dark:text-gray-300"
-                          : "text-nordic/60 dark:text-gray-400"
+                            ? "text-nordic/70 dark:text-gray-300"
+                            : "text-nordic/60 dark:text-gray-400"
                       }`}
                     >
                       {user.email}
@@ -506,23 +542,21 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
                 {/* Role & Status */}
                 <div className="col-span-12 md:col-span-3 w-full flex items-center justify-between md:justify-start gap-4">
-                  {/* Role Badge */}
                   {user.role === "admin" ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-nordic text-white">
-                      Administrator
+                      {t("admin.users.roles.admin")}
                     </span>
-                  ) : user.role === "broker" ||
-                    user.roleLabel.toLowerCase().includes("broker") ? (
+                  ) : user.role === "broker" ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary">
-                      Senior Broker
+                      {t("admin.users.roles.broker")}
                     </span>
                   ) : user.role === "agent" ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                      Agent
+                      {t("admin.users.roles.agent")}
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                      {user.roleLabel || "Viewer"}
+                      {getRoleDisplayLabel(user.role)}
                     </span>
                   )}
 
@@ -539,21 +573,21 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                         <span className="material-icons text-[14px] mr-1 text-primary">
                           check_circle
                         </span>
-                        <span>Active</span>
+                        <span>{t("admin.users.status.Active")}</span>
                       </>
                     ) : user.status === "Away" ? (
                       <>
                         <span className="material-icons text-[14px] mr-1 text-gray-400">
                           schedule
                         </span>
-                        <span>Away</span>
+                        <span>{t("admin.users.status.Away")}</span>
                       </>
                     ) : (
                       <>
                         <span className="material-icons text-[14px] mr-1">
                           remove_circle_outline
                         </span>
-                        <span>Inactive</span>
+                        <span>{t("admin.users.status.Inactive")}</span>
                       </>
                     )}
                   </div>
@@ -567,7 +601,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                         isHighlighted ? "text-nordic/50" : "text-nordic/40"
                       }`}
                     >
-                      Properties
+                      {t("admin.users.stats.properties")}
                     </div>
                     <div
                       className={`text-sm font-semibold ${
@@ -585,7 +619,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                         isHighlighted ? "text-nordic/50" : "text-nordic/40"
                       }`}
                     >
-                      {user.secondaryStatLabel}
+                      {t(`admin.users.stats.${user.secondaryStatKey}`)}
                     </div>
                     <div
                       className={`text-sm font-semibold ${
@@ -594,14 +628,18 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                           : "text-nordic dark:text-white"
                       }`}
                     >
-                      {user.secondaryStatValue}
+                      {secondaryValue}
                     </div>
                   </div>
                 </div>
 
                 {/* Actions (Change Role) */}
-                <div className="col-span-12 md:col-span-2 w-full flex justify-end relative">
+                <div
+                  data-role-dropdown
+                  className="col-span-12 md:col-span-2 w-full flex justify-end relative"
+                >
                   <button
+                    type="button"
                     onClick={() =>
                       setOpenDropdownId(isMenuOpen ? null : user.id)
                     }
@@ -609,17 +647,16 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                       isMenuOpen
                         ? "bg-primary text-white shadow-md hover:bg-primary-dark"
                         : isHighlighted
-                        ? "border border-nordic/10 bg-white dark:bg-gray-800 shadow-sm text-nordic hover:bg-nordic hover:text-white"
-                        : "border border-gray-200 dark:border-gray-600 bg-transparent text-nordic/70 dark:text-gray-300 hover:border-nordic hover:text-nordic dark:hover:text-white group-hover:bg-white group-hover:shadow-sm"
+                          ? "border border-nordic/10 bg-white dark:bg-gray-800 shadow-sm text-nordic hover:bg-nordic hover:text-white"
+                          : "border border-gray-200 dark:border-gray-600 bg-transparent text-nordic/70 dark:text-gray-300 hover:border-nordic hover:text-nordic dark:hover:text-white group-hover:bg-white group-hover:shadow-sm"
                     }`}
                   >
-                    Change Role
+                    {t("admin.users.changeRole")}
                     <span className="material-icons text-[16px] ml-2">
                       {isMenuOpen ? "expand_less" : "expand_more"}
                     </span>
                   </button>
 
-                  {/* Interactive Dropdown Menu */}
                   {isMenuOpen && (
                     <div className="absolute top-full right-0 mt-2 w-48 rounded-lg shadow-dropdown bg-primary ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden z-50 origin-top-right animate-in fade-in slide-in-from-top-1 duration-150">
                       <div
@@ -640,7 +677,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                           <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
                             shield
                           </span>
-                          Administrator
+                          {t("admin.users.roles.admin")}
                         </button>
 
                         <button
@@ -656,7 +693,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                           <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
                             business_center
                           </span>
-                          Broker
+                          {t("admin.users.roles.brokerShort")}
                         </button>
 
                         <button
@@ -672,7 +709,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                           <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
                             support_agent
                           </span>
-                          Agent
+                          {t("admin.users.roles.agent")}
                         </button>
 
                         <button
@@ -688,7 +725,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                           <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
                             visibility
                           </span>
-                          Viewer
+                          {t("admin.users.roles.user")}
                         </button>
 
                         <div className="border-t border-white/10 my-1" />
@@ -702,7 +739,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                           <span className="material-icons text-sm mr-3 text-red-300 group-hover:text-red-100">
                             block
                           </span>
-                          Suspend User
+                          {t("admin.users.suspendUser")}
                         </button>
                       </div>
                     </div>
@@ -720,19 +757,19 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-nordic/60 dark:text-gray-400">
-                Showing{" "}
+                {t("admin.users.showing")}{" "}
                 <span className="font-medium text-nordic dark:text-white">
                   {totalUsers > 0 ? startIndex + 1 : 0}
                 </span>{" "}
-                to{" "}
+                {t("admin.users.to")}{" "}
                 <span className="font-medium text-nordic dark:text-white">
                   {Math.min(startIndex + pageSize, totalUsers)}
                 </span>{" "}
-                of{" "}
+                {t("admin.users.of")}{" "}
                 <span className="font-medium text-nordic dark:text-white">
                   {totalUsers}
                 </span>{" "}
-                users
+                {t("admin.users.usersCount")}
               </p>
             </div>
             <div>
@@ -740,18 +777,16 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                 aria-label="Pagination"
                 className="relative z-0 inline-flex rounded-md shadow-none -space-x-px"
               >
-                {/* Previous Button */}
                 <button
                   type="button"
                   disabled={currentPage <= 1}
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   className="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium text-nordic/50 hover:text-primary transition-colors disabled:opacity-30 cursor-pointer"
                 >
-                  <span className="sr-only">Previous</span>
+                  <span className="sr-only">{t("admin.users.previous")}</span>
                   <span className="material-icons text-xl">chevron_left</span>
                 </button>
 
-                {/* Page Number Buttons */}
                 {Array.from({ length: totalPages }).map((_, i) => {
                   const pNum = i + 1;
                   const isCurrent = pNum === currentPage;
@@ -772,7 +807,6 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                   );
                 })}
 
-                {/* Next Button */}
                 <button
                   type="button"
                   disabled={currentPage >= totalPages}
@@ -781,7 +815,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                   }
                   className="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium text-nordic/50 hover:text-primary transition-colors disabled:opacity-30 cursor-pointer"
                 >
-                  <span className="sr-only">Next</span>
+                  <span className="sr-only">{t("admin.users.next")}</span>
                   <span className="material-icons text-xl">chevron_right</span>
                 </button>
               </nav>
@@ -796,20 +830,21 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-nordic bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
             >
-              Previous
+              {t("admin.users.previous")}
             </button>
             <span className="text-xs text-nordic/60">
-              Page {currentPage} of {totalPages}
+              {t("admin.users.pageOf", {
+                current: currentPage,
+                total: totalPages,
+              })}
             </span>
             <button
               type="button"
               disabled={currentPage >= totalPages}
-              onClick={() =>
-                setCurrentPage((p) => Math.min(totalPages, p + 1))
-              }
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               className="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-nordic bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
             >
-              Next
+              {t("admin.users.next")}
             </button>
           </div>
         </div>
@@ -817,21 +852,31 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
       {/* Add User Modal */}
       {isAddUserModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#152e2a] rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-dropdown border border-nordic/10 animate-in zoom-in-95 duration-150">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200"
+        >
+          <div
+            className="fixed inset-0"
+            onClick={() => setIsAddUserModalOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="relative z-10 bg-white dark:bg-[#152e2a] rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-dropdown border border-nordic/10 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-4 border-b border-nordic/10">
               <div className="flex items-center gap-2.5">
                 <span className="material-icons text-primary text-2xl">
                   person_add
                 </span>
                 <h3 className="text-lg font-bold text-nordic dark:text-white">
-                  Add Directory User
+                  {t("admin.users.modalTitle")}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddUserModalOpen(false)}
-                className="text-nordic/40 hover:text-nordic transition-colors p-1 rounded-lg"
+                aria-label={t("modals.close")}
+                className="text-nordic/40 hover:text-nordic transition-colors p-1 rounded-lg cursor-pointer"
               >
                 <span className="material-icons text-xl">close</span>
               </button>
@@ -840,7 +885,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
             <form onSubmit={handleAddUserSubmit} className="mt-5 space-y-4">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1.5">
-                  Email Address
+                  {t("admin.users.emailLabel")}
                 </label>
                 <input
                   type="email"
@@ -854,16 +899,16 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1.5">
-                  System Role
+                  {t("admin.users.systemRoleLabel")}
                 </label>
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value as UserRole)}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all cursor-pointer"
                 >
-                  <option value="agent">Agent (Real Estate Specialist)</option>
-                  <option value="admin">Administrator (Full Control)</option>
-                  <option value="user">Viewer (Client / Read-only)</option>
+                  <option value="agent">{t("admin.users.roleAgentDesc")}</option>
+                  <option value="admin">{t("admin.users.roleAdminDesc")}</option>
+                  <option value="user">{t("admin.users.roleUserDesc")}</option>
                 </select>
               </div>
 
@@ -871,16 +916,18 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsAddUserModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-nordic/70 hover:text-nordic transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-nordic/70 hover:text-nordic transition-colors cursor-pointer"
                 >
-                  Cancel
+                  {t("admin.users.cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={isPendingAssign}
                   className="inline-flex items-center justify-center px-5 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium shadow-sm transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  {isPendingAssign ? "Adding..." : "Add User"}
+                  {isPendingAssign
+                    ? t("admin.users.adding")
+                    : t("admin.users.addUser")}
                 </button>
               </div>
             </form>
@@ -890,4 +937,3 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
     </div>
   );
 };
-

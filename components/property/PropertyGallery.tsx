@@ -153,14 +153,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 z-10">
           {copiedToast && (
             <span className="bg-black/75 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm animate-in fade-in duration-200 shadow-sm font-medium">
-              Enlace copiado!
+              {t("propertyDetail.linkCopied")}
             </span>
           )}
           <button
             type="button"
             onClick={handleShare}
-            aria-label="Compartir propiedad"
-            title="Compartir propiedad"
+            aria-label={t("propertyDetail.shareProperty")}
+            title={t("propertyDetail.shareProperty")}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white text-nordic hover:text-mosque backdrop-blur-md flex items-center justify-center transition-all duration-200 z-10 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
           >
             <span className="material-icons text-base sm:text-lg leading-none select-none flex items-center justify-center">

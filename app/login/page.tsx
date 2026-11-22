@@ -22,9 +22,7 @@ function LoginContent() {
   const errorParam = searchParams.get("error");
 
   const [errorMessage, setErrorMessage] = useState<string | null>(
-    errorParam === "auth_exchange_failed"
-      ? "La sesión anterior expiró o requiere renovación. Haz clic en el proveedor a continuación para iniciar sesión."
-      : errorParam
+    errorParam === "auth_exchange_failed" ? t("auth.sessionExpired") : errorParam
   );
 
   useEffect(() => {
@@ -49,8 +47,10 @@ function LoginContent() {
         setErrorMessage(error.message);
         setLoadingProvider(null);
       }
-    } catch (err: any) {
-      setErrorMessage(err?.message || "Failed to initiate Google sign in.");
+    } catch (err: unknown) {
+      setErrorMessage(
+        err instanceof Error ? err.message : t("auth.googleError")
+      );
       setLoadingProvider(null);
     }
   };
@@ -71,8 +71,10 @@ function LoginContent() {
         setErrorMessage(error.message);
         setLoadingProvider(null);
       }
-    } catch (err: any) {
-      setErrorMessage(err?.message || "Failed to initiate GitHub sign in.");
+    } catch (err: unknown) {
+      setErrorMessage(
+        err instanceof Error ? err.message : t("auth.githubError")
+      );
       setLoadingProvider(null);
     }
   };

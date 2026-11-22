@@ -29,7 +29,6 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   initialFeaturedProperties,
   initialPagination,
-  initialPage = 1,
   initialCategory = "All",
   initialMarketTab = "All",
   initialQuery = "",
@@ -440,8 +439,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         onClose={() => setIsFilterModalOpen(false)}
         initialFilters={{
           location: searchQuery,
-          minPrice: minPrice !== undefined ? minPrice : 1200000,
-          maxPrice: maxPrice !== undefined ? maxPrice : 4500000,
+          minPrice: minPrice !== undefined ? minPrice : 0,
+          maxPrice: maxPrice !== undefined ? maxPrice : 20000000,
           propertyType:
             selectedCategory === "All" ? "Any Type" : selectedCategory,
           beds,

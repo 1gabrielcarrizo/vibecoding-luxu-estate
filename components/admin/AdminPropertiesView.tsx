@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useTransition, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Property } from "@/types/property";
 import {
   setPropertyFeaturedAction,
-  deletePropertyAction,
   togglePropertyActiveAction,
 } from "@/app/actions/properties";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
 
 interface AdminPropertiesViewProps {
   initialProperties?: Property[];
@@ -113,25 +114,58 @@ const TEMPLATE_PROPERTIES: PropertyItemDisplay[] = [
   },
 ];
 
+function mapPropertiesToDisplay(props: Property[]): PropertyItemDisplay[] {
+  if (props.length > 0) {
+    const mappedDb: PropertyItemDisplay[] = props.map((p) => {
+      const estMonthly = Math.round(p.price * 0.004);
+      const isActive = p.isActive !== false;
+      const status: "Active" | "Pending" | "Sold" | "Inactive" = !isActive
+        ? "Inactive"
+        : p.badge?.toUpperCase().includes("SOLD")
+          ? "Sold"
+          : "Active";
+
+      return {
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        location: p.location,
+        beds: p.beds,
+        baths: p.baths,
+        sqft: `${p.sqm || 2000} m²`,
+        price: p.price,
+        formattedPrice:
+          p.formattedPrice || `$${p.price.toLocaleString("en-US")}`,
+        monthly: `$${estMonthly.toLocaleString("en-US")}`,
+        status,
+        image: p.images?.[0] || p.imageUrl || TEMPLATE_PROPERTIES[0].image,
+        isFeatured: p.isFeatured,
+        isActive,
+      };
+    });
+
+    const existingTitles = new Set(mappedDb.map((p) => p.title.toLowerCase()));
+    const remainingTemplates = TEMPLATE_PROPERTIES.filter(
+      (t) => !existingTitles.has(t.title.toLowerCase())
+    );
+    return [...mappedDb, ...remainingTemplates];
+  }
+  return TEMPLATE_PROPERTIES;
+}
+
 export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
   initialProperties = [],
 }) => {
+  const { t, locale } = useTranslation();
+
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"All" | "Active" | "Inactive" | "Pending" | "Sold">("All");
+  const [filterStatus, setFilterStatus] = useState<
+    "All" | "Active" | "Inactive" | "Pending" | "Sold"
+  >("All");
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
-
-  // Add / Edit Property Modal
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newLocation, setNewLocation] = useState("");
-  const [newPrice, setNewPrice] = useState("");
-  const [newBeds, setNewBeds] = useState("3");
-  const [newBaths, setNewBaths] = useState("2");
-  const [newSqft, setNewSqft] = useState("2,100");
-  const [newStatus, setNewStatus] = useState<"Active" | "Pending" | "Sold">("Active");
 
   // Toast
   const [toast, setToast] = useState<{
@@ -144,83 +178,51 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Helper to map Database properties to display items
-  const mapPropertiesToDisplay = (props: Property[]): PropertyItemDisplay[] => {
-    if (props.length > 0) {
-      const mappedDb: PropertyItemDisplay[] = props.map((p) => {
-        const estMonthly = Math.round(p.price * 0.004);
-        const isActive = p.isActive !== false;
-        const status: "Active" | "Pending" | "Sold" | "Inactive" = !isActive
-          ? "Inactive"
-          : p.badge?.toUpperCase().includes("SOLD")
-          ? "Sold"
-          : "Active";
+  const [overrides, setOverrides] = useState<
+    Record<string, Partial<PropertyItemDisplay>>
+  >({});
 
-        return {
-          id: p.id,
-          slug: p.slug,
-          title: p.title,
-          location: p.location,
-          beds: p.beds,
-          baths: p.baths,
-          sqft: `${p.sqm || 2000} m²`,
-          price: p.price,
-          formattedPrice:
-            p.formattedPrice ||
-            `$${p.price.toLocaleString("en-US")}`,
-          monthly: `$${estMonthly.toLocaleString("en-US")}`,
-          status,
-          image:
-            p.images?.[0] ||
-            p.imageUrl ||
-            TEMPLATE_PROPERTIES[0].image,
-          isFeatured: p.isFeatured,
-          isActive,
-        };
-      });
-
-      // Keep template items if they don't collide
-      const existingTitles = new Set(mappedDb.map((p) => p.title.toLowerCase()));
-      const remainingTemplates = TEMPLATE_PROPERTIES.filter(
-        (t) => !existingTitles.has(t.title.toLowerCase())
-      );
-      return [...mappedDb, ...remainingTemplates];
-    }
-    return TEMPLATE_PROPERTIES;
-  };
-
-  // Merge Database properties with template properties
-  const [propertyList, setPropertyList] = useState<PropertyItemDisplay[]>(() =>
-    mapPropertiesToDisplay(initialProperties)
-  );
-
-  // Synchronize state when initialProperties prop updates (e.g., after navigation or router.refresh)
-  useEffect(() => {
-    setPropertyList(mapPropertiesToDisplay(initialProperties));
-  }, [initialProperties]);
+  const propertyList = useMemo(() => {
+    const base = mapPropertiesToDisplay(initialProperties);
+    return base.map((item) =>
+      overrides[item.id] ? { ...item, ...overrides[item.id] } : item
+    );
+  }, [initialProperties, overrides]);
 
   // Filter logic
   const filteredProperties = useMemo(() => {
     return propertyList.filter((prop) => {
+      const displayTitle = prop.slug
+        ? getLocalizedTitle(prop.slug, locale, prop.title)
+        : prop.title;
+      const q = searchQuery.trim().toLowerCase();
       const matchesSearch =
-        searchQuery.trim() === "" ||
-        prop.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prop.location.toLowerCase().includes(searchQuery.toLowerCase());
+        q === "" ||
+        prop.title.toLowerCase().includes(q) ||
+        displayTitle.toLowerCase().includes(q) ||
+        prop.location.toLowerCase().includes(q);
 
       const matchesStatus =
         filterStatus === "All" || prop.status === filterStatus;
 
       return matchesSearch && matchesStatus;
     });
-  }, [propertyList, searchQuery, filterStatus]);
+  }, [propertyList, searchQuery, filterStatus, locale]);
 
   // Statistics calculation
   const totalCount = propertyList.length;
-  const activeCount = propertyList.filter((p) => p.isActive !== false && p.status !== "Inactive").length;
-  const inactiveCount = propertyList.filter((p) => p.isActive === false || p.status === "Inactive").length;
+  const activeCount = propertyList.filter(
+    (p) => p.isActive !== false && p.status !== "Inactive"
+  ).length;
+  const inactiveCount = propertyList.filter(
+    (p) => p.isActive === false || p.status === "Inactive"
+  ).length;
 
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredProperties.length / pageSize));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProperties.length / pageSize)
+  );
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedProps = filteredProperties.slice(
     startIndex,
@@ -228,49 +230,52 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
   );
 
   // Toggle Featured Status
-  const handleToggleFeatured = async (propertyId: string, currentStatus?: boolean) => {
+  const handleToggleFeatured = async (
+    propertyId: string,
+    currentStatus?: boolean
+  ) => {
     const nextStatus = !currentStatus;
 
-    setPropertyList((prev) =>
-      prev.map((p) =>
-        p.id === propertyId ? { ...p, isFeatured: nextStatus } : p
-      )
-    );
+    setOverrides((prev) => ({
+      ...prev,
+      [propertyId]: { ...prev[propertyId], isFeatured: nextStatus },
+    }));
 
     try {
       await setPropertyFeaturedAction(propertyId, nextStatus);
       showToast(
         "success",
-        `Property ${nextStatus ? "marked as featured" : "unmarked from featured"}.`
+        nextStatus
+          ? t("admin.properties.toastFeatured")
+          : t("admin.properties.toastUnfeatured")
       );
     } catch {
       showToast(
         "success",
-        `Status updated: Property ${nextStatus ? "featured" : "standard"}.`
+        nextStatus
+          ? t("admin.properties.toastFeatured")
+          : t("admin.properties.toastUnfeatured")
       );
     }
   };
 
-  // Toggle Active / Deactivate Status (Soft Delete instead of DB deletion)
+  // Toggle Active / Deactivate Status
   const handleToggleActive = async (
     propertyId: string,
     currentActive?: boolean,
     title?: string
   ) => {
     const nextActive = !currentActive;
+    const safeTitle = title || "";
 
-    // Optimistic UI update
-    setPropertyList((prev) =>
-      prev.map((p) =>
-        p.id === propertyId
-          ? {
-              ...p,
-              isActive: nextActive,
-              status: nextActive ? "Active" : "Inactive",
-            }
-          : p
-      )
-    );
+    setOverrides((prev) => ({
+      ...prev,
+      [propertyId]: {
+        ...prev[propertyId],
+        isActive: nextActive,
+        status: nextActive ? "Active" : "Inactive",
+      },
+    }));
 
     try {
       const res = await togglePropertyActiveAction(propertyId, nextActive);
@@ -278,577 +283,448 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
         showToast(
           "success",
           nextActive
-            ? `Propiedad "${title}" activada (visible para clientes).`
-            : `Propiedad "${title}" desactivada (oculta de búsquedas).`
+            ? t("admin.properties.toastActivated", { title: safeTitle })
+            : t("admin.properties.toastDeactivated", { title: safeTitle })
         );
       } else {
-        showToast("error", res.error || "No se pudo actualizar el estado de la propiedad.");
-        // Revert
-        setPropertyList((prev) =>
-          prev.map((p) =>
-            p.id === propertyId
-              ? {
-                  ...p,
-                  isActive: currentActive,
-                  status: currentActive ? "Active" : "Inactive",
-                }
-              : p
-          )
-        );
+        showToast("error", res.error || t("admin.properties.toastStatusError"));
+        setOverrides((prev) => ({
+          ...prev,
+          [propertyId]: {
+            ...prev[propertyId],
+            isActive: currentActive,
+            status: currentActive ? "Active" : "Inactive",
+          },
+        }));
       }
     } catch {
       showToast(
         "success",
         nextActive
-          ? `Propiedad "${title}" activada.`
-          : `Propiedad "${title}" desactivada.`
+          ? t("admin.properties.toastActivated", { title: safeTitle })
+          : t("admin.properties.toastDeactivated", { title: safeTitle })
       );
     }
   };
 
-  // Delete property triggers soft delete deactivation to prevent deleting from DB
-  const handleDeleteProperty = async (propertyId: string, title: string) => {
-    await handleToggleActive(propertyId, true, title);
-  };
+  return (
+    <div className="flex-grow flex flex-col w-full">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-dropdown border text-sm font-medium animate-in fade-in slide-in-from-bottom-3 duration-200 ${
+            toast.type === "success"
+              ? "bg-white text-emerald-800 border-emerald-200 dark:bg-[#152e2a] dark:text-emerald-300 dark:border-emerald-800"
+              : "bg-white text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-200 dark:border-rose-800"
+          }`}
+        >
+          <span className="material-icons text-lg">
+            {toast.type === "success" ? "check_circle" : "error"}
+          </span>
+          <span>{toast.text}</span>
+        </div>
+      )}
 
-    // Add property submit
-    const handleAddPropertySubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!newTitle.trim() || !newPrice.trim()) return;
+      {/* Main Container */}
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-nordic dark:text-white tracking-tight">
+              {t("admin.properties.title")}
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
+              {t("admin.properties.subtitle")}
+            </p>
+          </div>
 
-      const numericPrice = parseFloat(newPrice.replace(/[^0-9.]/g, "")) || 950000;
-      const newProp: PropertyItemDisplay = {
-        id: `prop-${Date.now()}`,
-        title: newTitle.trim(),
-        location: newLocation.trim() || "Beverly Hills, CA",
-        beds: parseInt(newBeds) || 3,
-        baths: parseFloat(newBaths) || 2,
-        sqft: `${newSqft} sqft`,
-        price: numericPrice,
-        formattedPrice: `$${numericPrice.toLocaleString("en-US")}`,
-        monthly: `$${Math.round(numericPrice * 0.0038).toLocaleString("en-US")}`,
-        status: newStatus,
-        image:
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-        isFeatured: false,
-      };
-
-      setPropertyList((prev) => [newProp, ...prev]);
-      showToast("success", `Property "${newTitle}" added to portfolio.`);
-      setIsAddModalOpen(false);
-      setNewTitle("");
-      setNewLocation("");
-      setNewPrice("");
-    };
-
-    return (
-      <div className="flex-grow flex flex-col w-full">
-        {/* Toast Notification */}
-        {toast && (
-          <div
-            className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-dropdown border text-sm font-medium animate-in fade-in slide-in-from-bottom-3 duration-200 ${toast.type === "success"
-                ? "bg-white text-emerald-800 border-emerald-200 dark:bg-[#152e2a] dark:text-emerald-300 dark:border-emerald-800"
-                : "bg-white text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-200 dark:border-rose-800"
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setFilterDrawerOpen(!filterDrawerOpen)}
+              className={`flex-1 sm:flex-initial bg-white dark:bg-[#152e2a] border border-gray-200 dark:border-primary/30 text-nordic dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-primary/10 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm inline-flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
+                filterDrawerOpen || filterStatus !== "All" || searchQuery
+                  ? "border-primary text-primary"
+                  : ""
               }`}
-          >
-            <span className="material-icons text-lg">
-              {toast.type === "success" ? "check_circle" : "error"}
-            </span>
-            <span>{toast.text}</span>
+            >
+              <span className="material-icons text-base">filter_list</span>
+              <span>{t("admin.properties.filter")}</span>
+            </button>
+
+            <Link
+              href="/admin/properties/new"
+              className="flex-1 sm:flex-initial bg-primary hover:bg-primary/90 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium shadow-md shadow-primary/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap"
+            >
+              <span className="material-icons text-base">add</span>
+              <span>{t("admin.properties.addProperty")}</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Collapsible Filter Bar */}
+        {filterDrawerOpen && (
+          <div className="bg-white dark:bg-[#152e2a] p-4 sm:p-5 rounded-xl border border-primary/15 shadow-sm mb-8 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+                  {t("admin.properties.searchLabel")}
+                </label>
+                <div className="relative">
+                  <span className="material-icons absolute left-3 top-2.5 text-nordic/40 text-lg">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    placeholder={t("admin.properties.searchPlaceholder")}
+                    className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
+                  {t("admin.properties.statusFilterLabel")}
+                </label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => {
+                    setFilterStatus(
+                      e.target.value as
+                        | "All"
+                        | "Active"
+                        | "Inactive"
+                        | "Pending"
+                        | "Sold"
+                    );
+                    setCurrentPage(1);
+                  }}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                >
+                  <option value="All">
+                    {t("admin.properties.allStatuses")}
+                  </option>
+                  <option value="Active">
+                    {t("admin.properties.statusActive")}
+                  </option>
+                  <option value="Inactive">
+                    {t("admin.properties.statusInactive")}
+                  </option>
+                  <option value="Pending">
+                    {t("admin.properties.statusPending")}
+                  </option>
+                  <option value="Sold">
+                    {t("admin.properties.statusSold")}
+                  </option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setFilterStatus("All");
+                    setCurrentPage(1);
+                  }}
+                  className="w-full py-2 text-xs font-semibold text-nordic/70 hover:text-nordic border border-nordic/15 rounded-lg hover:bg-nordic/5 transition-colors cursor-pointer"
+                >
+                  {t("admin.properties.resetFilters")}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Main Container */}
-        <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          {/* Header Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-nordic dark:text-white tracking-tight">
-                My Properties
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
-                Manage your portfolio and track performance.
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                {t("admin.properties.totalListings")}
+              </p>
+              <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
+                {totalCount}
               </p>
             </div>
-
-            <div className="flex items-center gap-2.5 sm:gap-3">
-              <button
-                onClick={() => setFilterDrawerOpen(!filterDrawerOpen)}
-                className={`flex-1 sm:flex-initial bg-white dark:bg-[#152e2a] border border-gray-200 dark:border-primary/30 text-nordic dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-primary/10 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm inline-flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
-                  filterDrawerOpen || filterStatus !== "All" || searchQuery
-                    ? "border-primary text-primary"
-                    : ""
-                }`}
-              >
-                <span className="material-icons text-base">filter_list</span>
-                <span>Filter</span>
-              </button>
-
-              <Link
-                href="/admin/properties/new"
-                className="flex-1 sm:flex-initial bg-primary hover:bg-primary/90 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium shadow-md shadow-primary/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap"
-              >
-                <span className="material-icons text-base">add</span>
-                <span>Add Property</span>
-              </Link>
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <span className="material-icons">apartment</span>
             </div>
           </div>
 
-        {/* Collapsible Filter Bar */ }
-    {
-      filterDrawerOpen && (
-        <div className="bg-white dark:bg-[#152e2a] p-4 sm:p-5 rounded-xl border border-primary/15 shadow-sm mb-8 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                Search Properties
-              </label>
-              <div className="relative">
-                <span className="material-icons absolute left-3 top-2.5 text-nordic/40 text-lg">
-                  search
-                </span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  placeholder="Search by title, city..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                {t("admin.properties.activeProperties")}
+              </p>
+              <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
+                {activeCount}
+              </p>
             </div>
+            <div className="h-10 w-10 rounded-full bg-hint-green flex items-center justify-center text-primary">
+              <span className="material-icons">check_circle</span>
+            </div>
+          </div>
 
+          <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                Status Filter
-              </label>
-              <select
-                value={filterStatus}
-                onChange={(e) => {
-                  setFilterStatus(e.target.value as any);
-                  setCurrentPage(1);
-                }}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-              >
-                <option value="All">All Statuses</option>
-                <option value="Active">Active (Activas)</option>
-                <option value="Inactive">Inactive (Desactivadas)</option>
-                <option value="Pending">Pending Sale</option>
-                <option value="Sold">Sold</option>
-              </select>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                {t("admin.properties.inactiveProperties")}
+              </p>
+              <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
+                {inactiveCount}
+              </p>
             </div>
+            <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400">
+              <span className="material-icons">visibility_off</span>
+            </div>
+          </div>
+        </div>
 
-            <div className="flex items-end">
+        {/* Property List Container */}
+        <div className="bg-white dark:bg-[#152e2a] rounded-xl shadow-sm border border-gray-200 dark:border-primary/20 overflow-hidden">
+          {/* Table Header */}
+          <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 dark:bg-primary/5 border-b border-gray-100 dark:border-primary/10 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <div className="col-span-6">{t("admin.properties.colDetails")}</div>
+            <div className="col-span-2">{t("admin.properties.colPrice")}</div>
+            <div className="col-span-2">{t("admin.properties.colStatus")}</div>
+            <div className="col-span-2 text-right">
+              {t("admin.properties.colActions")}
+            </div>
+          </div>
+
+          {/* List Items */}
+          {paginatedProps.length === 0 ? (
+            <div className="p-12 text-center text-gray-500">
+              <span className="material-icons text-4xl text-nordic/30 mb-2">
+                domain_disabled
+              </span>
+              <p className="text-base font-semibold text-nordic dark:text-white">
+                {t("admin.properties.noProperties")}
+              </p>
+              <p className="text-xs text-nordic/60 mt-1">
+                {t("admin.properties.noPropertiesSub")}
+              </p>
+            </div>
+          ) : (
+            paginatedProps.map((item) => {
+              const displayTitle = item.slug
+                ? getLocalizedTitle(item.slug, locale, item.title)
+                : item.title;
+
+              return (
+                <div
+                  key={item.id}
+                  className="group grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 dark:border-primary/10 hover:bg-background-light dark:hover:bg-primary/5 transition-colors items-center"
+                >
+                  {/* Property Details */}
+                  <div className="col-span-12 md:col-span-6 flex gap-3 sm:gap-4 items-center">
+                    <div className="relative h-16 w-20 sm:h-20 sm:w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                      <img
+                        alt={displayTitle}
+                        src={item.image}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base sm:text-lg font-bold text-nordic dark:text-white group-hover:text-primary transition-colors cursor-pointer truncate">
+                        {item.slug ? (
+                          <Link href={`/propiedades/${item.slug}`}>
+                            {displayTitle}
+                          </Link>
+                        ) : (
+                          displayTitle
+                        )}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+                        {item.location}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 text-[11px] sm:text-xs text-gray-400 dark:text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <span className="material-icons text-[14px]">
+                            bed
+                          </span>{" "}
+                          {item.beds} {t("admin.properties.beds")}
+                        </span>
+                        <span className="w-1 h-1 rounded-full bg-gray-300" />
+                        <span className="flex items-center gap-1">
+                          <span className="material-icons text-[14px]">
+                            bathtub
+                          </span>{" "}
+                          {item.baths} {t("admin.properties.baths")}
+                        </span>
+                        <span className="w-1 h-1 rounded-full bg-gray-300" />
+                        <span>{item.sqft}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price */}
+                  <div className="col-span-6 md:col-span-2">
+                    <div className="text-sm sm:text-base font-semibold text-nordic dark:text-gray-200">
+                      {item.formattedPrice}
+                    </div>
+                    <div className="text-xs text-gray-400">{item.monthly}</div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="col-span-6 md:col-span-2 flex justify-end md:justify-start">
+                    {item.isActive === false || item.status === "Inactive" ? (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5" />
+                        {t("admin.properties.statusInactive")}
+                      </span>
+                    ) : item.status === "Active" ? (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-hint-green text-primary border border-primary/10">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5" />
+                        {t("admin.properties.statusActive")}
+                      </span>
+                    ) : item.status === "Pending" ? (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5" />
+                        {t("admin.properties.statusPending")}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mr-1.5" />
+                        {t("admin.properties.statusSold")}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-1.5 sm:gap-2 pt-2 md:pt-0 border-t md:border-0 border-gray-100 dark:border-primary/10">
+                    {/* Star / Feature */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleToggleFeatured(item.id, item.isFeatured)
+                      }
+                      className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                        item.isFeatured
+                          ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20"
+                          : "text-gray-400 hover:text-amber-500 hover:bg-hint-green/30"
+                      }`}
+                      title={
+                        item.isFeatured
+                          ? t("admin.properties.featuredTitle")
+                          : t("admin.properties.featureOnHome")
+                      }
+                      aria-label={
+                        item.isFeatured
+                          ? t("admin.properties.featuredTitle")
+                          : t("admin.properties.featureOnHome")
+                      }
+                    >
+                      <span className="material-icons text-xl leading-none select-none flex items-center justify-center">
+                        {item.isFeatured ? "star" : "star_border"}
+                      </span>
+                    </button>
+
+                    {/* Edit */}
+                    <Link
+                      href={`/admin/properties/${item.id}/edit`}
+                      className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-primary hover:bg-hint-green/30 transition-all cursor-pointer"
+                      title={t("admin.properties.editTitle")}
+                      aria-label={t("admin.properties.editTitle")}
+                    >
+                      <span className="material-icons text-xl leading-none select-none flex items-center justify-center">
+                        edit
+                      </span>
+                    </Link>
+
+                    {/* Activate / Deactivate */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleToggleActive(
+                          item.id,
+                          item.isActive !== false,
+                          displayTitle
+                        )
+                      }
+                      className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                        item.isActive === false
+                          ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                          : "text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                      }`}
+                      title={
+                        item.isActive === false
+                          ? t("admin.properties.activateTitle")
+                          : t("admin.properties.deactivateTitle")
+                      }
+                      aria-label={
+                        item.isActive === false
+                          ? t("admin.properties.activateTitle")
+                          : t("admin.properties.deactivateTitle")
+                      }
+                    >
+                      <span className="material-icons text-xl leading-none select-none flex items-center justify-center">
+                        {item.isActive === false
+                          ? "visibility"
+                          : "visibility_off"}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+
+          {/* Pagination */}
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gray-50/50 dark:bg-primary/5">
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
+              {t("admin.properties.showing")}{" "}
+              <span className="font-medium text-nordic dark:text-white">
+                {filteredProperties.length > 0 ? startIndex + 1 : 0}
+              </span>{" "}
+              {t("admin.properties.to")}{" "}
+              <span className="font-medium text-nordic dark:text-white">
+                {Math.min(startIndex + pageSize, filteredProperties.length)}
+              </span>{" "}
+              {t("admin.properties.of")}{" "}
+              <span className="font-medium text-nordic dark:text-white">
+                {filteredProperties.length}
+              </span>{" "}
+              {t("admin.properties.results")}
+            </div>
+            <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setFilterStatus("All");
-                  setCurrentPage(1);
-                }}
-                className="w-full py-2 text-xs font-semibold text-nordic/70 hover:text-nordic border border-nordic/15 rounded-lg hover:bg-nordic/5 transition-colors"
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 text-xs sm:text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
               >
-                Reset Filters
+                {t("admin.properties.previous")}
               </button>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    {/* Stats Overview */ }
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-      {/* Card 1: Total Listings */}
-      <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Total Listings
-          </p>
-          <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
-            {totalCount}
-          </p>
-        </div>
-        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-          <span className="material-icons">apartment</span>
-        </div>
-      </div>
-
-      {/* Card 2: Active Properties */}
-      <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Active Properties
-          </p>
-          <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
-            {activeCount}
-          </p>
-        </div>
-        <div className="h-10 w-10 rounded-full bg-hint-green flex items-center justify-center text-primary">
-          <span className="material-icons">check_circle</span>
-        </div>
-      </div>
-
-      {/* Card 3: Inactive Properties (Desactivadas) */}
-      <div className="bg-white dark:bg-[#152e2a] p-5 rounded-xl border border-primary/10 shadow-sm flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Inactive (Desactivadas)
-          </p>
-          <p className="text-2xl font-bold text-nordic dark:text-white mt-1">
-            {inactiveCount}
-          </p>
-        </div>
-        <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400">
-          <span className="material-icons">visibility_off</span>
-        </div>
-      </div>
-    </div>
-
-    {/* Property List Container */ }
-    <div className="bg-white dark:bg-[#152e2a] rounded-xl shadow-sm border border-gray-200 dark:border-primary/20 overflow-hidden">
-      {/* Table Header */}
-      <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 dark:bg-primary/5 border-b border-gray-100 dark:border-primary/10 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-        <div className="col-span-6">Property Details</div>
-        <div className="col-span-2">Price</div>
-        <div className="col-span-2">Status</div>
-        <div className="col-span-2 text-right">Actions</div>
-      </div>
-
-      {/* List Items */}
-      {paginatedProps.length === 0 ? (
-        <div className="p-12 text-center text-gray-500">
-          <span className="material-icons text-4xl text-nordic/30 mb-2">
-            domain_disabled
-          </span>
-          <p className="text-base font-semibold text-nordic dark:text-white">
-            No properties found
-          </p>
-          <p className="text-xs text-nordic/60 mt-1">
-            Try modifying your filter settings.
-          </p>
-        </div>
-      ) : (
-        paginatedProps.map((item) => (
-          <div
-            key={item.id}
-            className="group grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 dark:border-primary/10 hover:bg-background-light dark:hover:bg-primary/5 transition-colors items-center"
-          >
-            {/* Property Details */}
-            <div className="col-span-12 md:col-span-6 flex gap-3 sm:gap-4 items-center">
-              <div className="relative h-16 w-20 sm:h-20 sm:w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
-                <img
-                  alt={item.title}
-                  src={item.image}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-base sm:text-lg font-bold text-nordic dark:text-white group-hover:text-primary transition-colors cursor-pointer truncate">
-                  {item.slug ? (
-                    <Link href={`/propiedades/${item.slug}`}>
-                      {item.title}
-                    </Link>
-                  ) : (
-                    item.title
-                  )}
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
-                  {item.location}
-                </p>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 text-[11px] sm:text-xs text-gray-400 dark:text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <span className="material-icons text-[14px]">bed</span>{" "}
-                    {item.beds} Beds
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-gray-300" />
-                  <span className="flex items-center gap-1">
-                    <span className="material-icons text-[14px]">
-                      bathtub
-                    </span>{" "}
-                    {item.baths} Baths
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-gray-300" />
-                  <span>{item.sqft}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Price */}
-            <div className="col-span-6 md:col-span-2">
-              <div className="text-sm sm:text-base font-semibold text-nordic dark:text-gray-200">
-                {item.formattedPrice}
-              </div>
-              <div className="text-xs text-gray-400">{item.monthly}</div>
-            </div>
-
-            {/* Status */}
-            <div className="col-span-6 md:col-span-2 flex justify-end md:justify-start">
-              {item.isActive === false || item.status === "Inactive" ? (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5" />
-                  Desactivada
-                </span>
-              ) : item.status === "Active" ? (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-hint-green text-primary border border-primary/10">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5" />
-                  Active
-                </span>
-              ) : item.status === "Pending" ? (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5" />
-                  Pending
-                </span>
-              ) : (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mr-1.5" />
-                  Sold
-                </span>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-1.5 sm:gap-2 pt-2 md:pt-0 border-t md:border-0 border-gray-100 dark:border-primary/10">
-              {/* Star / Feature */}
               <button
-                onClick={() => handleToggleFeatured(item.id, item.isFeatured)}
-                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-                  item.isFeatured
-                    ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20"
-                    : "text-gray-400 hover:text-amber-500 hover:bg-hint-green/30"
-                }`}
-                title={item.isFeatured ? "Featured Property" : "Feature on Homepage"}
-              >
-                <span className="material-icons text-xl leading-none select-none flex items-center justify-center">
-                  {item.isFeatured ? "star" : "star_border"}
-                </span>
-              </button>
-
-              {/* Edit */}
-              <Link
-                href={`/admin/properties/${item.id}/edit`}
-                className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-primary hover:bg-hint-green/30 transition-all cursor-pointer"
-                title="Edit Property"
-              >
-                <span className="material-icons text-xl leading-none select-none flex items-center justify-center">
-                  edit
-                </span>
-              </Link>
-
-              {/* Activate / Deactivate (Evita eliminar de la base de datos) */}
-              <button
+                type="button"
+                disabled={currentPage >= totalPages}
                 onClick={() =>
-                  handleToggleActive(item.id, item.isActive !== false, item.title)
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
                 }
-                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-                  item.isActive === false
-                    ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
-                    : "text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
-                }`}
-                title={
-                  item.isActive === false
-                    ? "Activar propiedad (mostrar en búsquedas y Home)"
-                    : "Desactivar propiedad (ocultar de búsquedas y Home)"
-                }
+                className="px-3 py-1.5 text-xs sm:text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
               >
-                <span className="material-icons text-xl leading-none select-none flex items-center justify-center">
-                  {item.isActive === false ? "visibility" : "visibility_off"}
-                </span>
+                {t("admin.properties.next")}
               </button>
             </div>
           </div>
-        ))
-      )}
-
-      {/* Pagination */}
-      <div className="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gray-50/50 dark:bg-primary/5">
-        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
-          Showing{" "}
-          <span className="font-medium text-nordic dark:text-white">
-            {filteredProperties.length > 0 ? startIndex + 1 : 0}
-          </span>{" "}
-          to{" "}
-          <span className="font-medium text-nordic dark:text-white">
-            {Math.min(startIndex + pageSize, filteredProperties.length)}
-          </span>{" "}
-          of{" "}
-          <span className="font-medium text-nordic dark:text-white">
-            {filteredProperties.length}
-          </span>{" "}
-          results
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            disabled={currentPage <= 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            className="px-3 py-1.5 text-xs sm:text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            disabled={currentPage >= totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            className="px-3 py-1.5 text-xs sm:text-sm border border-gray-200 dark:border-primary/30 rounded-md text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-primary/20 disabled:opacity-50 cursor-pointer"
-          >
-            Next
-          </button>
-        </div>
-      </div>
-        </div >
-      </main >
+      </main>
 
-  {/* Footer */ }
-  < footer className = "mt-auto border-t border-gray-200 dark:border-primary/20 bg-white dark:bg-[#152e2a]" >
-    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <p className="text-center text-sm text-gray-400 dark:text-gray-500">
-        © 2026 LuxeEstate Property Management. All rights reserved.
-      </p>
+      {/* Footer */}
+      <footer className="mt-auto border-t border-gray-200 dark:border-primary/20 bg-white dark:bg-[#152e2a]">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-gray-400 dark:text-gray-500">
+            {t("admin.properties.footerRights")}
+          </p>
+        </div>
+      </footer>
     </div>
-      </footer >
-
-  {/* Add New Property Modal */ }
-{
-  isAddModalOpen && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#152e2a] rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-dropdown border border-nordic/10 animate-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between pb-4 border-b border-nordic/10">
-          <div className="flex items-center gap-2.5">
-            <span className="material-icons text-primary text-2xl">
-              add_business
-            </span>
-            <h3 className="text-lg font-bold text-nordic dark:text-white">
-              Add New Property
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsAddModalOpen(false)}
-            className="text-nordic/40 hover:text-nordic transition-colors p-1 rounded-lg"
-          >
-            <span className="material-icons text-xl">close</span>
-          </button>
-        </div>
-
-        <form onSubmit={handleAddPropertySubmit} className="mt-5 space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-              Property Title
-            </label>
-            <input
-              type="text"
-              required
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="e.g. Modern Glass Penthouse"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-              Location / Address
-            </label>
-            <input
-              type="text"
-              required
-              value={newLocation}
-              onChange={(e) => setNewLocation(e.target.value)}
-              placeholder="e.g. 500 Sunset Blvd, Los Angeles, CA"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                Price (USD)
-              </label>
-              <input
-                type="number"
-                required
-                value={newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
-                placeholder="1250000"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                Status
-              </label>
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value as any)}
-                className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white cursor-pointer"
-              >
-                <option value="Active">Active</option>
-                <option value="Pending">Pending</option>
-                <option value="Sold">Sold</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                Beds
-              </label>
-              <input
-                type="number"
-                value={newBeds}
-                onChange={(e) => setNewBeds(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                Baths
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                value={newBaths}
-                onChange={(e) => setNewBaths(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-nordic/60 dark:text-gray-400 mb-1">
-                Area (sqft)
-              </label>
-              <input
-                type="text"
-                value={newSqft}
-                onChange={(e) => setNewSqft(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="pt-4 flex items-center justify-end gap-3 border-t border-nordic/10">
-            <button
-              type="button"
-              onClick={() => setIsAddModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-nordic/70 hover:text-nordic transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="inline-flex items-center justify-center px-5 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium shadow-sm transition-colors cursor-pointer"
-            >
-              Save Property
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-    </div >
   );
 };
-

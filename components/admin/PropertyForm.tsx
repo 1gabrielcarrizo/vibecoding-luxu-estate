@@ -6,8 +6,12 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Property } from "@/types/property";
 import { PropertyInput } from "@/lib/supabase/properties";
-import { createPropertyAction, updatePropertyAction } from "@/app/actions/properties";
+import {
+  createPropertyAction,
+  updatePropertyAction,
+} from "@/app/actions/properties";
 import { supabase } from "@/lib/supabase/client";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 // Dynamically import Leaflet map to avoid window SSR issues
 const DynamicReactLeafletMap = dynamic(
@@ -18,9 +22,6 @@ const DynamicReactLeafletMap = dynamic(
       <div className="w-full h-56 bg-slate-100 animate-pulse flex flex-col items-center justify-center gap-2">
         <span className="material-icons text-mosque/40 text-2xl animate-spin">
           sync
-        </span>
-        <span className="text-xs text-gray-400 font-sf-pro">
-          Loading map...
         </span>
       </div>
     ),
@@ -47,11 +48,19 @@ const AVAILABLE_AMENITIES = [
   "Wine Cellar",
 ];
 
+type PropertyCategoryOption =
+  | "House"
+  | "Apartment"
+  | "Villa"
+  | "Penthouse"
+  | "Commercial";
+
 export const PropertyForm: React.FC<PropertyFormProps> = ({
   initialData,
   isEdit = false,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isPending, startTransition] = useTransition();
 
   // Basic Information
@@ -64,9 +73,9 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     if (initialData?.type === "rent") return "for-rent";
     return "for-sale";
   });
-  const [category, setCategory] = useState<
-    "House" | "Apartment" | "Villa" | "Penthouse" | "Commercial"
-  >((initialData?.category as any) || "House");
+  const [category, setCategory] = useState<PropertyCategoryOption>(
+    (initialData?.category as PropertyCategoryOption) || "House"
+  );
   const [priceSuffix, setPriceSuffix] = useState(
     initialData?.priceSuffix || ""
   );
@@ -93,9 +102,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Location
-  const [location, setLocation] = useState(
-    initialData?.location || ""
-  );
+  const [location, setLocation] = useState(initialData?.location || "");
   const [lat, setLat] = useState<string>(() => {
     if (initialData?.coordinates?.lat != null) {
       return initialData.coordinates.lat.toString();
@@ -147,9 +154,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
   const [isActive, setIsActive] = useState<boolean>(
     initialData?.isActive !== undefined ? initialData.isActive : true
   );
-  const [badge, setBadge] = useState<string>(
-    initialData?.badge || ""
-  );
+  const [badge, setBadge] = useState<string>(initialData?.badge || "");
 
   // Field validation errors
   const [errors, setErrors] = useState<{
@@ -172,14 +177,18 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Toggle amenity
   const toggleAmenity = (item: string) => {
     setSelectedAmenities((prev) =>
       prev.includes(item) ? prev.filter((a) => a !== item) : [...prev, item]
     );
   };
 
-  // Formatting description toolbar
+  const getAmenityLabel = (item: string) => {
+    const key = `amenitiesList.${item}`;
+    const translated = t(key);
+    return translated !== key ? translated : item;
+  };
+
   const insertTextAtCursor = (prefix: string, suffix: string = "") => {
     const textarea = document.getElementById(
       "description"
@@ -206,7 +215,6 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     }, 10);
   };
 
-  // Core file upload handler (handles both file input and drag-and-drop)
   const uploadFiles = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
 
@@ -218,15 +226,15 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
-      // Validate max file size 5MB
       if (file.size > 5 * 1024 * 1024) {
-        setUploadError(`File "${file.name}" exceeds the 5MB size limit.`);
+        setUploadError(
+          t("admin.form.errors.fileTooBig", { name: file.name })
+        );
         continue;
       }
 
-      // Validate image mime type
       if (!file.type.startsWith("image/")) {
-        setUploadError(`File "${file.name}" is not a supported image file.`);
+        setUploadError(t("admin.form.errors.notImage", { name: file.name }));
         continue;
       }
 
@@ -246,7 +254,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
 
         if (uploadErr) {
           console.error("Storage upload error:", uploadErr);
-          setUploadError(`Upload error for ${file.name}: ${uploadErr.message}`);
+          setUploadError(`${file.name}: ${uploadErr.message}`);
           continue;
         }
 
@@ -257,9 +265,13 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
         if (urlData?.publicUrl) {
           uploadedUrls.push(urlData.publicUrl);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Unexpected upload error:", err);
-        setUploadError(err?.message || "Failed to upload image.");
+        setUploadError(
+          err instanceof Error
+            ? err.message
+            : t("admin.form.errors.uploadFailed")
+        );
       }
     }
 
@@ -268,9 +280,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       setErrors((prev) => ({ ...prev, images: "" }));
       showToast(
         "success",
-        `${uploadedUrls.length} image${
-          uploadedUrls.length > 1 ? "s" : ""
-        } uploaded to Supabase Storage!`
+        t("admin.form.toasts.uploaded", { count: uploadedUrls.length })
       );
     }
 
@@ -280,7 +290,6 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     }
   };
 
-  // Handle Drag & Drop events
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -309,10 +318,10 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     }
   };
 
-  // Drag and drop reordering between image thumbnails
-  const [draggedThumbIndex, setDraggedThumbIndex] = useState<number | null>(null);
+  const [draggedThumbIndex, setDraggedThumbIndex] = useState<number | null>(
+    null
+  );
 
-  // Move image left (toward main cover position)
   const handleMoveImageLeft = (index: number) => {
     if (index <= 0) return;
     setImages((prev) => {
@@ -324,7 +333,6 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     });
   };
 
-  // Move image right
   const handleMoveImageRight = (index: number) => {
     if (index >= images.length - 1) return;
     setImages((prev) => {
@@ -336,7 +344,6 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
     });
   };
 
-  // Set Main Image (moves it directly to position 0)
   const handleSetMainImage = (index: number) => {
     if (index === 0) return;
     setImages((prev) => {
@@ -344,7 +351,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       const [selected] = copy.splice(index, 1);
       return [selected, ...copy];
     });
-    showToast("success", "Imagen configurada como Portada Principal (#1).");
+    showToast("success", t("admin.form.toasts.coverSet"));
   };
 
   const handleThumbDragStart = (e: React.DragEvent, index: number) => {
@@ -370,49 +377,46 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       return copy;
     });
     setDraggedThumbIndex(null);
-    showToast("success", "Orden de imágenes actualizado.");
+    showToast("success", t("admin.form.toasts.orderUpdated"));
   };
 
-  // Remove image
   const handleRemoveImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Add custom URL image
   const handleAddCustomUrl = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customImageUrl.trim()) return;
     setImages((prev) => [...prev, customImageUrl.trim()]);
     setErrors((prev) => ({ ...prev, images: "" }));
     setCustomImageUrl("");
-    showToast("success", "Image URL added to gallery.");
+    showToast("success", t("admin.form.toasts.urlAdded"));
   };
 
-  // Comprehensive Form Validation
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
 
     if (!title.trim()) {
-      newErrors.title = "Property Title is required.";
+      newErrors.title = t("admin.form.errors.titleRequired");
     } else if (title.trim().length < 4) {
-      newErrors.title = "Property Title must be at least 4 characters.";
+      newErrors.title = t("admin.form.errors.titleMin");
     }
 
     const cleanPrice = price.toString().replace(/[^0-9.]/g, "");
     const numericPrice = parseFloat(cleanPrice);
     if (!price || cleanPrice === "") {
-      newErrors.price = "Price is required.";
+      newErrors.price = t("admin.form.errors.priceRequired");
     } else if (isNaN(numericPrice) || numericPrice <= 0) {
-      newErrors.price = "Price must be greater than 0 (no negative or zero values).";
+      newErrors.price = t("admin.form.errors.pricePositive");
     }
 
     if (!location.trim()) {
-      newErrors.location = "Property address / location is required.";
+      newErrors.location = t("admin.form.errors.locationRequired");
     }
 
     const numSqm = parseFloat(sqm);
     if (!sqm || isNaN(numSqm) || numSqm <= 0) {
-      newErrors.sqm = "Area must be greater than 0 m².";
+      newErrors.sqm = t("admin.form.errors.sqmPositive");
     }
 
     const numYear = parseInt(yearBuilt);
@@ -421,24 +425,24 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       yearBuilt &&
       (isNaN(numYear) || numYear < 1800 || numYear > currentYear + 5)
     ) {
-      newErrors.yearBuilt = `Enter a valid year between 1800 and ${currentYear + 5}.`;
+      newErrors.yearBuilt = t("admin.form.errors.yearRange", {
+        max: currentYear + 5,
+      });
     }
 
     if (images.length === 0) {
-      newErrors.images =
-        "At least one property image is required. Upload or enter an image URL.";
+      newErrors.images = t("admin.form.errors.imagesRequired");
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
-      showToast("error", "Please fix the marked fields before submitting.");
+      showToast("error", t("admin.form.errors.fixFields"));
       return;
     }
 
@@ -449,10 +453,10 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       (status === "sold"
         ? "SOLD"
         : status === "for-rent"
-        ? "FOR RENT"
-        : isFeatured
-        ? "FEATURED"
-        : "FOR SALE");
+          ? "FOR RENT"
+          : isFeatured
+            ? "FEATURED"
+            : "FOR SALE");
 
     const parsedLat = lat.trim() !== "" ? parseFloat(lat) : undefined;
     const parsedLng = lng.trim() !== "" ? parseFloat(lng) : undefined;
@@ -475,7 +479,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
       sqm: parseFloat(sqm) || 200,
       garage,
       yearBuilt: parseInt(yearBuilt) || new Date().getFullYear(),
-      images: images,
+      images,
       description: description.trim(),
       amenities: selectedAmenities,
       isFeatured,
@@ -493,28 +497,39 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
         if (isEdit && initialData?.id) {
           const res = await updatePropertyAction(initialData.id, payload);
           if (res.success) {
-            showToast("success", `Property "${payload.title}" updated successfully!`);
+            showToast(
+              "success",
+              t("admin.form.toasts.updated", { title: payload.title })
+            );
             router.refresh();
             setTimeout(() => {
               window.location.href = "/admin/properties";
             }, 600);
           } else {
-            showToast("error", res.error || "Failed to update property.");
+            showToast("error", res.error || t("admin.form.errors.updateFailed"));
           }
         } else {
           const res = await createPropertyAction(payload);
           if (res.success) {
-            showToast("success", `Property "${payload.title}" published successfully!`);
+            showToast(
+              "success",
+              t("admin.form.toasts.created", { title: payload.title })
+            );
             router.refresh();
             setTimeout(() => {
               window.location.href = "/admin/properties";
             }, 600);
           } else {
-            showToast("error", res.error || "Failed to create property.");
+            showToast("error", res.error || t("admin.form.errors.createFailed"));
           }
         }
-      } catch (err: any) {
-        showToast("error", err?.message || "An unexpected error occurred.");
+      } catch (err: unknown) {
+        showToast(
+          "error",
+          err instanceof Error
+            ? err.message
+            : t("admin.form.errors.unexpected")
+        );
       }
     });
   };
@@ -548,7 +563,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     className="hover:text-mosque transition-colors"
                     href="/admin/properties"
                   >
-                    Properties
+                    {t("admin.form.breadcrumbProperties")}
                   </Link>
                 </li>
                 <li>
@@ -557,18 +572,20 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   </span>
                 </li>
                 <li aria-current="page" className="text-nordic font-semibold">
-                  {isEdit ? "Edit Property" : "Add New"}
+                  {isEdit
+                    ? t("admin.form.breadcrumbEdit")
+                    : t("admin.form.breadcrumbNew")}
                 </li>
               </ol>
             </nav>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-nordic tracking-tight">
-                {isEdit ? "Edit Property" : "Add New Property"}
+                {isEdit ? t("admin.form.editTitle") : t("admin.form.newTitle")}
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 font-normal font-sf-pro hidden sm:block">
                 {isEdit
-                  ? "Update listing specifications, pricing, amenities, coordinates, and gallery."
-                  : "Fill in the details below to create a new listing. Fields marked with * are mandatory."}
+                  ? t("admin.form.editSubtitle")
+                  : t("admin.form.newSubtitle")}
               </p>
             </div>
           </div>
@@ -578,7 +595,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
               onClick={() => router.push("/admin/properties")}
               className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg border border-gray-300 bg-white text-nordic hover:bg-gray-50 transition-colors font-medium font-sf-pro text-sm cursor-pointer shadow-xs"
             >
-              Cancel
+              {t("admin.form.cancel")}
             </button>
             <button
               type="button"
@@ -590,17 +607,16 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 {isPending ? "hourglass_empty" : "save"}
               </span>
               {isPending
-                ? "Saving..."
+                ? t("admin.form.saving")
                 : isEdit
-                ? "Update Property"
-                : "Save Property"}
+                  ? t("admin.form.updateProperty")
+                  : t("admin.form.saveProperty")}
             </button>
           </div>
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Main 12-Column Grid Form matching code.html */}
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 xl:grid-cols-12 gap-6 sm:gap-8 items-start pb-24 md:pb-8"
@@ -614,7 +630,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   <span className="material-icons text-lg">info</span>
                 </div>
                 <h2 className="text-lg sm:text-xl font-bold text-nordic">
-                  Basic Information
+                  {t("admin.form.basicInfo")}
                 </h2>
               </div>
               <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
@@ -623,7 +639,8 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     className="block text-sm font-medium text-nordic mb-1.5 font-sf-pro"
                     htmlFor="title"
                   >
-                    Property Title <span className="text-red-500">*</span>
+                    {t("admin.form.propertyTitle")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     className={`w-full text-base px-4 py-2.5 rounded-md border bg-white text-nordic placeholder-gray-400 transition-all font-sf-pro ${
@@ -635,9 +652,10 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     value={title}
                     onChange={(e) => {
                       setTitle(e.target.value);
-                      if (errors.title) setErrors((prev) => ({ ...prev, title: "" }));
+                      if (errors.title)
+                        setErrors((prev) => ({ ...prev, title: "" }));
                     }}
-                    placeholder="e.g. Modern Penthouse with Ocean View"
+                    placeholder={t("admin.form.titlePlaceholder")}
                     type="text"
                   />
                   {errors.title && (
@@ -653,7 +671,8 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                       className="block text-sm font-medium text-nordic mb-1.5 font-sf-pro"
                       htmlFor="price"
                     >
-                      Price (USD) <span className="text-red-500">*</span>
+                      {t("admin.form.priceUsd")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-sf-pro text-sm">
@@ -680,7 +699,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                             setPrice("");
                             setErrors((prev) => ({
                               ...prev,
-                              price: "Price is required.",
+                              price: t("admin.form.errors.priceRequired"),
                             }));
                             return;
                           }
@@ -690,8 +709,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                           if (num <= 0) {
                             setErrors((prev) => ({
                               ...prev,
-                              price:
-                                "Price must be greater than 0 (no negative or zero values).",
+                              price: t("admin.form.errors.pricePositive"),
                             }));
                           } else {
                             setErrors((prev) => ({ ...prev, price: "" }));
@@ -713,7 +731,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                       className="block text-sm font-medium text-nordic mb-1.5 font-sf-pro"
                       htmlFor="status"
                     >
-                      Status
+                      {t("admin.form.status")}
                     </label>
                     <select
                       className="w-full px-4 py-2.5 rounded-md border border-gray-200 bg-white text-nordic focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-base font-sf-pro cursor-pointer"
@@ -725,9 +743,13 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                         )
                       }
                     >
-                      <option value="for-sale">For Sale</option>
-                      <option value="for-rent">For Rent</option>
-                      <option value="sold">Sold</option>
+                      <option value="for-sale">
+                        {t("admin.form.forSale")}
+                      </option>
+                      <option value="for-rent">
+                        {t("admin.form.forRent")}
+                      </option>
+                      <option value="sold">{t("admin.form.sold")}</option>
                     </select>
                   </div>
 
@@ -736,47 +758,45 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                       className="block text-sm font-medium text-nordic mb-1.5 font-sf-pro"
                       htmlFor="category"
                     >
-                      Property Type
+                      {t("admin.form.propertyType")}
                     </label>
                     <select
                       className="w-full px-4 py-2.5 rounded-md border border-gray-200 bg-white text-nordic focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-base font-sf-pro cursor-pointer"
                       id="category"
                       value={category}
                       onChange={(e) =>
-                        setCategory(
-                          e.target.value as
-                            | "House"
-                            | "Apartment"
-                            | "Villa"
-                            | "Penthouse"
-                            | "Commercial"
-                        )
+                        setCategory(e.target.value as PropertyCategoryOption)
                       }
                     >
-                      <option value="Apartment">Apartment</option>
-                      <option value="House">House</option>
-                      <option value="Villa">Villa</option>
-                      <option value="Penthouse">Penthouse</option>
-                      <option value="Commercial">Commercial</option>
+                      <option value="Apartment">
+                        {t("categories.Apartment")}
+                      </option>
+                      <option value="House">{t("categories.House")}</option>
+                      <option value="Villa">{t("categories.Villa")}</option>
+                      <option value="Penthouse">
+                        {t("categories.Penthouse")}
+                      </option>
+                      <option value="Commercial">
+                        {t("categories.Commercial")}
+                      </option>
                     </select>
                   </div>
                 </div>
 
-                {/* Additional Price Suffix field (especially for Rent) */}
                 {status === "for-rent" && (
                   <div>
                     <label
                       className="block text-sm font-medium text-nordic mb-1.5 font-sf-pro"
                       htmlFor="priceSuffix"
                     >
-                      Price Suffix (e.g. /month, /week)
+                      {t("admin.form.priceSuffix")}
                     </label>
                     <input
                       className="w-full px-4 py-2.5 rounded-md border border-gray-200 bg-white text-nordic placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
                       id="priceSuffix"
                       value={priceSuffix}
                       onChange={(e) => setPriceSuffix(e.target.value)}
-                      placeholder="/month"
+                      placeholder={t("admin.form.priceSuffixPlaceholder")}
                       type="text"
                     />
                   </div>
@@ -790,14 +810,16 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic flex-shrink-0">
                   <span className="material-icons text-lg">description</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-bold text-nordic">Description</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-nordic">
+                  {t("admin.form.description")}
+                </h2>
               </div>
               <div className="p-4 sm:p-8">
                 <div className="mb-3 flex gap-2 border-b border-gray-100 pb-2 overflow-x-auto">
                   <button
                     className="p-1.5 text-gray-400 hover:text-nordic hover:bg-gray-50 rounded transition-colors cursor-pointer"
                     type="button"
-                    title="Bold"
+                    title={t("admin.form.bold")}
                     onClick={() => insertTextAtCursor("**", "**")}
                   >
                     <span className="material-icons text-lg">format_bold</span>
@@ -805,7 +827,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   <button
                     className="p-1.5 text-gray-400 hover:text-nordic hover:bg-gray-50 rounded transition-colors cursor-pointer"
                     type="button"
-                    title="Italic"
+                    title={t("admin.form.italic")}
                     onClick={() => insertTextAtCursor("*", "*")}
                   >
                     <span className="material-icons text-lg">
@@ -815,7 +837,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   <button
                     className="p-1.5 text-gray-400 hover:text-nordic hover:bg-gray-50 rounded transition-colors cursor-pointer"
                     type="button"
-                    title="Bullet List"
+                    title={t("admin.form.bulletList")}
                     onClick={() => insertTextAtCursor("\n- ")}
                   >
                     <span className="material-icons text-lg">
@@ -828,16 +850,18 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe the property features, neighborhood, and unique selling points..."
+                  placeholder={t("admin.form.descriptionPlaceholder")}
                   maxLength={2000}
                 />
                 <div className="mt-2 text-right text-xs text-gray-400 font-sf-pro">
-                  {description.length} / 2000 characters
+                  {t("admin.form.charactersCount", {
+                    count: description.length,
+                  })}
                 </div>
               </div>
             </div>
 
-            {/* Card 3: Gallery (Supabase Bucket Integration with Drag and Drop) */}
+            {/* Card 3: Gallery */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="px-5 sm:px-8 py-4 sm:py-6 border-b border-hint-green/30 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
                 <div className="flex items-center gap-3">
@@ -845,10 +869,14 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     <span className="material-icons text-lg">image</span>
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-nordic">Gallery</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-nordic">
+                      {t("admin.form.gallery")}
+                    </h2>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      Supabase Storage Bucket:{" "}
-                      <span className="font-semibold text-mosque">properties</span>
+                      {t("admin.form.storageBucket")}{" "}
+                      <span className="font-semibold text-mosque">
+                        properties
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -857,7 +885,6 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 </span>
               </div>
               <div className="p-4 sm:p-8">
-                {/* Upload Dropzone with Drag and Drop functionality */}
                 <div
                   onClick={() => fileInputRef.current?.click()}
                   onDragOver={handleDragOver}
@@ -868,8 +895,8 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     isDragging
                       ? "border-mosque bg-hint-green/30 ring-4 ring-mosque/20 scale-[1.01]"
                       : errors.images
-                      ? "border-rose-400 bg-rose-50/20"
-                      : "border-gray-300 bg-gray-50/50 hover:bg-hint-green/10 hover:border-mosque/40"
+                        ? "border-rose-400 bg-rose-50/20"
+                        : "border-gray-300 bg-gray-50/50 hover:bg-hint-green/10 hover:border-mosque/40"
                   }`}
                 >
                   <input
@@ -887,7 +914,9 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   <div className="flex flex-col items-center justify-center space-y-3 pointer-events-none">
                     <div
                       className={`w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-mosque transition-transform duration-300 ${
-                        isDragging ? "scale-125 text-primary" : "group-hover:scale-110"
+                        isDragging
+                          ? "scale-125 text-primary"
+                          : "group-hover:scale-110"
                       }`}
                     >
                       {isUploading ? (
@@ -903,13 +932,13 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     <div className="space-y-1">
                       <p className="text-sm sm:text-base font-medium text-nordic font-sf-pro">
                         {isUploading
-                          ? "Uploading to Supabase..."
+                          ? t("admin.form.uploading")
                           : isDragging
-                          ? "Drop images right here!"
-                          : "Click or drag images here to upload"}
+                            ? t("admin.form.dropHere")
+                            : t("admin.form.clickOrDrag")}
                       </p>
                       <p className="text-xs text-gray-400 font-sf-pro max-w-sm mx-auto">
-                        Max file size 5MB per image. Directly saved in Supabase bucket.
+                        {t("admin.form.maxFileSize")}
                       </p>
                     </div>
                   </div>
@@ -927,13 +956,12 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   </p>
                 )}
 
-                {/* Direct URL input alternative */}
                 <div className="mt-4 flex flex-col sm:flex-row gap-2">
                   <input
                     type="url"
                     value={customImageUrl}
                     onChange={(e) => setCustomImageUrl(e.target.value)}
-                    placeholder="Or paste external image URL..."
+                    placeholder={t("admin.form.pasteUrlPlaceholder")}
                     className="flex-1 px-3 py-2 text-xs rounded-lg border border-gray-200 bg-white text-nordic placeholder-gray-400 focus:ring-1 focus:ring-mosque"
                   />
                   <button
@@ -941,11 +969,10 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     onClick={handleAddCustomUrl}
                     className="px-3 py-2 text-xs font-semibold rounded-lg bg-gray-100 hover:bg-gray-200 text-nordic transition-colors cursor-pointer"
                   >
-                    Add URL
+                    {t("admin.form.addUrl")}
                   </button>
                 </div>
 
-                {/* Thumbnails Grid matching code.html with reordering & main selection */}
                 {images.length > 0 && (
                   <div className="space-y-3 mt-6">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
@@ -973,11 +1000,13 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                               src={imgUrl}
                             />
 
-                            {/* Badge: Main Cover vs Index */}
                             <div className="absolute top-2 left-2 z-10 pointer-events-none">
                               {isMain ? (
                                 <span className="bg-mosque text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm font-sf-pro uppercase tracking-wider flex items-center gap-1">
-                                  <span className="material-icons text-[12px]">star</span> Portada
+                                  <span className="material-icons text-[12px]">
+                                    star
+                                  </span>{" "}
+                                  {t("admin.form.coverBadge")}
                                 </span>
                               ) : (
                                 <span className="bg-black/60 backdrop-blur text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm font-sf-pro">
@@ -986,7 +1015,6 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                               )}
                             </div>
 
-                            {/* Quick Action Buttons (Bottom Bar) */}
                             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 flex items-center justify-between opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity z-20">
                               <div className="flex items-center gap-1">
                                 {index > 0 && (
@@ -996,10 +1024,12 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                                       e.stopPropagation();
                                       handleMoveImageLeft(index);
                                     }}
-                                    title="Mover a la izquierda"
+                                    title={t("admin.form.moveLeft")}
                                     className="w-6 h-6 rounded bg-white/90 hover:bg-white text-nordic flex items-center justify-center transition-colors cursor-pointer"
                                   >
-                                    <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">arrow_back</span>
+                                    <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">
+                                      arrow_back
+                                    </span>
                                   </button>
                                 )}
                                 {index < images.length - 1 && (
@@ -1009,10 +1039,12 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                                       e.stopPropagation();
                                       handleMoveImageRight(index);
                                     }}
-                                    title="Mover a la derecha"
+                                    title={t("admin.form.moveRight")}
                                     className="w-6 h-6 rounded bg-white/90 hover:bg-white text-nordic flex items-center justify-center transition-colors cursor-pointer"
                                   >
-                                    <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">arrow_forward</span>
+                                    <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">
+                                      arrow_forward
+                                    </span>
                                   </button>
                                 )}
                               </div>
@@ -1025,10 +1057,12 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                                       e.stopPropagation();
                                       handleSetMainImage(index);
                                     }}
-                                    title="Definir como Portada Principal"
+                                    title={t("admin.form.setAsCover")}
                                     className="w-6 h-6 rounded bg-amber-400 hover:bg-amber-300 text-nordic flex items-center justify-center transition-colors cursor-pointer"
                                   >
-                                    <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">star</span>
+                                    <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">
+                                      star
+                                    </span>
                                   </button>
                                 )}
                                 <button
@@ -1037,10 +1071,12 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                                     e.stopPropagation();
                                     handleRemoveImage(index);
                                   }}
-                                  title="Eliminar imagen"
+                                  title={t("admin.form.deleteImage")}
                                   className="w-6 h-6 rounded bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition-colors cursor-pointer"
                                 >
-                                  <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">delete</span>
+                                  <span className="material-icons text-[14px] leading-none select-none flex items-center justify-center">
+                                    delete
+                                  </span>
                                 </button>
                               </div>
                             </div>
@@ -1048,7 +1084,6 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                         );
                       })}
 
-                      {/* Add More Button */}
                       <button
                         onClick={() => fileInputRef.current?.click()}
                         className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:text-mosque hover:border-mosque hover:bg-hint-green/20 transition-all group cursor-pointer"
@@ -1058,18 +1093,18 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                           add_photo_alternate
                         </span>
                         <span className="text-xs mt-1 font-medium font-sf-pro">
-                          Agregar Más
+                          {t("admin.form.addMore")}
                         </span>
                       </button>
                     </div>
 
-                    {/* Helper text explaining drag & swap */}
                     <div className="p-2.5 bg-hint-green/20 rounded-lg border border-mosque/20 flex items-center gap-2 text-xs text-nordic font-sf-pro">
                       <span className="material-icons text-mosque text-sm flex-shrink-0">
                         swap_horiz
                       </span>
                       <span>
-                        <strong>Gestión de imágenes:</strong> Arrastra y suelta para reordenar, o usa las flechas ◀ ▶. El botón ★ define la <strong>Portada Principal (#1)</strong>. No hay límite obligatorio de fotos (mínimo 1).
+                        <strong>{t("admin.form.galleryHelpTitle")}</strong>{" "}
+                        {t("admin.form.galleryHelpText")}
                       </span>
                     </div>
                   </div>
@@ -1086,7 +1121,9 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                 <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic flex-shrink-0">
                   <span className="material-icons text-lg">place</span>
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-nordic">Location</h2>
+                <h2 className="text-base sm:text-lg font-bold text-nordic">
+                  {t("admin.form.location")}
+                </h2>
               </div>
               <div className="p-4 sm:p-6 space-y-4">
                 <div>
@@ -1094,7 +1131,8 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     className="block text-sm font-medium text-nordic mb-1.5 font-sf-pro"
                     htmlFor="location"
                   >
-                    Address <span className="text-red-500">*</span>
+                    {t("admin.form.address")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     className={`w-full px-4 py-2.5 rounded-md border bg-white text-nordic placeholder-gray-400 transition-all text-sm font-sf-pro ${
@@ -1109,7 +1147,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                       if (errors.location)
                         setErrors((prev) => ({ ...prev, location: "" }));
                     }}
-                    placeholder="Street Address, City, Zip"
+                    placeholder={t("admin.form.addressPlaceholder")}
                     type="text"
                   />
                   {errors.location && (
@@ -1119,21 +1157,20 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                   )}
                 </div>
 
-                {/* Latitude & Longitude inputs between Address and Map */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label
                       className="block text-xs font-medium text-nordic mb-1 font-sf-pro"
                       htmlFor="lat"
                     >
-                      Latitude
+                      {t("admin.form.latitude")}
                     </label>
                     <input
                       className="w-full px-3 py-2 rounded-md border border-gray-200 bg-white text-nordic placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-xs font-sf-pro"
                       id="lat"
                       value={lat}
                       onChange={(e) => setLat(e.target.value)}
-                      placeholder="e.g. 37.7749"
+                      placeholder="37.7749"
                       type="number"
                       step="any"
                     />
@@ -1143,28 +1180,29 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                       className="block text-xs font-medium text-nordic mb-1 font-sf-pro"
                       htmlFor="lng"
                     >
-                      Longitude
+                      {t("admin.form.longitude")}
                     </label>
                     <input
                       className="w-full px-3 py-2 rounded-md border border-gray-200 bg-white text-nordic placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-xs font-sf-pro"
                       id="lng"
                       value={lng}
                       onChange={(e) => setLng(e.target.value)}
-                      placeholder="e.g. -122.4194"
+                      placeholder="-122.4194"
                       type="number"
                       step="any"
                     />
                   </div>
                 </div>
 
-                {/* Map preview or interactive Leaflet map */}
                 <div className="relative z-0 [isolation:isolate] h-48 sm:h-56 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                   {hasValidCoords ? (
                     <div className="relative w-full h-full">
                       <DynamicReactLeafletMap
                         coordinates={{ lat: parsedLatNum, lng: parsedLngNum }}
-                        title={title.trim() || "Property Location"}
-                        location={location.trim() || `${parsedLatNum}, ${parsedLngNum}`}
+                        title={title.trim() || t("admin.form.location")}
+                        location={
+                          location.trim() || `${parsedLatNum}, ${parsedLngNum}`
+                        }
                       />
                     </div>
                   ) : (
@@ -1179,7 +1217,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                           <span className="material-icons text-sm text-mosque">
                             add_location_alt
                           </span>
-                          Ingresa latitud y longitud para ver el mapa
+                          {t("admin.form.enterCoordsHint")}
                         </span>
                       </div>
                     </div>
@@ -1188,13 +1226,15 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
               </div>
             </div>
 
-            {/* Card 5: Details (xl:sticky xl:top-40) */}
+            {/* Card 5: Details */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden xl:sticky xl:top-40">
               <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-hint-green/30 flex items-center gap-3 bg-gradient-to-r from-hint-green/10 to-transparent">
                 <div className="w-8 h-8 rounded-full bg-hint-green flex items-center justify-center text-nordic flex-shrink-0">
                   <span className="material-icons text-lg">straighten</span>
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-nordic">Details</h2>
+                <h2 className="text-base sm:text-lg font-bold text-nordic">
+                  {t("admin.form.details")}
+                </h2>
               </div>
               <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -1203,7 +1243,8 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                       className="text-xs text-gray-500 font-medium font-sf-pro mb-1 block"
                       htmlFor="area"
                     >
-                      Area (m²) <span className="text-red-500">*</span>
+                      {t("admin.form.areaSqm")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       className={`w-full text-left px-3 py-2 rounded border bg-gray-50 text-nordic transition-all font-sf-pro text-sm ${
@@ -1232,7 +1273,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                       className="text-xs text-gray-500 font-medium font-sf-pro mb-1 block"
                       htmlFor="year"
                     >
-                      Year Built
+                      {t("admin.form.yearBuilt")}
                     </label>
                     <input
                       className={`w-full text-left px-3 py-2 rounded border bg-gray-50 text-nordic transition-all font-sf-pro text-sm ${
@@ -1260,15 +1301,14 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
 
                 <hr className="border-gray-100" />
 
-                {/* Counters matching code.html */}
+                {/* Counters */}
                 <div className="space-y-4">
-                  {/* Bedrooms */}
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium text-nordic font-sf-pro flex items-center gap-2">
                       <span className="material-icons text-gray-400 text-sm">
                         bed
                       </span>{" "}
-                      Bedrooms
+                      {t("admin.form.bedrooms")}
                     </label>
                     <div className="flex items-center border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
                       <button
@@ -1294,13 +1334,12 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     </div>
                   </div>
 
-                  {/* Bathrooms */}
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium text-nordic font-sf-pro flex items-center gap-2">
                       <span className="material-icons text-gray-400 text-sm">
                         shower
                       </span>{" "}
-                      Bathrooms
+                      {t("admin.form.bathrooms")}
                     </label>
                     <div className="flex items-center border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
                       <button
@@ -1326,13 +1365,12 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                     </div>
                   </div>
 
-                  {/* Parking */}
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium text-nordic font-sf-pro flex items-center gap-2">
                       <span className="material-icons text-gray-400 text-sm">
                         directions_car
                       </span>{" "}
-                      Parking
+                      {t("admin.form.parking")}
                     </label>
                     <div className="flex items-center border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
                       <button
@@ -1361,10 +1399,10 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
 
                 <hr className="border-gray-100" />
 
-                {/* Amenities Checkboxes matching code.html */}
+                {/* Amenities Checkboxes */}
                 <div>
-                  <h3 className="text-sm font-bold text-nordic mb-3 font-sf-pro uppercase tracking-wider text-xs text-gray-500">
-                    Amenities
+                  <h3 className="text-xs font-bold mb-3 font-sf-pro uppercase tracking-wider text-gray-500">
+                    {t("admin.form.amenities")}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {AVAILABLE_AMENITIES.map((item) => {
@@ -1381,7 +1419,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                             className="w-4 h-4 text-mosque border-gray-300 rounded focus:ring-mosque cursor-pointer accent-[#006655]"
                           />
                           <span className="text-sm text-gray-700 font-sf-pro group-hover:text-nordic transition-colors">
-                            {item}
+                            {getAmenityLabel(item)}
                           </span>
                         </label>
                       );
@@ -1391,22 +1429,21 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
 
                 <hr className="border-gray-100" />
 
-                {/* Additional Settings (Missing fields added appropriately) */}
+                {/* Listing Flags */}
                 <div>
-                  <h3 className="text-sm font-bold text-nordic mb-3 font-sf-pro uppercase tracking-wider text-xs text-gray-500">
-                    Listing Flags
+                  <h3 className="text-xs font-bold mb-3 font-sf-pro uppercase tracking-wider text-gray-500">
+                    {t("admin.form.listingFlags")}
                   </h3>
                   <div className="space-y-4">
-                    {/* Active / Inactive Status Switch */}
                     <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/70 flex items-center justify-between">
                       <div className="pr-2">
                         <label className="text-sm font-semibold text-nordic block">
-                          Propiedad Activa
+                          {t("admin.form.activeProperty")}
                         </label>
                         <p className="text-xs text-gray-500 mt-0.5">
                           {isActive
-                            ? "Visible en filtros de búsqueda y HomeScreen."
-                            : "Desactivada: Oculta para clientes, visible solo en administración."}
+                            ? t("admin.form.activeDesc")
+                            : t("admin.form.inactiveDesc")}
                         </p>
                       </div>
                       <button
@@ -1415,7 +1452,11 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-mosque/30 flex-shrink-0 ${
                           isActive ? "bg-mosque" : "bg-gray-300"
                         }`}
-                        title={isActive ? "Desactivar propiedad" : "Activar propiedad"}
+                        title={
+                          isActive
+                            ? t("admin.properties.deactivateTitle")
+                            : t("admin.properties.activateTitle")
+                        }
                       >
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -1427,7 +1468,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
 
                     <label className="flex items-center justify-between cursor-pointer">
                       <span className="text-sm font-medium text-nordic font-sf-pro">
-                        Feature on Homepage
+                        {t("admin.form.featureOnHomepage")}
                       </span>
                       <input
                         type="checkbox"
@@ -1439,13 +1480,13 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
 
                     <div>
                       <label className="text-xs text-gray-500 font-medium font-sf-pro mb-1 block">
-                        Custom Badge (optional)
+                        {t("admin.form.customBadge")}
                       </label>
                       <input
                         type="text"
                         value={badge}
                         onChange={(e) => setBadge(e.target.value)}
-                        placeholder="e.g. EXCLUSIVE, PRICE DROP"
+                        placeholder={t("admin.form.customBadgePlaceholder")}
                         className="w-full text-left px-3 py-2 rounded border border-gray-200 bg-gray-50 text-nordic focus:bg-white focus:ring-1 focus:ring-mosque focus:border-mosque transition-all font-sf-pro text-sm"
                       />
                     </div>
@@ -1455,40 +1496,40 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
             </div>
           </div>
 
-          {/* Mobile Bottom Bar matching code.html */}
+          {/* Mobile Bottom Bar */}
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-xl md:hidden z-40 flex gap-3">
             <button
               type="button"
               onClick={() => router.push("/admin/properties")}
-              className="flex-1 py-3 rounded-lg border border-gray-300 bg-white text-nordic font-medium font-sf-pro"
+              className="flex-1 py-3 rounded-lg border border-gray-300 bg-white text-nordic font-medium font-sf-pro cursor-pointer"
             >
-              Cancel
+              {t("admin.form.cancel")}
             </button>
             <button
               type="button"
               disabled={isPending || isUploading}
               onClick={handleSubmit}
-              className="flex-1 py-3 rounded-lg bg-mosque text-white font-medium font-sf-pro flex justify-center items-center gap-2 disabled:opacity-50"
+              className="flex-1 py-3 rounded-lg bg-mosque text-white font-medium font-sf-pro flex justify-center items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               <span className="material-icons text-sm">
                 {isPending ? "hourglass_empty" : "save"}
               </span>
               {isPending
-                ? "Saving..."
+                ? t("admin.form.saving")
                 : isEdit
-                ? "Update"
-                : "Save"}
+                  ? t("admin.form.updateShort")
+                  : t("admin.form.saveShort")}
             </button>
           </div>
         </form>
       </main>
 
-      {/* Footer matching code.html */}
+      {/* Footer */}
       <footer className="bg-white border-t border-gray-100 py-8 mt-12 mb-16 md:mb-0">
         <div className="max-w-7xl mx-auto px-4 text-center text-xs text-gray-400 font-sf-pro">
-          © 2026 LuxeEstate Real Estate Inc. All rights reserved. <br />
+          {t("admin.form.footerRights")} <br />
           <span className="mt-2 block text-gray-300">
-            Designed for modern agencies.
+            {t("admin.form.footerTagline")}
           </span>
         </div>
       </footer>

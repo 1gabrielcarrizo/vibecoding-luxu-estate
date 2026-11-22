@@ -69,32 +69,32 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
   // Local state for all filters
   const [location, setLocation] = useState(initialFilters.location || "");
   const [minPrice, setMinPrice] = useState(
-    initialFilters.minPrice !== undefined ? initialFilters.minPrice : 1200000
+    initialFilters.minPrice !== undefined ? initialFilters.minPrice : MIN_LIMIT
   );
   const [maxPrice, setMaxPrice] = useState(
-    initialFilters.maxPrice !== undefined ? initialFilters.maxPrice : 4500000
+    initialFilters.maxPrice !== undefined ? initialFilters.maxPrice : MAX_LIMIT
   );
   const [minPriceInput, setMinPriceInput] = useState(
     formatWithCommas(
-      initialFilters.minPrice !== undefined ? initialFilters.minPrice : 1200000
+      initialFilters.minPrice !== undefined ? initialFilters.minPrice : MIN_LIMIT
     )
   );
   const [maxPriceInput, setMaxPriceInput] = useState(
     formatWithCommas(
-      initialFilters.maxPrice !== undefined ? initialFilters.maxPrice : 4500000
+      initialFilters.maxPrice !== undefined ? initialFilters.maxPrice : MAX_LIMIT
     )
   );
   const [propertyType, setPropertyType] = useState<PropertyCategory | "Any Type">(
     initialFilters.propertyType || "Any Type"
   );
   const [beds, setBeds] = useState(
-    initialFilters.beds !== undefined ? initialFilters.beds : 3
+    initialFilters.beds !== undefined ? initialFilters.beds : 0
   );
   const [baths, setBaths] = useState(
-    initialFilters.baths !== undefined ? initialFilters.baths : 2
+    initialFilters.baths !== undefined ? initialFilters.baths : 0
   );
   const [amenities, setAmenities] = useState<string[]>(
-    initialFilters.amenities || ["Swimming Pool", "High-speed Wifi"]
+    initialFilters.amenities || []
   );
 
   // Sync state whenever modal opens or initialFilters change
@@ -103,11 +103,11 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
       const initMin =
         initialFilters.minPrice !== undefined
           ? initialFilters.minPrice
-          : 1200000;
+          : MIN_LIMIT;
       const initMax =
         initialFilters.maxPrice !== undefined
           ? initialFilters.maxPrice
-          : 4500000;
+          : MAX_LIMIT;
 
       setLocation(initialFilters.location || "");
       setMinPrice(initMin);
@@ -115,13 +115,9 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
       setMinPriceInput(formatWithCommas(initMin));
       setMaxPriceInput(formatWithCommas(initMax));
       setPropertyType(initialFilters.propertyType || "Any Type");
-      setBeds(initialFilters.beds !== undefined ? initialFilters.beds : 3);
-      setBaths(initialFilters.baths !== undefined ? initialFilters.baths : 2);
-      setAmenities(
-        initialFilters.amenities && initialFilters.amenities.length > 0
-          ? initialFilters.amenities
-          : ["Swimming Pool", "High-speed Wifi"]
-      );
+      setBeds(initialFilters.beds !== undefined ? initialFilters.beds : 0);
+      setBaths(initialFilters.baths !== undefined ? initialFilters.baths : 0);
+      setAmenities(initialFilters.amenities || []);
     }
   }, [isOpen, initialFilters]);
 
@@ -158,10 +154,10 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
   // Price range formatted header text
   const priceRangeLabel = useMemo(() => {
     if (minPrice <= MIN_LIMIT && maxPrice >= MAX_LIMIT) {
-      return "Any Price";
+      return t("filters.anyPrice");
     }
     return `${formatPriceShort(minPrice)} – ${formatPriceShort(maxPrice)}`;
-  }, [minPrice, maxPrice]);
+  }, [minPrice, maxPrice, t]);
 
   // Price slider handlers
   const handleMinSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {

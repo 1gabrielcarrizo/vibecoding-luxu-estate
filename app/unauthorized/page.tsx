@@ -1,8 +1,18 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { LanguageSelector } from "@/components/common/LanguageSelector";
 
 export default function UnauthorizedPage() {
+  const { t } = useTranslation();
+
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center p-4 sm:p-6 text-nordic">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center p-4 sm:p-6 text-nordic relative">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+        <LanguageSelector />
+      </div>
+
       <div className="w-full max-w-md bg-surface dark:bg-[#152e2a] rounded-2xl shadow-xl border border-mosque/15 p-6 sm:p-8 text-center backdrop-blur-sm">
         <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/10 text-amber-600 mb-6">
           <span className="material-symbols-outlined text-3xl sm:text-4xl">
@@ -11,11 +21,11 @@ export default function UnauthorizedPage() {
         </div>
 
         <h1 className="text-2xl font-bold tracking-tight text-nordic dark:text-white mb-3">
-          Acceso Restringido
+          {t("unauthorized.title")}
         </h1>
 
         <p className="text-sm text-nordic/70 dark:text-gray-300 leading-relaxed mb-8">
-          Esta sección está reservada exclusivamente para el equipo administrativo de Luxe Estate. Tu cuenta no cuenta con permisos de administrador actualmente.
+          {t("unauthorized.description")}
         </p>
 
         <div className="space-y-3">
@@ -24,7 +34,7 @@ export default function UnauthorizedPage() {
             className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-mosque hover:bg-mosque-light text-white text-sm font-semibold transition-all shadow-md hover:shadow-lg cursor-pointer"
           >
             <span className="material-symbols-outlined text-lg">home</span>
-            <span>Volver al Inicio</span>
+            <span>{t("unauthorized.backHome")}</span>
           </Link>
 
           <Link
@@ -32,15 +42,14 @@ export default function UnauthorizedPage() {
             className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-mosque/20 hover:bg-mosque/5 text-nordic dark:text-gray-200 text-sm font-medium transition-all cursor-pointer"
           >
             <span className="material-symbols-outlined text-lg">sync_alt</span>
-            <span>Iniciar Sesión con otra cuenta</span>
+            <span>{t("unauthorized.switchAccount")}</span>
           </Link>
         </div>
 
         <div className="mt-8 pt-6 border-t border-mosque/10 text-xs text-nordic/50 dark:text-gray-400">
-          ¿Crees que se trata de un error? Contacta con el superadministrador del sistema.
+          {t("unauthorized.contactNote")}
         </div>
       </div>
     </div>
   );
 }
-

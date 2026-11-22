@@ -3,11 +3,15 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+type CallbackStage = "signingIn" | "verifying" | "success";
 
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [statusText, setStatusText] = useState("Iniciando sesión...");
+  const { t } = useTranslation();
+  const [stage, setStage] = useState<CallbackStage>("signingIn");
 
   useEffect(() => {
     let isMounted = true;
@@ -34,7 +38,7 @@ function CallbackContent() {
         const code = searchParams.get("code");
 
         if (code) {
-          setStatusText("Verificando credenciales...");
+          if (isMounted) setStage("verifying");
           const { error: exchangeError } =
             await supabase.auth.exchangeCodeForSession(code);
           if (exchangeError) {
@@ -45,21 +49,18 @@ function CallbackContent() {
           }
         }
 
-        // Check if session is established
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
         if (session) {
           if (isMounted) {
-            setStatusText("¡Autenticado con éxito! Redirigiendo...");
+            setStage("success");
           }
-          // Full navigation so all server components and middleware see updated cookies
           window.location.href = safeNext;
           return;
         }
 
-        // Wait for auth state change if session is still settling (e.g. from hash fragment)
         const {
           data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -69,17 +70,10 @@ function CallbackContent() {
           }
         });
 
-        // Safety fallback timer: if no session after 2 seconds, redirect to safeNext or login
         const timer = setTimeout(async () => {
           subscription.unsubscribe();
-          const {
-            data: { session: finalSession },
-          } = await supabase.auth.getSession();
-          if (finalSession) {
-            window.location.href = safeNext;
-          } else {
-            window.location.href = safeNext;
-          }
+          await supabase.auth.getSession();
+          window.location.href = safeNext;
         }, 2000);
 
         return () => {
@@ -99,6 +93,13 @@ function CallbackContent() {
     };
   }, [searchParams, router]);
 
+  const statusText =
+    stage === "verifying"
+      ? t("auth.verifyingCredentials")
+      : stage === "success"
+        ? t("auth.authSuccessRedirect")
+        : t("auth.signingIn");
+
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark flex flex-col items-center justify-center p-4 font-display">
       <div className="bg-surface dark:bg-[#152e2a] rounded-2xl shadow-soft p-8 max-w-sm w-full text-center border border-white/50 dark:border-primary/20 backdrop-blur-sm">
@@ -107,7 +108,7 @@ function CallbackContent() {
           {statusText}
         </h2>
         <p className="text-xs text-nordic/60 dark:text-gray-400">
-          Por favor espera mientras completamos tu acceso.
+          {t("auth.waitSession")}
         </p>
       </div>
     </div>
@@ -127,4 +128,3 @@ export default function AuthCallbackPage() {
     </Suspense>
   );
 }
-

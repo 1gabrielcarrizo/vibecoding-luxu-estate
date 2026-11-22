@@ -111,7 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             href="/"
             onClick={() => onTabChange?.("Buy")}
             className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 group cursor-pointer focus:outline-none"
-            aria-label="Return to LuxeEstate home"
+            aria-label={t("auth.returnHome")}
           >
             <span className="material-symbols-outlined text-mosque text-2xl sm:text-3xl font-bold transition-transform duration-300 group-hover:scale-110">
               villa
@@ -215,10 +215,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </div>
                       <div className="overflow-hidden">
                         <p className="text-sm font-semibold text-nordic dark:text-white truncate">
-                          {displayName || "User"}
+                          {displayName || t("nav.userFallback")}
                         </p>
                         <p className="text-xs text-nordic/60 dark:text-gray-400 truncate">
-                          {email || "Signed in"}
+                          {email || t("nav.signedIn")}
                         </p>
                         <div className="flex items-center gap-1.5 mt-1">
                           {provider && (
@@ -228,7 +228,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                           )}
                           {role && (
                             <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full bg-nordic/10 text-nordic dark:bg-white/10 dark:text-white capitalize">
-                              {role}
+                              {t(`nav.roles.${role}`) !== `nav.roles.${role}`
+                                ? t(`nav.roles.${role}`)
+                                : role}
                             </span>
                           )}
                         </div>
@@ -272,7 +274,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           <span className="material-symbols-outlined text-lg">
                             admin_panel_settings
                           </span>
-                          <span>Panel Admin</span>
+                          <span>{t("nav.adminPanel")}</span>
                         </Link>
                       )}
                       <button
@@ -368,10 +370,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                   <div className="overflow-hidden">
                     <p className="text-sm font-semibold text-nordic truncate">
-                      {displayName || "User"}
+                      {displayName || t("nav.userFallback")}
                     </p>
                     <p className="text-xs text-nordic/60 truncate">
-                      {email || "Signed in"}
+                      {email || t("nav.signedIn")}
                     </p>
                   </div>
                 </div>
@@ -394,7 +396,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span className="material-symbols-outlined text-lg">
                       admin_panel_settings
                     </span>
-                    <span>Panel Administrador</span>
+                    <span>{t("nav.adminPanel")}</span>
                   </Link>
                 )}
                 <button
