@@ -381,7 +381,9 @@
     "priceAlertsLabel": "Alertes de Prix",
     "priceDropAlerts": "M'avertir en cas de baisse de prix d'un favori",
     "visitRemindersLabel": "Rappels",
-    "tourReminders": "Rappels de visites programmées"
+    "tourReminders": "Rappels de visites programmées",
+    "viewPhoto": "Agrandir la photo de profil",
+    "openFullImage": "Ouvrir l'image dans un nouvel onglet"
   },
   "notifications": {
     "title": "Notifications",
@@ -519,7 +521,8 @@
         "All Users": "Tous",
         "Agents": "Agents",
         "Brokers": "Courtiers",
-        "Admins": "Admins"
+        "Admins": "Admins",
+        "Users": "Utilisateurs"
       },
       "colDetails": "Informations",
       "colRoleStatus": "Rôle & Statut",
@@ -529,10 +532,11 @@
       "noUsersSub": "Essayez d'ajuster votre recherche ou vos filtres.",
       "roles": {
         "admin": "Administrateur",
+        "superAdmin": "Super Admin",
         "broker": "Courtier Senior",
         "brokerShort": "Courtier",
         "agent": "Agent",
-        "user": "Lecteur",
+        "user": "Utilisateur",
         "suspended": "Suspendu"
       },
       "status": {
@@ -545,9 +549,16 @@
         "salesYtd": "Ventes (Année)",
         "accessLevel": "Niveau Accès",
         "lastLogin": "Dernière Connexion",
-        "level5": "Niveau 5"
+        "level5": "Niveau 5",
+        "standardAccess": "Standard",
+        "superAccess": "Total (Super)"
       },
       "changeRole": "Changer de Rôle",
+      "youBadge": "Vous",
+      "protectedRole": "Protégé",
+      "yourAccount": "Votre compte",
+      "superAdminLockedHint": "Le rôle du Super Administrateur ne peut pas être modifié.",
+      "ownRoleLockedHint": "Vous ne pouvez pas modifier votre propre rôle.",
       "suspendUser": "Suspendre l'Utilisateur",
       "showing": "Affichage de",
       "to": "à",
@@ -561,7 +572,7 @@
       "systemRoleLabel": "Rôle Système",
       "roleAgentDesc": "Agent (Spécialiste Immobilier)",
       "roleAdminDesc": "Administrateur (Contrôle Total)",
-      "roleUserDesc": "Lecteur (Client / Lecture seule)",
+      "roleUserDesc": "Utilisateur (Accès standard)",
       "cancel": "Annuler",
       "adding": "Ajout...",
       "toastRoleUpdated": "Rôle de {name} mis à jour en {role}.",

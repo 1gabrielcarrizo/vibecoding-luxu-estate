@@ -11,6 +11,8 @@ import React, {
 } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "./client";
+import { isSuperAdminEmail } from "./superAdmin";
+import { getHighResAvatarUrl } from "@/lib/utils/avatar";
 import { UserRole } from "@/types/database.types";
 
 interface AuthContextType {
@@ -26,10 +28,10 @@ interface AuthContextType {
   refreshRole: () => Promise<void>;
   signInWithGoogle: (
     redirectToUrl?: string
-  ) => Promise<{ data?: any; error: AuthError | null }>;
+  ) => Promise<{ data?: unknown; error: AuthError | null }>;
   signInWithGithub: (
     redirectToUrl?: string
-  ) => Promise<{ data?: any; error: AuthError | null }>;
+  ) => Promise<{ data?: unknown; error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
 }
 
@@ -38,14 +40,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 function extractAvatarUrl(user: User | null): string | null {
   if (!user) return null;
   const meta = user.user_metadata || {};
-  if (meta.avatar_url) return meta.avatar_url;
-  if (meta.picture) return meta.picture;
+  if (meta.avatar_url) return getHighResAvatarUrl(meta.avatar_url, 400);
+  if (meta.picture) return getHighResAvatarUrl(meta.picture, 400);
 
   if (user.identities && user.identities.length > 0) {
     for (const identity of user.identities) {
       const idData = identity.identity_data || {};
-      if (idData.avatar_url) return idData.avatar_url;
-      if (idData.picture) return idData.picture;
+      if (idData.avatar_url) return getHighResAvatarUrl(idData.avatar_url, 400);
+      if (idData.picture) return getHighResAvatarUrl(idData.picture, 400);
     }
   }
   return null;
@@ -244,7 +246,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const displayName = useMemo(() => extractDisplayName(user), [user]);
   const provider = useMemo(() => extractProvider(user), [user]);
   const email = user?.email || null;
-  const isAdmin = role === "admin" || user?.app_metadata?.role === "admin";
+  const isAdmin =
+    role === "admin" ||
+    user?.app_metadata?.role === "admin" ||
+    isSuperAdminEmail(email);
 
   const value = useMemo(
     () => ({

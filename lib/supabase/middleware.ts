@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { Database } from "@/types/database.types";
+import { isSuperAdminEmail } from "./superAdmin";
 
 const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -64,12 +65,13 @@ export async function updateSession(request: NextRequest) {
     const userEmail = (user.email || "").toLowerCase();
 
     // Verify admin role:
-    // 1. Env configured admin emails
+    // 1. Protected Super Admin or env-configured admin emails
     // 2. app_metadata (secure, set only by server/service_role - NEVER user_metadata)
+    const isSuperAdmin = isSuperAdminEmail(userEmail);
     const isEnvAdmin = ADMIN_EMAILS.length > 0 && ADMIN_EMAILS.includes(userEmail);
     const isAppMetadataAdmin = user.app_metadata?.role === "admin";
 
-    let hasAdminRole = isEnvAdmin || isAppMetadataAdmin;
+    let hasAdminRole = isSuperAdmin || isEnvAdmin || isAppMetadataAdmin;
 
     // 3. Database user_roles table check
     if (!hasAdminRole) {

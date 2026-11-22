@@ -381,7 +381,9 @@
     "priceAlertsLabel": "Price Alerts",
     "priceDropAlerts": "Notify me on price drops for saved homes",
     "visitRemindersLabel": "Reminders",
-    "tourReminders": "Upcoming scheduled tour reminders"
+    "tourReminders": "Upcoming scheduled tour reminders",
+    "viewPhoto": "View profile photo",
+    "openFullImage": "Open image in new tab"
   },
   "notifications": {
     "title": "Notifications",
@@ -519,7 +521,8 @@
         "All Users": "All Users",
         "Agents": "Agents",
         "Brokers": "Brokers",
-        "Admins": "Admins"
+        "Admins": "Admins",
+        "Users": "Users"
       },
       "colDetails": "User Details",
       "colRoleStatus": "Role & Status",
@@ -529,10 +532,11 @@
       "noUsersSub": "Try adjusting your search criteria or role filters.",
       "roles": {
         "admin": "Administrator",
+        "superAdmin": "Super Admin",
         "broker": "Senior Broker",
         "brokerShort": "Broker",
         "agent": "Agent",
-        "user": "Viewer",
+        "user": "User",
         "suspended": "Suspended"
       },
       "status": {
@@ -545,9 +549,16 @@
         "salesYtd": "Sales (YTD)",
         "accessLevel": "Access Level",
         "lastLogin": "Last Login",
-        "level5": "Level 5"
+        "level5": "Level 5",
+        "standardAccess": "Standard",
+        "superAccess": "Full (Super)"
       },
       "changeRole": "Change Role",
+      "youBadge": "You",
+      "protectedRole": "Protected",
+      "yourAccount": "Your account",
+      "superAdminLockedHint": "The Super Admin role cannot be modified.",
+      "ownRoleLockedHint": "You cannot change your own role.",
       "suspendUser": "Suspend User",
       "showing": "Showing",
       "to": "to",
@@ -561,7 +572,7 @@
       "systemRoleLabel": "System Role",
       "roleAgentDesc": "Agent (Real Estate Specialist)",
       "roleAdminDesc": "Administrator (Full Control)",
-      "roleUserDesc": "Viewer (Client / Read-only)",
+      "roleUserDesc": "User (Standard access)",
       "cancel": "Cancel",
       "adding": "Adding...",
       "toastRoleUpdated": "Role updated for {name} to {role}.",

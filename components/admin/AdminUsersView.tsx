@@ -9,6 +9,15 @@ import {
 } from "@/app/actions/roles";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { useRealtimeTableSync } from "@/lib/supabase/useRealtimeSync";
+import { isSuperAdminEmail } from "@/lib/supabase/superAdmin";
+import { getHighResAvatarUrl } from "@/lib/utils/avatar";
+import { AvatarLightboxModal } from "@/components/common/AvatarLightboxModal";
+
+type FunctionalRole = "admin" | "user";
+
+function normalizeFunctionalRole(role?: string | null): FunctionalRole {
+  return role === "admin" ? "admin" : "user";
+}
 
 interface DirectoryUserItem {
   id: string;
@@ -16,7 +25,7 @@ interface DirectoryUserItem {
   name: string;
   email: string;
   avatar: string | null;
-  role: "admin" | "broker" | "agent" | "user" | "suspended" | string;
+  role: FunctionalRole;
   status: "Active" | "Away" | "Inactive";
   statusDot?: "green" | "yellow";
   propertiesCount: string | number;
@@ -51,12 +60,12 @@ const TEMPLATE_USERS: DirectoryUserItem[] = [
     email: "sarah.miller@luxuryestates.com",
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuC56qX3A4ZIRCJqxha17327kptmQpANrrIT6CLj09DTQ7ZLjB0fF9cMlC1MCJKAs3hr5oUDilNrCcdzUdLAZtwX25YQblIBzVpUSa4XfyFc_WJDGvW0T1svVr884aNmze31Cl_2UkKik03EROGXyke1i6PuTAZaAtf8yMN8xLPJIAdQ5Gc1m_SqkCpADlwXPZ8fL-BWzj4Ck3PpZ1GjAGsyq9Ul9L3SmH_UnJzI-NbipFCmtQI2JJiB0TiUhogRjIBNn8TCUkubVhs",
-    role: "broker",
+    role: "user",
     status: "Active",
     statusDot: "green",
-    propertiesCount: "24",
-    secondaryStatKey: "salesYtd",
-    secondaryStatValue: "$4.2M",
+    propertiesCount: "-",
+    secondaryStatKey: "accessLevel",
+    secondaryStatValue: "Standard",
     isHighlighted: true,
   },
   {
@@ -65,11 +74,11 @@ const TEMPLATE_USERS: DirectoryUserItem[] = [
     email: "marcus.c@luxuryestates.com",
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuD6y5hdg1R7gLFSihyqty_LGTd8uQTZHpyo_det0XoV6ak0U5H9xxuTlfFTXPP3vX9dhpeIETDGBcowSSiDyHVTXQm_0Xv8KXRj-n2PLGHHBlmSsYSxlZPErAGQSycUYUlDT1FNqac9hxwpfwQ3MjO4tdj7q9Pmb8WHgzBaOMain4vzaZbThFi3Hg9-qkhofOnAi7hJ1JD3EgK6Zu5iWLE8NDph0Uhd8iHYZHNUfUzBfJN1E6NRB2EKwbx7MmgWloP-YysiRt4IfrE",
-    role: "agent",
+    role: "user",
     status: "Away",
-    propertiesCount: "8",
-    secondaryStatKey: "salesYtd",
-    secondaryStatValue: "$1.8M",
+    propertiesCount: "-",
+    secondaryStatKey: "accessLevel",
+    secondaryStatValue: "Standard",
   },
   {
     id: "USR-1029",
@@ -103,11 +112,11 @@ const TEMPLATE_USERS: DirectoryUserItem[] = [
     email: "david.o@luxuryestates.com",
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAg2jyeiLRo7sss3zX5bvvLWpJNUabZqBCz9HIWx2jcHtvG5KfoaquiQRmwZWTLpD4Rr3jS3iRzWjTa0VLibUkWK_MxV6fzcMISmS1SEsNldZilln2O3A6992ZnLgEiD8ASlQ1cFmc-XvY1X7sK_3pBGUWYHWWutX34hxrAZ-HsCMlmBgatcSpPiTXo4ICkrQ7uSf490A6Bxx60h1ac_QZQl46jo1CciIMS6fFu2O2ZozSmTaFlwiOWhN1vo5n4gXQ0gjh785OlBLQ",
-    role: "agent",
+    role: "user",
     status: "Active",
-    propertiesCount: "14",
-    secondaryStatKey: "salesYtd",
-    secondaryStatValue: "$3.1M",
+    propertiesCount: "-",
+    secondaryStatKey: "accessLevel",
+    secondaryStatValue: "Standard",
   },
 ];
 
@@ -119,22 +128,29 @@ interface AdminUsersViewProps {
 
 export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   initialUsers = [],
+  currentUserId = null,
+  currentUserEmail = null,
 }) => {
   const { t } = useTranslation();
 
   // State
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<
-    "All Users" | "Agents" | "Brokers" | "Admins"
-  >("All Users");
+  const [activeTab, setActiveTab] = useState<"All Users" | "Admins" | "Users">(
+    "All Users"
+  );
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [previewAvatar, setPreviewAvatar] = useState<{
+    src: string;
+    name: string;
+    subtitle: string;
+  } | null>(null);
   const pageSize = 5;
 
   // Add User modal state
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
-  const [newRole, setNewRole] = useState<UserRole>("agent");
+  const [newRole, setNewRole] = useState<FunctionalRole>("user");
   const [isPendingAssign, startAssignTransition] = useTransition();
 
   // Notification Toast
@@ -203,9 +219,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       const row = payload.new as Partial<UserRoleRow> | undefined;
       if (!row?.id) return;
 
-      const roleVal = row.role || "user";
+      const roleVal = normalizeFunctionalRole(row.role);
       const cleanName = row.full_name?.trim() || undefined;
       const cleanAvatar = row.avatar_url?.trim() || null;
+      const isSuper = isSuperAdminEmail(row.email);
 
       if (payload.eventType === "UPDATE") {
         setUserOverrides((prev) => ({
@@ -217,9 +234,13 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
             ...(row.email ? { email: row.email } : {}),
             role: roleVal,
             statusDot: roleVal === "admin" ? "yellow" : "green",
-            propertiesCount: roleVal === "agent" ? 12 : "-",
-            secondaryStatKey: roleVal === "admin" ? "accessLevel" : "salesYtd",
-            secondaryStatValue: roleVal === "admin" ? "Level 5" : "$2.4M",
+            propertiesCount: "-",
+            secondaryStatKey: "accessLevel",
+            secondaryStatValue: isSuper
+              ? "Super"
+              : roleVal === "admin"
+                ? "Level 5"
+                : "Standard",
           },
         }));
       } else if (payload.eventType === "INSERT") {
@@ -235,9 +256,13 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
           role: roleVal,
           status: "Active",
           statusDot: roleVal === "admin" ? "yellow" : "green",
-          propertiesCount: roleVal === "agent" ? 12 : "-",
-          secondaryStatKey: roleVal === "admin" ? "accessLevel" : "salesYtd",
-          secondaryStatValue: roleVal === "admin" ? "Level 5" : "$2.4M",
+          propertiesCount: "-",
+          secondaryStatKey: "accessLevel",
+          secondaryStatValue: isSuper
+            ? "Super"
+            : roleVal === "admin"
+              ? "Level 5"
+              : "Standard",
         };
         setAddedUsers((prev) => [
           newItem,
@@ -260,6 +285,8 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       const shortId = u.id.slice(0, 4).toUpperCase();
       const realFullName = u.full_name?.trim();
       const realAvatar = u.avatar_url?.trim() || null;
+      const roleVal = normalizeFunctionalRole(u.role);
+      const isSuper = isSuperAdminEmail(email);
 
       return {
         id: `USR-${shortId}`,
@@ -267,12 +294,16 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         name: realFullName || formatFallbackName(email, shortId),
         email,
         avatar: realAvatar,
-        role: u.role,
+        role: isSuper ? "admin" : roleVal,
         status: "Active",
-        statusDot: u.role === "admin" ? "yellow" : "green",
-        propertiesCount: u.role === "agent" ? 12 : "-",
-        secondaryStatKey: u.role === "admin" ? "accessLevel" : "salesYtd",
-        secondaryStatValue: u.role === "admin" ? "Level 5" : "$2.4M",
+        statusDot: roleVal === "admin" || isSuper ? "yellow" : "green",
+        propertiesCount: "-",
+        secondaryStatKey: "accessLevel",
+        secondaryStatValue: isSuper
+          ? "Super"
+          : roleVal === "admin"
+            ? "Level 5"
+            : "Standard",
         isHighlighted: idx === 0,
       };
     });
@@ -306,9 +337,6 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
   const getRoleDisplayLabel = (role: string): string => {
     if (role === "admin") return t("admin.users.roles.admin");
-    if (role === "broker") return t("admin.users.roles.broker");
-    if (role === "agent") return t("admin.users.roles.agent");
-    if (role === "suspended") return t("admin.users.roles.suspended");
     return t("admin.users.roles.user");
   };
 
@@ -322,12 +350,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         user.id.toLowerCase().includes(searchQuery.toLowerCase());
 
       let matchesTab = true;
-      if (activeTab === "Agents") {
-        matchesTab = user.role === "agent";
-      } else if (activeTab === "Brokers") {
-        matchesTab = user.role === "broker";
-      } else if (activeTab === "Admins") {
+      if (activeTab === "Admins") {
         matchesTab = user.role === "admin";
+      } else if (activeTab === "Users") {
+        matchesTab = user.role !== "admin";
       }
 
       return matchesSearch && matchesTab;
@@ -340,29 +366,54 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedUsers = filteredUsers.slice(startIndex, startIndex + pageSize);
 
-  // Role change handler
+  // Role change handler with Super Admin + self-change protection and rollback on error
   const handleRoleChange = async (
     targetUser: DirectoryUserItem,
-    chosenRole: "admin" | "broker" | "agent" | "user" | "suspended"
+    chosenRole: FunctionalRole
   ) => {
     setOpenDropdownId(null);
 
-    const dbRole: UserRole =
-      chosenRole === "admin"
-        ? "admin"
-        : chosenRole === "user" || chosenRole === "suspended"
-          ? "user"
-          : "agent";
+    if (isSuperAdminEmail(targetUser.email)) {
+      showToast("error", t("admin.users.superAdminLockedHint"));
+      return;
+    }
 
+    const isSelf = Boolean(
+      (currentUserId && targetUser.dbId === currentUserId) ||
+        (currentUserEmail &&
+          targetUser.email.toLowerCase() === currentUserEmail.toLowerCase())
+    );
+    if (isSelf) {
+      showToast("error", t("admin.users.ownRoleLockedHint"));
+      return;
+    }
+
+    const dbRole: UserRole = chosenRole === "admin" ? "admin" : "user";
     const overrideKey = targetUser.dbId || targetUser.id;
+    const previousOverride = userOverrides[overrideKey];
+
     setUserOverrides((prev) => ({
       ...prev,
       [overrideKey]: {
         ...prev[overrideKey],
         role: chosenRole,
-        status: chosenRole === "suspended" ? "Inactive" : targetUser.status,
+        statusDot: chosenRole === "admin" ? "yellow" : "green",
+        secondaryStatKey: "accessLevel",
+        secondaryStatValue: chosenRole === "admin" ? "Level 5" : "Standard",
       },
     }));
+
+    const revertOptimistic = () => {
+      setUserOverrides((prev) => {
+        const next = { ...prev };
+        if (previousOverride) {
+          next[overrideKey] = previousOverride;
+        } else {
+          delete next[overrideKey];
+        }
+        return next;
+      });
+    };
 
     const localizedRole = getRoleDisplayLabel(chosenRole);
 
@@ -378,9 +429,11 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
             })
           );
         } else {
+          revertOptimistic();
           showToast("error", res.error || t("admin.users.toastRoleError"));
         }
       } catch (err: unknown) {
+        revertOptimistic();
         showToast(
           "error",
           err instanceof Error ? err.message : t("admin.users.toastRoleError")
@@ -400,25 +453,36 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   // Add User submit handler
   const handleAddUserSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail.trim()) return;
+    const cleanedEmail = newEmail.trim().toLowerCase();
+    if (!cleanedEmail) return;
+
+    if (isSuperAdminEmail(cleanedEmail)) {
+      showToast("error", t("admin.users.superAdminLockedHint"));
+      return;
+    }
+
+    if (currentUserEmail && cleanedEmail === currentUserEmail.toLowerCase()) {
+      showToast("error", t("admin.users.ownRoleLockedHint"));
+      return;
+    }
 
     startAssignTransition(async () => {
       try {
         const localizedRole = getRoleDisplayLabel(newRole);
-        const res = await assignRoleByEmailAction(newEmail, newRole);
+        const res = await assignRoleByEmailAction(cleanedEmail, newRole);
         if (res.success) {
           showToast(
             "success",
             t("admin.users.toastUserAssigned", {
               role: localizedRole,
-              email: newEmail,
+              email: cleanedEmail,
             })
           );
         } else {
           showToast(
             "success",
             t("admin.users.toastUserInvited", {
-              email: newEmail,
+              email: cleanedEmail,
               role: localizedRole,
             })
           );
@@ -428,15 +492,15 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         setAddedUsers((prev) => [
           {
             id: newId,
-            name: formatFallbackName(newEmail.trim(), newId),
-            email: newEmail.trim(),
+            name: formatFallbackName(cleanedEmail, newId),
+            email: cleanedEmail,
             avatar: null,
             role: newRole,
             status: "Active",
-            statusDot: "green",
-            propertiesCount: 0,
-            secondaryStatKey: "salesYtd",
-            secondaryStatValue: "$0",
+            statusDot: newRole === "admin" ? "yellow" : "green",
+            propertiesCount: "-",
+            secondaryStatKey: "accessLevel",
+            secondaryStatValue: newRole === "admin" ? "Level 5" : "Standard",
           },
           ...prev,
         ]);
@@ -515,7 +579,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
         {/* Tab Filters */}
         <div className="mt-6 sm:mt-8 flex gap-4 sm:gap-6 border-b border-nordic/10 overflow-x-auto scrollbar-hide">
-          {(["All Users", "Agents", "Brokers", "Admins"] as const).map(
+          {(["All Users", "Admins", "Users"] as const).map(
             (tab) => {
               const isActive = activeTab === tab;
               return (
@@ -567,14 +631,26 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         ) : (
           paginatedUsers.map((user, idx) => {
             const isMenuOpen = openDropdownId === user.id;
+            const isSuperAdmin = isSuperAdminEmail(user.email);
+            const isCurrentUser = Boolean(
+              (currentUserId && user.dbId === currentUserId) ||
+                (currentUserEmail &&
+                  user.email.toLowerCase() === currentUserEmail.toLowerCase())
+            );
             const isHighlighted =
               user.isHighlighted ||
               (activeTab === "All Users" && idx === 0 && currentPage === 1);
 
+            const highResThumb = getHighResAvatarUrl(user.avatar, 200);
+
             const secondaryValue =
-              user.secondaryStatValue === "Level 5"
-                ? t("admin.users.stats.level5")
-                : user.secondaryStatValue;
+              user.secondaryStatValue === "Super"
+                ? t("admin.users.stats.superAccess")
+                : user.secondaryStatValue === "Level 5"
+                  ? t("admin.users.stats.level5")
+                  : user.secondaryStatValue === "Standard"
+                    ? t("admin.users.stats.standardAccess")
+                    : user.secondaryStatValue;
 
             return (
               <div
@@ -587,22 +663,41 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                 {/* User Details */}
                 <div className="col-span-12 md:col-span-4 flex items-center w-full">
                   <div className="relative flex-shrink-0">
-                    {user.avatar && !brokenAvatarIds.has(user.id) ? (
-                      <img
-                        alt={user.name}
-                        src={user.avatar}
-                        referrerPolicy="no-referrer"
-                        onError={() =>
-                          setBrokenAvatarIds((prev) =>
-                            new Set(prev).add(user.id)
-                          )
+                    {highResThumb && !brokenAvatarIds.has(user.id) ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPreviewAvatar({
+                            src: user.avatar!,
+                            name: user.name,
+                            subtitle: user.email,
+                          })
                         }
-                        className={`h-12 w-12 rounded-full object-cover ${user.isGrayscale ? "grayscale" : ""
-                          } ${isHighlighted
+                        title={t("profile.viewPhoto")}
+                        aria-label={`${t("profile.viewPhoto")}: ${user.name}`}
+                        className={`group/thumb relative h-12 w-12 rounded-full overflow-hidden cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isHighlighted
                             ? "border-2 border-white dark:border-primary"
-                            : ""
+                            : "border border-nordic/10"
                           }`}
-                      />
+                      >
+                        <img
+                          alt={user.name}
+                          src={highResThumb}
+                          referrerPolicy="no-referrer"
+                          onError={() =>
+                            setBrokenAvatarIds((prev) =>
+                              new Set(prev).add(user.id)
+                            )
+                          }
+                          className={`h-full w-full object-cover transition-transform duration-200 group-hover/thumb:scale-110 ${user.isGrayscale ? "grayscale" : ""
+                            }`}
+                        />
+                        <span className="absolute inset-0 bg-black/0 group-hover/thumb:bg-black/30 transition-colors flex items-center justify-center">
+                          <span className="material-icons text-white text-sm opacity-0 group-hover/thumb:opacity-100 transition-opacity">
+                            zoom_in
+                          </span>
+                        </span>
+                      </button>
                     ) : (
                       <div
                         aria-label={user.name}
@@ -615,20 +710,27 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                       </div>
                     )}
                     {user.statusDot === "green" && (
-                      <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 ring-2 ring-white" />
+                      <span className="pointer-events-none absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 ring-2 ring-white" />
                     )}
                     {user.statusDot === "yellow" && (
-                      <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-yellow-400 ring-2 ring-white" />
+                      <span className="pointer-events-none absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-yellow-400 ring-2 ring-white" />
                     )}
                   </div>
                   <div className="ml-4 overflow-hidden">
-                    <div
-                      className={`text-sm font-bold truncate ${user.status === "Inactive"
-                          ? "text-nordic/60 dark:text-gray-400"
-                          : "text-nordic dark:text-white"
-                        }`}
-                    >
-                      {user.name}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span
+                        className={`text-sm font-bold truncate ${user.status === "Inactive"
+                            ? "text-nordic/60 dark:text-gray-400"
+                            : "text-nordic dark:text-white"
+                          }`}
+                      >
+                        {user.name}
+                      </span>
+                      {isCurrentUser && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary/15 text-primary dark:bg-primary/30 dark:text-emerald-200">
+                          {t("admin.users.youBadge")}
+                        </span>
+                      )}
                     </div>
                     <div
                       className={`text-xs truncate ${user.status === "Inactive"
@@ -653,21 +755,20 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
                 {/* Role & Status */}
                 <div className="col-span-12 md:col-span-3 w-full flex items-center justify-between md:justify-start gap-4">
-                  {user.role === "admin" ? (
+                  {isSuperAdmin ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-nordic text-hint-green border border-mosque/30 shadow-xs">
+                      <span className="material-icons text-[14px]">
+                        workspace_premium
+                      </span>
+                      {t("admin.users.roles.superAdmin")}
+                    </span>
+                  ) : user.role === "admin" ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-nordic text-white">
                       {t("admin.users.roles.admin")}
                     </span>
-                  ) : user.role === "broker" ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary">
-                      {t("admin.users.roles.broker")}
-                    </span>
-                  ) : user.role === "agent" ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                      {t("admin.users.roles.agent")}
-                    </span>
                   ) : (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                      {getRoleDisplayLabel(user.role)}
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                      {t("admin.users.roles.user")}
                     </span>
                   )}
 
@@ -744,106 +845,84 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                   data-role-dropdown
                   className="col-span-12 md:col-span-2 w-full flex justify-end relative"
                 >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOpenDropdownId(isMenuOpen ? null : user.id)
-                    }
-                    className={`inline-flex items-center px-4 py-2 text-xs font-medium rounded-lg focus:outline-none transition-colors w-full md:w-auto justify-center cursor-pointer ${isMenuOpen
-                        ? "bg-primary text-white shadow-md hover:bg-primary-dark"
-                        : isHighlighted
-                          ? "border border-nordic/10 bg-white dark:bg-gray-800 shadow-sm text-nordic hover:bg-nordic hover:text-white"
-                          : "border border-gray-200 dark:border-gray-600 bg-transparent text-nordic/70 dark:text-gray-300 hover:border-nordic hover:text-nordic dark:hover:text-white group-hover:bg-white group-hover:shadow-sm"
-                      }`}
-                  >
-                    {t("admin.users.changeRole")}
-                    <span className="material-icons text-[16px] ml-2">
-                      {isMenuOpen ? "expand_less" : "expand_more"}
-                    </span>
-                  </button>
-
-                  {isMenuOpen && (
-                    <div className="absolute top-full right-0 mt-2 w-48 rounded-lg shadow-dropdown bg-primary ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden z-50 origin-top-right animate-in fade-in slide-in-from-top-1 duration-150">
-                      <div
-                        className="py-1"
-                        role="menu"
-                        aria-orientation="vertical"
+                  {isSuperAdmin || isCurrentUser ? (
+                    <button
+                      type="button"
+                      disabled
+                      title={
+                        isSuperAdmin
+                          ? t("admin.users.superAdminLockedHint")
+                          : t("admin.users.ownRoleLockedHint")
+                      }
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg border border-nordic/15 bg-nordic/5 dark:bg-white/5 text-nordic/50 dark:text-gray-400 cursor-not-allowed w-full md:w-auto"
+                    >
+                      <span className="material-icons text-[15px]">lock</span>
+                      <span>
+                        {isSuperAdmin
+                          ? t("admin.users.protectedRole")
+                          : t("admin.users.yourAccount")}
+                      </span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenDropdownId(isMenuOpen ? null : user.id)
+                        }
+                        className={`inline-flex items-center px-4 py-2 text-xs font-medium rounded-lg focus:outline-none transition-colors w-full md:w-auto justify-center cursor-pointer ${isMenuOpen
+                            ? "bg-primary text-white shadow-md hover:bg-primary-dark"
+                            : isHighlighted
+                              ? "border border-nordic/10 bg-white dark:bg-gray-800 shadow-sm text-nordic hover:bg-nordic hover:text-white"
+                              : "border border-gray-200 dark:border-gray-600 bg-transparent text-nordic/70 dark:text-gray-300 hover:border-nordic hover:text-nordic dark:hover:text-white group-hover:bg-white group-hover:shadow-sm"
+                          }`}
                       >
-                        <button
-                          type="button"
-                          onClick={() => handleRoleChange(user, "admin")}
-                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "admin"
-                              ? "bg-white/20 text-white font-medium"
-                              : "text-white/70 hover:bg-white/10 hover:text-white"
-                            }`}
-                          role="menuitem"
-                        >
-                          <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
-                            shield
-                          </span>
-                          {t("admin.users.roles.admin")}
-                        </button>
+                        {t("admin.users.changeRole")}
+                        <span className="material-icons text-[16px] ml-2">
+                          {isMenuOpen ? "expand_less" : "expand_more"}
+                        </span>
+                      </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleRoleChange(user, "broker")}
-                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "broker"
-                              ? "bg-white/20 text-white font-medium"
-                              : "text-white/70 hover:bg-white/10 hover:text-white"
-                            }`}
-                          role="menuitem"
-                        >
-                          <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
-                            business_center
-                          </span>
-                          {t("admin.users.roles.brokerShort")}
-                        </button>
+                      {isMenuOpen && (
+                        <div className="absolute top-full right-0 mt-2 w-48 rounded-lg shadow-dropdown bg-primary ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden z-50 origin-top-right animate-in fade-in slide-in-from-top-1 duration-150">
+                          <div
+                            className="py-1"
+                            role="menu"
+                            aria-orientation="vertical"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleRoleChange(user, "admin")}
+                              className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "admin"
+                                  ? "bg-white/20 text-white font-medium"
+                                  : "text-white/70 hover:bg-white/10 hover:text-white"
+                                }`}
+                              role="menuitem"
+                            >
+                              <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
+                                shield
+                              </span>
+                              {t("admin.users.roles.admin")}
+                            </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleRoleChange(user, "agent")}
-                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "agent"
-                              ? "bg-white/20 text-white font-medium"
-                              : "text-white/70 hover:bg-white/10 hover:text-white"
-                            }`}
-                          role="menuitem"
-                        >
-                          <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
-                            support_agent
-                          </span>
-                          {t("admin.users.roles.agent")}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleRoleChange(user, "user")}
-                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "user"
-                              ? "bg-white/20 text-white font-medium"
-                              : "text-white/70 hover:bg-white/10 hover:text-white"
-                            }`}
-                          role="menuitem"
-                        >
-                          <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
-                            visibility
-                          </span>
-                          {t("admin.users.roles.user")}
-                        </button>
-
-                        <div className="border-t border-white/10 my-1" />
-
-                        <button
-                          type="button"
-                          onClick={() => handleRoleChange(user, "suspended")}
-                          className="group flex items-center w-full px-4 py-3 text-xs text-red-200 hover:bg-red-500/20 hover:text-red-100 transition-colors cursor-pointer text-left"
-                          role="menuitem"
-                        >
-                          <span className="material-icons text-sm mr-3 text-red-300 group-hover:text-red-100">
-                            block
-                          </span>
-                          {t("admin.users.suspendUser")}
-                        </button>
-                      </div>
-                    </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRoleChange(user, "user")}
+                              className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "user"
+                                  ? "bg-white/20 text-white font-medium"
+                                  : "text-white/70 hover:bg-white/10 hover:text-white"
+                                }`}
+                              role="menuitem"
+                            >
+                              <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
+                                person
+                              </span>
+                              {t("admin.users.roles.user")}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -1003,12 +1082,11 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                 </label>
                 <select
                   value={newRole}
-                  onChange={(e) => setNewRole(e.target.value as UserRole)}
+                  onChange={(e) => setNewRole(e.target.value as FunctionalRole)}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-nordic/15 bg-background-light dark:bg-gray-800 text-nordic dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all cursor-pointer"
                 >
-                  <option value="agent">{t("admin.users.roleAgentDesc")}</option>
-                  <option value="admin">{t("admin.users.roleAdminDesc")}</option>
                   <option value="user">{t("admin.users.roleUserDesc")}</option>
+                  <option value="admin">{t("admin.users.roleAdminDesc")}</option>
                 </select>
               </div>
 
@@ -1034,6 +1112,15 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* High-Res Avatar Lightbox Modal */}
+      <AvatarLightboxModal
+        isOpen={Boolean(previewAvatar)}
+        onClose={() => setPreviewAvatar(null)}
+        imageUrl={previewAvatar?.src || null}
+        name={previewAvatar?.name || ""}
+        subtitle={previewAvatar?.subtitle || null}
+      />
     </div>
   );
 };

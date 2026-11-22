@@ -1,6 +1,7 @@
 "use server";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { isSuperAdminEmail } from "@/lib/supabase/superAdmin";
 import { UserRole, UserRoleRow } from "@/types/database.types";
 import { revalidatePath } from "next/cache";
 import { connection } from "next/server";
@@ -35,8 +36,11 @@ export async function verifyIsAdmin(): Promise<{
 
   const userEmail = (user.email || "").toLowerCase();
 
-  // Check env-configured fallback admin
-  if (ADMIN_EMAILS.length > 0 && ADMIN_EMAILS.includes(userEmail)) {
+  // Check protected Super Admin or env-configured fallback admin
+  if (
+    isSuperAdminEmail(userEmail) ||
+    (ADMIN_EMAILS.length > 0 && ADMIN_EMAILS.includes(userEmail))
+  ) {
     return { isAdmin: true, userId: user.id, userEmail };
   }
 
@@ -90,12 +94,12 @@ export async function getAdminUsersAction(): Promise<{
     }
 
     return { success: true, users: (data as UserRoleRow[]) || [] };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Unexpected error fetching user roles:", err);
     return {
       success: false,
       users: [],
-      error: err?.message || "Failed to fetch users",
+      error: err instanceof Error ? err.message : "Failed to fetch users",
     };
   }
 }
@@ -120,8 +124,33 @@ export async function updateUserRoleAction(
 
     const supabase = await createServerSupabaseClient();
 
-    // If changing own role away from admin, check if other admins exist
-    if (userId === targetUserId && newRole !== "admin") {
+    // Only functional roles ("admin" | "user") are assignable
+    const normalizedRole: UserRole = newRole === "admin" ? "admin" : "user";
+
+    // Look up target user to enforce Super Admin protection
+    const { data: targetRow } = await supabase
+      .from("user_roles")
+      .select("id, email, role")
+      .eq("id", targetUserId)
+      .maybeSingle();
+
+    if (isSuperAdminEmail(targetRow?.email)) {
+      return {
+        success: false,
+        error: "No se puede modificar el rol del Super Administrador.",
+      };
+    }
+
+    // Prevent any admin from changing their own role to avoid accidental lockouts
+    if (userId && userId === targetUserId) {
+      return {
+        success: false,
+        error: "No puedes cambiar tu propio rol.",
+      };
+    }
+
+    // Defense-in-depth: never leave the system without at least one admin
+    if (targetRow?.role === "admin" && normalizedRole !== "admin") {
       const { data: otherAdmins } = await supabase
         .from("user_roles")
         .select("id")
@@ -132,7 +161,7 @@ export async function updateUserRoleAction(
         return {
           success: false,
           error:
-            "No puedes remover tu propio rol de administrador porque eres el único administrador en el sistema.",
+            "Debe existir al menos un administrador activo en el sistema.",
         };
       }
     }
@@ -140,7 +169,7 @@ export async function updateUserRoleAction(
     const { error } = await supabase
       .from("user_roles")
       .update({
-        role: newRole,
+        role: normalizedRole,
         updated_at: new Date().toISOString(),
       })
       .eq("id", targetUserId);
@@ -153,11 +182,11 @@ export async function updateUserRoleAction(
     revalidatePath("/admin");
     revalidatePath("/admin/users");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Unexpected error in updateUserRoleAction:", err);
     return {
       success: false,
-      error: err?.message || "Error al actualizar el rol",
+      error: err instanceof Error ? err.message : "Error al actualizar el rol",
     };
   }
 }
@@ -194,10 +223,10 @@ export async function assignRoleByEmailAction(
       error:
         "No se encontró un usuario registrado con ese correo. El usuario debe iniciar sesión al menos una vez en la aplicación.",
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     return {
       success: false,
-      error: err?.message || "Error al asignar el rol.",
+      error: err instanceof Error ? err.message : "Error al asignar el rol.",
     };
   }
 }

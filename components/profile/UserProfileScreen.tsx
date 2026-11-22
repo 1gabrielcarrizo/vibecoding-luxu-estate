@@ -10,7 +10,9 @@ import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { mapRowToProperty } from "@/lib/supabase/properties";
 import { supabase } from "@/lib/supabase/client";
 import { Navbar } from "@/components/common/Navbar";
+import { AvatarLightboxModal } from "@/components/common/AvatarLightboxModal";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
+import { getHighResAvatarUrl } from "@/lib/utils/avatar";
 import { useAuth } from "@/lib/supabase/AuthContext";
 import { useFavorites } from "@/lib/favorites/FavoritesContext";
 import { useVisits, ScheduledVisit } from "@/lib/visits/VisitsContext";
@@ -168,6 +170,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
     setTabOverride({ forUrl: tabFromUrl, tab });
   };
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isAvatarLightboxOpen, setIsAvatarLightboxOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editLocation, setEditLocation] = useState("");
   const [savedNotice, setSavedNotice] = useState(false);
@@ -233,6 +236,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
 
   const profileDisplayName =
     prefs.customName.trim() || displayName || t("profile.guestName");
+  const highResAvatarUrl = getHighResAvatarUrl(avatarUrl, 400);
 
   const memberYear = (() => {
     if (user?.created_at) {
@@ -351,15 +355,26 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
             <div className="relative group flex-shrink-0">
               <div className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white flex items-center justify-center">
-                {avatarUrl ? (
-                  <Image
-                    alt={profileDisplayName}
-                    src={avatarUrl}
-                    fill
-                    sizes="(max-width: 1024px) 96px, 128px"
-                    priority
-                    className="object-cover"
-                  />
+                {highResAvatarUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsAvatarLightboxOpen(true)}
+                    title={t("profile.viewPhoto")}
+                    aria-label={t("profile.viewPhoto")}
+                    className="group/avatar relative w-full h-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-mosque"
+                  >
+                    <img
+                      alt={profileDisplayName}
+                      src={highResAvatarUrl}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover transition-transform duration-200 group-hover/avatar:scale-105"
+                    />
+                    <span className="absolute inset-0 bg-black/0 group-hover/avatar:bg-black/25 transition-colors flex items-center justify-center">
+                      <span className="material-icons text-white text-xl opacity-0 group-hover/avatar:opacity-100 transition-opacity drop-shadow">
+                        zoom_in
+                      </span>
+                    </span>
+                  </button>
                 ) : (
                   <span className="text-3xl lg:text-4xl font-bold text-mosque">
                     {profileDisplayName.charAt(0).toUpperCase()}
@@ -982,6 +997,14 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
           <span>{t("profile.profileUpdated")}</span>
         </div>
       )}
+
+      <AvatarLightboxModal
+        isOpen={isAvatarLightboxOpen}
+        onClose={() => setIsAvatarLightboxOpen(false)}
+        imageUrl={avatarUrl}
+        name={profileDisplayName}
+        subtitle={email}
+      />
 
       <PropertyFooter />
     </div>

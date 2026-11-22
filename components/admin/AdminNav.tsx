@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/supabase/AuthContext";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { NotificationsDropdown } from "@/components/common/NotificationsDropdown";
 import { LanguageSelector } from "@/components/common/LanguageSelector";
+import { getHighResAvatarUrl } from "@/lib/utils/avatar";
 
 interface AdminNavProps {
   userEmail?: string | null;
@@ -36,7 +37,7 @@ export const AdminNav: React.FC<AdminNavProps> = ({
   const email = authEmail || initialEmail || null;
   const name =
     authName || initialName || (email ? email.split("@")[0] : null);
-  const avatar = authAvatar || initialAvatar || null;
+  const avatar = getHighResAvatarUrl(authAvatar || initialAvatar, 200);
 
   // Close dropdown on click outside or Escape
   useEffect(() => {
