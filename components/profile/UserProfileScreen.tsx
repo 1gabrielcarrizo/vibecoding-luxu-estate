@@ -233,9 +233,6 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   const bathsLabel = (n: number) =>
     n === 1 ? t("favorites.bathSingular") : t("favorites.bathsPlural");
 
-  const formattedVisitsCount =
-    visitsCount > 0 && visitsCount < 10 ? `0${visitsCount}` : String(visitsCount);
-
   return (
     <div className="bg-clear-day font-display text-nordic min-h-screen flex flex-col selection:bg-mosque selection:text-white">
       <Navbar isDetailPage={true} />
@@ -332,7 +329,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
               className="text-center cursor-pointer group"
             >
               <div className="text-2xl font-bold text-mosque">
-                {isVisitsHydrated ? formattedVisitsCount : "—"}
+                {isVisitsHydrated ? visitsCount : "—"}
               </div>
               <div className="text-xs uppercase tracking-wider text-nordic/50 font-medium">
                 {t("profile.statsVisits")}

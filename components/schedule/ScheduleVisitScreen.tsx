@@ -54,7 +54,7 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
   const router = useRouter();
   const { t, locale } = useTranslation();
   const { displayName } = useAuth();
-  const { addVisit } = useVisits();
+  const { addVisit, removeVisit } = useVisits();
 
   const today = useMemo(() => parseIsoDate(initialTodayIso), [initialTodayIso]);
   const defaultSelected = useMemo(() => addDays(today, 1), [today]);
@@ -71,6 +71,8 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
   const [selectedTime, setSelectedTime] = useState<string>("10:00 AM");
   const [message, setMessage] = useState<string>("");
   const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
+  const [confirmedVisitId, setConfirmedVisitId] = useState<string | null>(null);
+  const [cancelledNotice, setCancelledNotice] = useState<boolean>(false);
   const [isContactOpen, setIsContactOpen] = useState<boolean>(false);
 
   const displayTitle = getLocalizedTitle(property.slug, locale, property.title);
@@ -224,7 +226,7 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
 
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
-    addVisit({
+    const created = addVisit({
       propertyId: property.id,
       propertySlug: property.slug,
       propertyTitle: property.title,
@@ -237,7 +239,19 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
       lat: property.coordinates?.lat,
       lng: property.coordinates?.lng,
     });
+    setConfirmedVisitId(created.id);
+    setCancelledNotice(false);
     setIsConfirmed(true);
+  };
+
+  const handleCancelConfirmedVisit = () => {
+    if (confirmedVisitId) {
+      removeVisit(confirmedVisitId);
+    }
+    setConfirmedVisitId(null);
+    setIsConfirmed(false);
+    setCancelledNotice(true);
+    setTimeout(() => setCancelledNotice(false), 4000);
   };
 
   const handleCancel = () => {
@@ -490,6 +504,17 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
                       {t("scheduleVisit.backToProperty")}
                     </Link>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={handleCancelConfirmedVisit}
+                    className="w-full py-2.5 px-4 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-medium text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span className="material-icons text-base">
+                      event_busy
+                    </span>
+                    <span>{t("scheduleVisit.cancelVisit")}</span>
+                  </button>
                 </div>
               </div>
             ) : (
@@ -695,6 +720,19 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
           </div>
         </div>
       </main>
+
+      {cancelledNotice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-40 bg-nordic text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-sm border border-white/10"
+        >
+          <span className="material-icons text-red-300 text-base">
+            event_busy
+          </span>
+          <span>{t("scheduleVisit.visitCancelledNotice")}</span>
+        </div>
+      )}
 
       <PropertyFooter />
 

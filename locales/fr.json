@@ -307,6 +307,8 @@
     "summaryNote": "Votre message",
     "changeDateTime": "Modifier la date ou l'heure",
     "backToProperty": "Voir le bien",
+    "cancelVisit": "Annuler la visite",
+    "visitCancelledNotice": "Votre visite programmée a été annulée.",
     "support": "Support",
     "guestName": "Client",
     "whatsappMessage": "Bonjour {agent}, je viens de confirmer une visite pour {title} le {date} à {time}. Mon nom est {name}{note}."
