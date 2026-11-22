@@ -7,6 +7,9 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { FeaturedCollections } from "@/components/home/FeaturedCollections";
 import { MarketSection } from "@/components/home/MarketSection";
 import { PropertyCategory, MarketFilterTab, Property } from "@/types/property";
+import { PropertyRow } from "@/types/database.types";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
+import { mapRowToProperty } from "@/lib/supabase/properties";
 import { PaginationResult } from "@/types/pagination";
 import { fetchPropertiesAction } from "@/app/actions/properties";
 import { SearchFiltersModal, FilterState } from "@/components/home/SearchFiltersModal";
@@ -65,7 +68,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     initialAmenities || []
   );
 
-  // Pagination state from server
+  // Pagination & featured state from server (patched in-place on Realtime events without reloading)
+  const [featuredList, setFeaturedList] = useState<Property[]>(
+    initialFeaturedProperties
+  );
   const [pagination, setPagination] =
     useState<PaginationResult>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,19 +99,104 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   }, [searchParams, router]);
 
-  // Real-time synchronization when any property is created, edited, featured, or deactivated
-  const handleRealtimePropertiesChange = useCallback(() => {
-    router.refresh();
-  }, [router]);
+  // Keep latest filter params in ref so silent Realtime sync never re-subscribes
+  const filterSnapshotRef = useRef({
+    currentPage: pagination.currentPage,
+    selectedCategory,
+    marketTab,
+    searchQuery,
+    minPrice,
+    maxPrice,
+    beds,
+    baths,
+    amenities,
+  });
+
+  useEffect(() => {
+    filterSnapshotRef.current = {
+      currentPage: pagination.currentPage,
+      selectedCategory,
+      marketTab,
+      searchQuery,
+      minPrice,
+      maxPrice,
+      beds,
+      baths,
+      amenities,
+    };
+  }, [
+    pagination.currentPage,
+    selectedCategory,
+    marketTab,
+    searchQuery,
+    minPrice,
+    maxPrice,
+    beds,
+    baths,
+    amenities,
+  ]);
+
+  // Silent in-place Realtime sync (zero page reload, zero scroll jump)
+  const handleRealtimePropertiesChange = useCallback(
+    async (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+      // 1. Patch Featured Collections in-place immediately
+      if (payload.eventType === "DELETE") {
+        const oldId = (payload.old as { id?: string } | undefined)?.id;
+        if (oldId) {
+          setFeaturedList((prev) => prev.filter((p) => p.id !== oldId));
+        }
+      } else {
+        const row = payload.new as unknown as PropertyRow | undefined;
+        if (row && typeof row.id === "string") {
+          const mapped = mapRowToProperty(row);
+          setFeaturedList((prev) => {
+            const withoutCurrent = prev.filter((p) => p.id !== mapped.id);
+            if (mapped.isFeatured && mapped.isActive !== false) {
+              const idx = prev.findIndex((p) => p.id === mapped.id);
+              if (idx >= 0) {
+                const updated = [...prev];
+                updated[idx] = mapped;
+                return updated;
+              }
+              return [mapped, ...withoutCurrent];
+            }
+            return withoutCurrent;
+          });
+        }
+      }
+
+      // 2. Silently refresh current paginated market grid with active filters
+      const snap = filterSnapshotRef.current;
+      try {
+        const result = await fetchPropertiesAction({
+          page: snap.currentPage,
+          pageSize: 8,
+          category: snap.selectedCategory,
+          type: snap.marketTab,
+          query: snap.searchQuery.trim(),
+          minPrice: snap.minPrice,
+          maxPrice: snap.maxPrice,
+          beds: snap.beds,
+          baths: snap.baths,
+          amenities: snap.amenities,
+        });
+        setPagination(result);
+      } catch (err) {
+        console.warn("Silent realtime market sync failed:", err);
+      }
+    },
+    []
+  );
 
   useRealtimeTableSync({
     table: "properties",
-    debounceMs: 400,
+    debounceMs: 300,
     onEvent: handleRealtimePropertiesChange,
   });
 
   // Sync state when props change (e.g. back/forward navigation or server re-render)
   useEffect(() => {
+    setFeaturedList(initialFeaturedProperties);
     setPagination(initialPagination);
     setSelectedCategory(initialCategory);
     setMarketTab(initialMarketTab);
@@ -117,6 +208,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     setBaths(initialBaths || 0);
     setAmenities(initialAmenities || []);
   }, [
+    initialFeaturedProperties,
     initialPagination,
     initialCategory,
     initialMarketTab,
@@ -383,8 +475,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   // Strictly at most 2 featured properties, and ONLY when no filters/searches are applied
   const featuredPropertiesToDisplay = useMemo(() => {
     if (isFilterActive) return [];
-    return initialFeaturedProperties.slice(0, 2);
-  }, [isFilterActive, initialFeaturedProperties]);
+    return featuredList.slice(0, 2);
+  }, [isFilterActive, featuredList]);
 
   return (
     <div className="min-h-screen bg-background-light text-nordic-dark font-display antialiased selection:bg-mosque selection:text-white">

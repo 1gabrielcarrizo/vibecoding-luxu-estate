@@ -304,7 +304,11 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
 
   return (
     <div className="bg-clear-day min-h-screen flex flex-col antialiased selection:bg-mosque/20 selection:text-mosque font-display text-nordic">
-      <PropertyRealtimeListener propertyId={property.id} />
+      <PropertyRealtimeListener
+        propertyId={property.id}
+        currentSlug={property.slug}
+        subPath="/schedule"
+      />
       <Navbar isDetailPage={true} />
 
       <main className="flex-grow flex flex-col items-center py-8 px-4 md:px-8">

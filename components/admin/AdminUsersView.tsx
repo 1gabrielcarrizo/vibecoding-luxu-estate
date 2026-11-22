@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useTransition, useMemo, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { UserRole, UserRoleRow } from "@/types/database.types";
 import {
   updateUserRoleAction,
@@ -102,7 +102,6 @@ interface AdminUsersViewProps {
 export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   initialUsers = [],
 }) => {
-  const router = useRouter();
   const { t } = useTranslation();
 
   // State
@@ -165,30 +164,70 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
     Record<string, Partial<DirectoryUserItem>>
   >({});
   const [addedUsers, setAddedUsers] = useState<DirectoryUserItem[]>([]);
+  const [deletedUserIds, setDeletedUserIds] = useState<Set<string>>(
+    () => new Set()
+  );
 
-  // Real-time synchronization across admin sessions when user_roles changes
+  // In-place client-side Realtime sync across admin sessions (zero page reload)
   const handleRealtimeUserRolesChange = useCallback(
-    (payload: { new?: Record<string, unknown>; old?: Record<string, unknown> }) => {
-      const changedDbId =
-        (typeof payload.new?.id === "string" && payload.new.id) ||
-        (typeof payload.old?.id === "string" && payload.old.id) ||
-        null;
-
-      if (changedDbId) {
-        setUserOverrides((prev) => {
-          const next = { ...prev };
-          delete next[changedDbId];
-          return next;
-        });
+    (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+      if (payload.eventType === "DELETE") {
+        const oldId = (payload.old as { id?: string } | undefined)?.id;
+        if (oldId) {
+          setDeletedUserIds((prev) => new Set(prev).add(oldId));
+        }
+        return;
       }
-      router.refresh();
+
+      const row = payload.new as Partial<UserRoleRow> | undefined;
+      if (!row?.id) return;
+
+      const roleVal = row.role || "user";
+      if (payload.eventType === "UPDATE") {
+        setUserOverrides((prev) => ({
+          ...prev,
+          [row.id!]: {
+            ...prev[row.id!],
+            role: roleVal,
+            statusDot: roleVal === "admin" ? "yellow" : "green",
+            propertiesCount: roleVal === "agent" ? 12 : "-",
+            secondaryStatKey: roleVal === "admin" ? "accessLevel" : "salesYtd",
+            secondaryStatValue: roleVal === "admin" ? "Level 5" : "$2.4M",
+          },
+        }));
+      } else if (payload.eventType === "INSERT") {
+        const email = row.email || "user@example.com";
+        const shortId = row.id.slice(0, 4).toUpperCase();
+        const namePart = email.split("@")[0].replace(/[._-]/g, " ");
+        const capitalizedName = namePart
+          .split(" ")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
+
+        const newItem: DirectoryUserItem = {
+          id: `USR-${shortId}`,
+          dbId: row.id,
+          name: capitalizedName || `User ${shortId}`,
+          email,
+          avatar: TEMPLATE_USERS[0].avatar,
+          role: roleVal,
+          status: "Active",
+          statusDot: roleVal === "admin" ? "yellow" : "green",
+          propertiesCount: roleVal === "agent" ? 12 : "-",
+          secondaryStatKey: roleVal === "admin" ? "accessLevel" : "salesYtd",
+          secondaryStatValue: roleVal === "admin" ? "Level 5" : "$2.4M",
+        };
+        setAddedUsers((prev) => [
+          newItem,
+          ...prev.filter((u) => u.dbId !== row.id && u.email !== email),
+        ]);
+      }
     },
-    [router]
+    []
   );
 
   useRealtimeTableSync({
     table: "user_roles",
-    debounceMs: 350,
     onEvent: handleRealtimeUserRolesChange,
   });
 
@@ -238,11 +277,13 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       ...baseList,
     ];
 
-    return merged.map((u) => {
-      const key = u.dbId || u.id;
-      return userOverrides[key] ? { ...u, ...userOverrides[key] } : u;
-    });
-  }, [initialUsers, addedUsers, userOverrides]);
+    return merged
+      .filter((u) => !u.dbId || !deletedUserIds.has(u.dbId))
+      .map((u) => {
+        const key = u.dbId || u.id;
+        return userOverrides[key] ? { ...u, ...userOverrides[key] } : u;
+      });
+  }, [initialUsers, addedUsers, userOverrides, deletedUserIds]);
 
   const getRoleDisplayLabel = (role: string): string => {
     if (role === "admin") return t("admin.users.roles.admin");

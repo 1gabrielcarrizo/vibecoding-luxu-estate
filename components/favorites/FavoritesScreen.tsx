@@ -2,8 +2,10 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { Property } from "@/types/property";
+import { PropertyRow } from "@/types/database.types";
+import { mapRowToProperty } from "@/lib/supabase/properties";
 import { Navbar } from "@/components/common/Navbar";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { useFavorites } from "@/lib/favorites/FavoritesContext";
@@ -22,18 +24,41 @@ interface FavoritesScreenProps {
 export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
   allProperties,
 }) => {
-  const router = useRouter();
   const { t, locale } = useTranslation();
   const { favorites, isHydrated, removeFavorite, addFavorite } = useFavorites();
 
-  const handleRealtimeRefresh = useCallback(() => {
-    router.refresh();
-  }, [router]);
+  // In-place client-side Realtime patch map (null = deactivated/deleted -> hidden immediately)
+  const [realtimePatches, setRealtimePatches] = useState<
+    Record<string, Property | null>
+  >({});
+
+  const handleRealtimePropertyEvent = useCallback(
+    (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+      if (payload.eventType === "DELETE") {
+        const oldId = (payload.old as { id?: string } | undefined)?.id;
+        if (oldId) {
+          setRealtimePatches((prev) => ({ ...prev, [oldId]: null }));
+        }
+        return;
+      }
+      const row = payload.new as unknown as PropertyRow | undefined;
+      if (!row || typeof row.id !== "string") return;
+
+      if (row.is_active === false) {
+        setRealtimePatches((prev) => ({ ...prev, [row.id]: null }));
+      } else {
+        setRealtimePatches((prev) => ({
+          ...prev,
+          [row.id]: mapRowToProperty(row),
+        }));
+      }
+    },
+    []
+  );
 
   useRealtimeTableSync({
     table: "properties",
-    debounceMs: 400,
-    onEvent: handleRealtimeRefresh,
+    onEvent: handleRealtimePropertyEvent,
   });
 
   const [sortBy, setSortBy] = useState<SortOption>("date_desc");
@@ -65,17 +90,24 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
     };
   }, []);
 
-  // Resolve saved properties along with their addedAt timestamp
+  // Resolve saved properties along with their addedAt timestamp (respecting live Realtime patches)
   const savedProperties = useMemo(() => {
     const propertyMap = new Map<string, Property>();
     for (const prop of allProperties) {
       propertyMap.set(prop.id, prop);
     }
+    for (const [id, patched] of Object.entries(realtimePatches)) {
+      if (patched === null) {
+        propertyMap.delete(id);
+      } else {
+        propertyMap.set(id, patched);
+      }
+    }
 
     const matched: Array<{ property: Property; addedAt: number }> = [];
     for (const entry of favorites) {
       const prop = propertyMap.get(entry.id);
-      if (prop) {
+      if (prop && prop.isActive !== false) {
         matched.push({ property: prop, addedAt: entry.addedAt });
       }
     }
@@ -91,7 +123,7 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
       default:
         return [...matched].sort((a, b) => b.addedAt - a.addedAt);
     }
-  }, [allProperties, favorites, sortBy]);
+  }, [allProperties, realtimePatches, favorites, sortBy]);
 
   const sortOptions: Array<{ value: SortOption; label: string }> = [
     { value: "date_desc", label: t("favorites.sortDateAdded") },

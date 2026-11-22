@@ -501,10 +501,9 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
               "success",
               t("admin.form.toasts.updated", { title: payload.title })
             );
-            router.refresh();
             setTimeout(() => {
-              window.location.href = "/admin/properties";
-            }, 600);
+              router.push("/admin/properties");
+            }, 400);
           } else {
             showToast("error", res.error || t("admin.form.errors.updateFailed"));
           }
@@ -515,10 +514,9 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({
               "success",
               t("admin.form.toasts.created", { title: payload.title })
             );
-            router.refresh();
             setTimeout(() => {
-              window.location.href = "/admin/properties";
-            }, 600);
+              router.push("/admin/properties");
+            }, 400);
           } else {
             showToast("error", res.error || t("admin.form.errors.createFailed"));
           }

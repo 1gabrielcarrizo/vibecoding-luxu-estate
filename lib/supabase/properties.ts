@@ -108,8 +108,8 @@ export function mapRowToProperty(row: PropertyRow): Property {
       ? { lat: Number(row.lat), lng: Number(row.lng) }
       : row.coordinates && typeof row.coordinates === "object"
       ? {
-          lat: Number((row.coordinates as any).lat) || 37.7749,
-          lng: Number((row.coordinates as any).lng) || -122.4194,
+          lat: Number((row.coordinates as { lat?: unknown }).lat) || 37.7749,
+          lng: Number((row.coordinates as { lng?: unknown }).lng) || -122.4194,
         }
       : (matchingFallback?.coordinates ?? {
           lat: 37.7749,
@@ -152,7 +152,7 @@ export function mapRowToProperty(row: PropertyRow): Property {
 }
 
 /**
- * Fetches featured properties from Supabase, ordered by most recently created/updated
+ * Fetches featured properties from Supabase with deterministic ordering
  */
 export async function getFeaturedProperties(limit = 4): Promise<Property[]> {
   try {
@@ -162,14 +162,15 @@ export async function getFeaturedProperties(limit = 4): Promise<Property[]> {
       .eq("is_featured", true)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
       .limit(limit);
 
-    if (error || !data || data.length === 0) {
-      console.warn("Using fallback featured properties:", error?.message);
-      return fallbackFeatured.filter((p) => p.isActive !== false).slice(0, limit);
+    if (!error && data) {
+      return data.map(mapRowToProperty);
     }
 
-    return data.map(mapRowToProperty);
+    console.warn("Using fallback featured properties:", error?.message);
+    return fallbackFeatured.filter((p) => p.isActive !== false).slice(0, limit);
   } catch (err) {
     console.error("Error fetching featured properties:", err);
     return fallbackFeatured.filter((p) => p.isActive !== false).slice(0, limit);
@@ -204,28 +205,30 @@ export async function setPropertyFeaturedStatus(
 }
 
 /**
- * Retrieves market properties, merging Supabase database entries with rich mock additions.
- * By default includes featured properties so all active properties are accessible and searchable.
+ * Retrieves active market properties with deterministic ordering.
+ * Never resurrects properties that exist in Supabase with is_active = false.
  */
 export async function getAllMarketProperties(includeFeatured = true): Promise<Property[]> {
   try {
-    let query = supabase
+    const { data, error } = await supabase
       .from("properties")
       .select("*")
-      .eq("is_active", true);
-
-    if (!includeFeatured) {
-      query = query.eq("is_featured", false);
-    }
-
-    const { data, error } = await query.order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true });
 
     if (data && data.length > 0 && !error) {
-      const dbProps = data.map(mapRowToProperty);
-      const existingIds = new Set(dbProps.map((p) => p.id));
+      const allDbIds = new Set(data.map((r) => r.id));
+      const activeDbRows = data.filter(
+        (r) => r.is_active !== false && (includeFeatured || !r.is_featured)
+      );
+      const dbProps = activeDbRows.map(mapRowToProperty);
       const extraProps = [
-        ...initialMarketProperties.filter((p) => !existingIds.has(p.id) && p.isActive !== false),
-        ...additionalMarketProperties.filter((p) => !existingIds.has(p.id) && p.isActive !== false),
+        ...initialMarketProperties.filter(
+          (p) => !allDbIds.has(p.id) && p.isActive !== false
+        ),
+        ...additionalMarketProperties.filter(
+          (p) => !allDbIds.has(p.id) && p.isActive !== false
+        ),
       ];
       return [...dbProps, ...extraProps];
     }
@@ -241,21 +244,23 @@ export async function getAllMarketProperties(includeFeatured = true): Promise<Pr
 
 /**
  * Retrieves ALL active properties across both featured and market listings,
- * merging Supabase DB rows with all local fallback datasets (deduplicated by ID).
+ * with deterministic ordering and excluding any DB property marked inactive.
  */
 export async function getAllActiveProperties(): Promise<Property[]> {
   try {
     const { data, error } = await supabase
       .from("properties")
       .select("*")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true });
 
     if (data && data.length > 0 && !error) {
-      const dbProps = data.map(mapRowToProperty);
-      const existingIds = new Set(dbProps.map((p) => p.id));
+      const allDbIds = new Set(data.map((r) => r.id));
+      const dbProps = data
+        .filter((r) => r.is_active !== false)
+        .map(mapRowToProperty);
       const extraProps = allFallbackProperties.filter(
-        (p) => !existingIds.has(p.id) && p.isActive !== false
+        (p) => !allDbIds.has(p.id) && p.isActive !== false
       );
       return [...dbProps, ...extraProps];
     }
@@ -267,15 +272,16 @@ export async function getAllActiveProperties(): Promise<Property[]> {
 }
 
 /**
- * Retrieves ALL properties for the admin dashboard (both featured and standard),
- * merging Supabase entries with fallbacks.
+ * Retrieves ALL properties for the admin dashboard (both active and inactive),
+ * with deterministic ordering.
  */
 export async function getAllPropertiesForAdmin(): Promise<Property[]> {
   try {
     const { data, error } = await supabase
       .from("properties")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true });
 
     if (data && data.length > 0 && !error) {
       const dbProps = data.map(mapRowToProperty);
@@ -426,7 +432,7 @@ export async function getPropertyBySlug(slug: string): Promise<Property | null> 
     // Continue to fallback check
   }
 
-  // 2. Check local fallback datasets
+  // 2. Check local fallback datasets (verifying live status/edits in Supabase first)
   const fallback = allFallbackProperties.find(
     (p) =>
       p.isActive !== false &&
@@ -435,7 +441,27 @@ export async function getPropertyBySlug(slug: string): Promise<Property | null> 
         slugify(p.title) === cleanSlug)
   );
 
-  return fallback || null;
+  if (fallback) {
+    try {
+      const { data: liveRow } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("id", fallback.id)
+        .maybeSingle();
+
+      if (liveRow) {
+        if (liveRow.is_active === false) {
+          return null;
+        }
+        return mapRowToProperty(liveRow);
+      }
+    } catch {
+      // Fallback offline
+    }
+    return fallback;
+  }
+
+  return null;
 }
 
 /**
@@ -760,7 +786,7 @@ export async function deactivateProperty(id: string): Promise<Property | null> {
     }
 
     return mapRowToProperty(data);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(`Unexpected error deactivating property ${id}:`, err);
     throw err;
   }
@@ -784,7 +810,7 @@ export async function activateProperty(id: string): Promise<Property | null> {
     }
 
     return mapRowToProperty(data);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(`Unexpected error activating property ${id}:`, err);
     throw err;
   }

@@ -5,6 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Property } from "@/types/property";
+import { PropertyRow } from "@/types/database.types";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
+import { mapRowToProperty } from "@/lib/supabase/properties";
 import { Navbar } from "@/components/common/Navbar";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { useAuth } from "@/lib/supabase/AuthContext";
@@ -116,14 +119,38 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   } = useVisits();
   const { addNotification } = useNotifications();
 
-  const handleRealtimeRefresh = useCallback(() => {
-    router.refresh();
-  }, [router]);
+  // In-place client-side Realtime patch map (null = hidden/deleted -> disappears immediately)
+  const [realtimePatches, setRealtimePatches] = useState<
+    Record<string, Property | null>
+  >({});
+
+  const handleRealtimePropertyEvent = useCallback(
+    (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+      if (payload.eventType === "DELETE") {
+        const oldId = (payload.old as { id?: string } | undefined)?.id;
+        if (oldId) {
+          setRealtimePatches((prev) => ({ ...prev, [oldId]: null }));
+        }
+        return;
+      }
+      const row = payload.new as unknown as PropertyRow | undefined;
+      if (!row || typeof row.id !== "string") return;
+
+      if (row.is_active === false) {
+        setRealtimePatches((prev) => ({ ...prev, [row.id]: null }));
+      } else {
+        setRealtimePatches((prev) => ({
+          ...prev,
+          [row.id]: mapRowToProperty(row),
+        }));
+      }
+    },
+    []
+  );
 
   useRealtimeTableSync({
     table: "properties",
-    debounceMs: 400,
-    onEvent: handleRealtimeRefresh,
+    onEvent: handleRealtimePropertyEvent,
   });
 
   const tabFromUrl = searchParams.get("tab");
@@ -183,18 +210,25 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
     [prefs, prefsKey]
   );
 
-  // Resolve full Property objects for user's saved favorites
+  // Resolve full Property objects for user's saved favorites (respecting live Realtime patches)
   const savedProperties = useMemo(() => {
     const map = new Map<string, Property>();
     for (const p of allProperties) map.set(p.id, p);
+    for (const [id, patched] of Object.entries(realtimePatches)) {
+      if (patched === null) {
+        map.delete(id);
+      } else {
+        map.set(id, patched);
+      }
+    }
 
     const list: Property[] = [];
     for (const fav of favorites) {
       const prop = map.get(fav.id);
-      if (prop) list.push(prop);
+      if (prop && prop.isActive !== false) list.push(prop);
     }
     return list;
-  }, [allProperties, favorites]);
+  }, [allProperties, realtimePatches, favorites]);
 
   const profileDisplayName =
     prefs.customName.trim() || displayName || t("profile.guestName");

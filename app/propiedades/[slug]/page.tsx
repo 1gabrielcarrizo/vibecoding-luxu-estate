@@ -104,7 +104,10 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
   return (
     <div className="min-h-screen bg-clear-day text-nordic selection:bg-mosque/20 font-display flex flex-col">
       {/* Real-time updates for this property */}
-      <PropertyRealtimeListener propertyId={property.id} />
+      <PropertyRealtimeListener
+        propertyId={property.id}
+        currentSlug={property.slug}
+      />
 
       {/* Schema.org Structured Data */}
       <PropertyJsonLd property={property} />

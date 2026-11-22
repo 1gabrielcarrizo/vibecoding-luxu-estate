@@ -2,8 +2,10 @@
 
 import React, { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { Property } from "@/types/property";
+import { PropertyRow } from "@/types/database.types";
+import { mapRowToProperty } from "@/lib/supabase/properties";
 import {
   setPropertyFeaturedAction,
   togglePropertyActiveAction,
@@ -116,35 +118,37 @@ const TEMPLATE_PROPERTIES: PropertyItemDisplay[] = [
   },
 ];
 
+function mapSinglePropertyToDisplay(p: Property): PropertyItemDisplay {
+  const estMonthly = Math.round(p.price * 0.004);
+  const isActive = p.isActive !== false;
+  const status: "Active" | "Pending" | "Sold" | "Inactive" = !isActive
+    ? "Inactive"
+    : p.badge?.toUpperCase().includes("SOLD")
+      ? "Sold"
+      : "Active";
+
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    location: p.location,
+    beds: p.beds,
+    baths: p.baths,
+    sqft: `${p.sqm || 2000} m²`,
+    price: p.price,
+    formattedPrice:
+      p.formattedPrice || `$${p.price.toLocaleString("en-US")}`,
+    monthly: `$${estMonthly.toLocaleString("en-US")}`,
+    status,
+    image: p.images?.[0] || p.imageUrl || TEMPLATE_PROPERTIES[0].image,
+    isFeatured: p.isFeatured,
+    isActive,
+  };
+}
+
 function mapPropertiesToDisplay(props: Property[]): PropertyItemDisplay[] {
   if (props.length > 0) {
-    const mappedDb: PropertyItemDisplay[] = props.map((p) => {
-      const estMonthly = Math.round(p.price * 0.004);
-      const isActive = p.isActive !== false;
-      const status: "Active" | "Pending" | "Sold" | "Inactive" = !isActive
-        ? "Inactive"
-        : p.badge?.toUpperCase().includes("SOLD")
-          ? "Sold"
-          : "Active";
-
-      return {
-        id: p.id,
-        slug: p.slug,
-        title: p.title,
-        location: p.location,
-        beds: p.beds,
-        baths: p.baths,
-        sqft: `${p.sqm || 2000} m²`,
-        price: p.price,
-        formattedPrice:
-          p.formattedPrice || `$${p.price.toLocaleString("en-US")}`,
-        monthly: `$${estMonthly.toLocaleString("en-US")}`,
-        status,
-        image: p.images?.[0] || p.imageUrl || TEMPLATE_PROPERTIES[0].image,
-        isFeatured: p.isFeatured,
-        isActive,
-      };
-    });
+    const mappedDb: PropertyItemDisplay[] = props.map(mapSinglePropertyToDisplay);
 
     const existingTitles = new Set(mappedDb.map((p) => p.title.toLowerCase()));
     const remainingTemplates = TEMPLATE_PROPERTIES.filter(
@@ -158,7 +162,6 @@ function mapPropertiesToDisplay(props: Property[]): PropertyItemDisplay[] {
 export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
   initialProperties = [],
 }) => {
-  const router = useRouter();
   const { t, locale } = useTranslation();
 
   // Filters & Search
@@ -184,40 +187,65 @@ export const AdminPropertiesView: React.FC<AdminPropertiesViewProps> = ({
   const [overrides, setOverrides] = useState<
     Record<string, Partial<PropertyItemDisplay>>
   >({});
+  const [insertedItems, setInsertedItems] = useState<PropertyItemDisplay[]>([]);
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(() => new Set());
 
-  // Real-time synchronization across admin sessions when any property changes
+  // In-place client-side Realtime sync (zero page reload, zero flicker)
   const handleRealtimePropertyChange = useCallback(
-    (payload: { new?: Record<string, unknown>; old?: Record<string, unknown> }) => {
-      const changedId =
-        (typeof payload.new?.id === "string" && payload.new.id) ||
-        (typeof payload.old?.id === "string" && payload.old.id) ||
-        null;
+    (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+      if (payload.eventType === "DELETE") {
+        const oldId = (payload.old as { id?: string } | undefined)?.id;
+        if (oldId) {
+          setDeletedIds((prev) => new Set(prev).add(oldId));
+          setInsertedItems((prev) => prev.filter((item) => item.id !== oldId));
+        }
+        return;
+      }
 
-      if (changedId) {
-        setOverrides((prev) => {
-          if (!(changedId in prev)) return prev;
-          const next = { ...prev };
-          delete next[changedId];
+      const row = payload.new as unknown as PropertyRow | undefined;
+      if (!row || typeof row.id !== "string") return;
+
+      const mapped = mapSinglePropertyToDisplay(mapRowToProperty(row));
+
+      if (payload.eventType === "INSERT") {
+        setDeletedIds((prev) => {
+          if (!prev.has(mapped.id)) return prev;
+          const next = new Set(prev);
+          next.delete(mapped.id);
           return next;
         });
+        setInsertedItems((prev) => [
+          mapped,
+          ...prev.filter((item) => item.id !== mapped.id),
+        ]);
+      } else if (payload.eventType === "UPDATE") {
+        setOverrides((prev) => ({
+          ...prev,
+          [mapped.id]: mapped,
+        }));
+        setInsertedItems((prev) =>
+          prev.map((item) => (item.id === mapped.id ? mapped : item))
+        );
       }
-      router.refresh();
     },
-    [router]
+    []
   );
 
   useRealtimeTableSync({
     table: "properties",
-    debounceMs: 350,
     onEvent: handleRealtimePropertyChange,
   });
 
   const propertyList = useMemo(() => {
     const base = mapPropertiesToDisplay(initialProperties);
-    return base.map((item) =>
-      overrides[item.id] ? { ...item, ...overrides[item.id] } : item
-    );
-  }, [initialProperties, overrides]);
+    const baseIds = new Set(base.map((b) => b.id));
+    const uniqueInserted = insertedItems.filter((item) => !baseIds.has(item.id));
+    return [...uniqueInserted, ...base]
+      .filter((item) => !deletedIds.has(item.id))
+      .map((item) =>
+        overrides[item.id] ? { ...item, ...overrides[item.id] } : item
+      );
+  }, [initialProperties, insertedItems, deletedIds, overrides]);
 
   // Filter logic
   const filteredProperties = useMemo(() => {
