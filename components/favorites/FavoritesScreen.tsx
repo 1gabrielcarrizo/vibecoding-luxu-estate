@@ -3,10 +3,8 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Property } from "@/types/property";
-import { defaultAgent } from "@/data/mockData";
 import { Navbar } from "@/components/common/Navbar";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
-import { ScheduleVisitModal } from "@/components/property/ScheduleVisitModal";
 import { useFavorites } from "@/lib/favorites/FavoritesContext";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
@@ -28,7 +26,6 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
   const [sortBy, setSortBy] = useState<SortOption>("date_desc");
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [bookingProperty, setBookingProperty] = useState<Property | null>(null);
   const [removedProperty, setRemovedProperty] = useState<Property | null>(null);
 
   const sortDropdownRef = useRef<HTMLDivElement>(null);
@@ -259,7 +256,6 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
                 viewMode="grid"
                 priority={index === 0}
                 onRemove={handleRemove}
-                onBookVisit={setBookingProperty}
               />
             ))}
 
@@ -291,7 +287,6 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
                 viewMode="list"
                 priority={index === 0}
                 onRemove={handleRemove}
-                onBookVisit={setBookingProperty}
               />
             ))}
 
@@ -347,23 +342,6 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
             {t("favorites.undo")}
           </button>
         </div>
-      )}
-
-      {/* Book Visit / Schedule Tour Modal */}
-      {bookingProperty && (
-        <ScheduleVisitModal
-          isOpen={!!bookingProperty}
-          onClose={() => setBookingProperty(null)}
-          property={{
-            ...bookingProperty,
-            title: getLocalizedTitle(
-              bookingProperty.slug,
-              locale,
-              bookingProperty.title
-            ),
-          }}
-          agent={bookingProperty.agent || defaultAgent}
-        />
       )}
 
       <PropertyFooter />

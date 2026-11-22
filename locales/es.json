@@ -276,5 +276,39 @@
     "emptyDescription": "Explora nuestra colección exclusiva y pulsa el corazón en las propiedades que te interesen para guardarlas aquí.",
     "removedToast": "Se quitó {title} de tus favoritos.",
     "undo": "Deshacer"
+  },
+  "scheduleVisit": {
+    "backToDetails": "Volver a los detalles de la propiedad",
+    "priceLabel": "Precio",
+    "hostedBy": "Guiado por",
+    "title": "Programar una Visita",
+    "subtitle": "Elige una fecha y un horario para recorrer la propiedad en persona.",
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "weekdays": {
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mié",
+      "thu": "Jue",
+      "fri": "Vie",
+      "sat": "Sáb",
+      "sun": "Dom"
+    },
+    "availableTimes": "Horarios Disponibles",
+    "messageLabel": "Mensaje para el asesor",
+    "optional": "Opcional",
+    "messagePlaceholder": "¿Alguna pregunta o solicitud específica?",
+    "cancel": "Cancelar",
+    "confirmVisit": "Confirmar Visita",
+    "confirmedTitle": "¡Visita Confirmada!",
+    "confirmedSubtitle": "{agent} ha recibido tu solicitud y te esperará en el horario seleccionado.",
+    "summaryDate": "Fecha seleccionada",
+    "summaryTime": "Horario",
+    "summaryNote": "Tu mensaje",
+    "changeDateTime": "Cambiar fecha u horario",
+    "backToProperty": "Ver propiedad",
+    "support": "Soporte",
+    "guestName": "Cliente",
+    "whatsappMessage": "Hola {agent}, acabo de confirmar una visita para {title} el {date} a las {time}. Mi nombre es {name}{note}."
   }
 }

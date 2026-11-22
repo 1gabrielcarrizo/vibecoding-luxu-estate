@@ -276,5 +276,39 @@
     "emptyDescription": "Explore our curated listings and tap the heart icon on any property to keep track of your favorites here.",
     "removedToast": "Removed {title} from favorites.",
     "undo": "Undo"
+  },
+  "scheduleVisit": {
+    "backToDetails": "Back to property details",
+    "priceLabel": "Price",
+    "hostedBy": "Hosted by",
+    "title": "Schedule a Viewing",
+    "subtitle": "Choose a date and time to tour the property in person.",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "availableTimes": "Available Times",
+    "messageLabel": "Message for the agent",
+    "optional": "Optional",
+    "messagePlaceholder": "Any specific questions or requests?",
+    "cancel": "Cancel",
+    "confirmVisit": "Confirm Visit",
+    "confirmedTitle": "Visit Confirmed!",
+    "confirmedSubtitle": "{agent} has received your request and will meet you at your selected time.",
+    "summaryDate": "Selected Date",
+    "summaryTime": "Time Slot",
+    "summaryNote": "Your Note",
+    "changeDateTime": "Change Date or Time",
+    "backToProperty": "Back to Property",
+    "support": "Support",
+    "guestName": "Client",
+    "whatsappMessage": "Hello {agent}, I just confirmed a viewing for {title} on {date} at {time}. My name is {name}{note}."
   }
 }

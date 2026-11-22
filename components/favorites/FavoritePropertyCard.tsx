@@ -12,7 +12,6 @@ interface FavoritePropertyCardProps {
   viewMode: "grid" | "list";
   priority?: boolean;
   onRemove: (property: Property) => void;
-  onBookVisit: (property: Property) => void;
 }
 
 export const FavoritePropertyCard: React.FC<FavoritePropertyCardProps> = ({
@@ -20,7 +19,6 @@ export const FavoritePropertyCard: React.FC<FavoritePropertyCardProps> = ({
   viewMode,
   priority = false,
   onRemove,
-  onBookVisit,
 }) => {
   const { t, locale } = useTranslation();
   const displayTitle = getLocalizedTitle(property.slug, locale, property.title);
@@ -208,9 +206,8 @@ export const FavoritePropertyCard: React.FC<FavoritePropertyCardProps> = ({
               >
                 {t("propertyCard.viewDetails")}
               </Link>
-              <button
-                type="button"
-                onClick={() => onBookVisit(property)}
+              <Link
+                href={`/propiedades/${property.slug}/schedule`}
                 className="px-5 py-2.5 rounded-lg border border-mosque text-mosque font-medium text-sm hover:bg-mosque hover:text-white transition-colors duration-300 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>
@@ -221,7 +218,7 @@ export const FavoritePropertyCard: React.FC<FavoritePropertyCardProps> = ({
                 <span className="material-icons text-base">
                   {isRent ? "calendar_today" : "arrow_forward"}
                 </span>
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -332,9 +329,8 @@ export const FavoritePropertyCard: React.FC<FavoritePropertyCardProps> = ({
         </div>
 
         <div className="mt-auto">
-          <button
-            type="button"
-            onClick={() => onBookVisit(property)}
+          <Link
+            href={`/propiedades/${property.slug}/schedule`}
             className="w-full py-2.5 rounded-lg border border-mosque text-mosque font-medium text-sm hover:bg-mosque hover:text-white transition-colors duration-300 flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>
@@ -343,7 +339,7 @@ export const FavoritePropertyCard: React.FC<FavoritePropertyCardProps> = ({
             <span className="material-icons text-base">
               {isRent ? "calendar_today" : "arrow_forward"}
             </span>
-          </button>
+          </Link>
         </div>
       </div>
     </article>

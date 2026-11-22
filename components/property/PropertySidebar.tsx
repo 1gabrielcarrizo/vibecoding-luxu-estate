@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { Property } from "@/types/property";
 import { PropertyMap } from "./PropertyMap";
-import { ScheduleVisitModal } from "./ScheduleVisitModal";
 import { ContactAgentModal } from "./ContactAgentModal";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
@@ -15,7 +15,6 @@ interface PropertySidebarProps {
 
 export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) => {
   const { t, locale } = useTranslation();
-  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   const displayTitle = getLocalizedTitle(property.slug, locale, property.title);
@@ -122,16 +121,15 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
 
           {/* Primary Action Buttons */}
           <div className="space-y-2.5 sm:space-y-3">
-            <button
-              type="button"
-              onClick={() => setIsScheduleOpen(true)}
+            <Link
+              href={`/propiedades/${property.slug}/schedule`}
               className="w-full bg-mosque hover:bg-primary-hover text-white py-3.5 sm:py-4 px-4 sm:px-6 rounded-lg font-medium transition-all shadow-lg shadow-mosque/20 flex items-center justify-center gap-2 group cursor-pointer text-sm sm:text-base"
             >
               <span className="material-icons text-lg sm:text-xl group-hover:scale-110 transition-transform">
                 calendar_today
               </span>
               <span>{t("propertyDetail.scheduleTour")}</span>
-            </button>
+            </Link>
 
             <button
               type="button"
@@ -152,14 +150,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
         />
       </div>
 
-      {/* Modals for lead capture */}
-      <ScheduleVisitModal
-        isOpen={isScheduleOpen}
-        onClose={() => setIsScheduleOpen(false)}
-        property={{ ...property, title: displayTitle }}
-        agent={agent}
-      />
-
+      {/* Modal for agent contact */}
       <ContactAgentModal
         isOpen={isContactOpen}
         onClose={() => setIsContactOpen(false)}
