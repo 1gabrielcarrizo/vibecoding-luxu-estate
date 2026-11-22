@@ -248,5 +248,33 @@
     "signingIn": "Signing you in...",
     "waitSession": "Please wait while we finalize your LuxeEstate session.",
     "returnToLogin": "Return to Login"
+  },
+  "favorites": {
+    "title": "Your Favorites",
+    "loadingSubtitle": "Loading your saved properties...",
+    "subtitleEmpty": "You don't have any saved properties yet.",
+    "subtitleSingular": "You have 1 saved property waiting for you.",
+    "subtitlePlural": "You have {count} saved properties waiting for you.",
+    "sortByPrefix": "Sort by:",
+    "sortDateAdded": "Date Added",
+    "sortPriceLow": "Price: Low to High",
+    "sortPriceHigh": "Price: High to Low",
+    "sortLargest": "Largest Area",
+    "gridViewAria": "Grid view",
+    "listViewAria": "List view",
+    "removeAria": "Remove from favorites",
+    "bedSingular": "Bed",
+    "bedsPlural": "Beds",
+    "bathSingular": "Bath",
+    "bathsPlural": "Baths",
+    "bookVisit": "Book Visit",
+    "scheduleTour": "Schedule Tour",
+    "discoverMore": "Discover More",
+    "discoverMoreSub": "Find more properties that match your lifestyle.",
+    "browseListings": "Browse Listings",
+    "emptyTitle": "No Saved Homes Yet",
+    "emptyDescription": "Explore our curated listings and tap the heart icon on any property to keep track of your favorites here.",
+    "removedToast": "Removed {title} from favorites.",
+    "undo": "Undo"
   }
 }

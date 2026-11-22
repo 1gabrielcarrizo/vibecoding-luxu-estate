@@ -122,6 +122,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           {/* Top Left: 1 to N Images Gallery */}
           <div className="lg:col-span-8 space-y-4">
             <PropertyGallery
+              propertyId={property.id}
               images={allImages}
               title={property.title}
               badges={badges}

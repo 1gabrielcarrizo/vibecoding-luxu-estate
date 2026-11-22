@@ -35,7 +35,7 @@ export const navLinks: NavLink[] = [
   { label: "Buy", href: "/?tab=Buy", isActive: true },
   { label: "Rent", href: "/?tab=Rent" },
   { label: "Sell", href: "/?tab=Sell" },
-  { label: "Saved Homes", href: "/#saved" },
+  { label: "Saved Homes", href: "/favorites" },
 ];
 
 export const categoryFilters: PropertyCategory[] = [

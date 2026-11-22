@@ -240,6 +240,33 @@ export async function getAllMarketProperties(includeFeatured = true): Promise<Pr
 }
 
 /**
+ * Retrieves ALL active properties across both featured and market listings,
+ * merging Supabase DB rows with all local fallback datasets (deduplicated by ID).
+ */
+export async function getAllActiveProperties(): Promise<Property[]> {
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    if (data && data.length > 0 && !error) {
+      const dbProps = data.map(mapRowToProperty);
+      const existingIds = new Set(dbProps.map((p) => p.id));
+      const extraProps = allFallbackProperties.filter(
+        (p) => !existingIds.has(p.id) && p.isActive !== false
+      );
+      return [...dbProps, ...extraProps];
+    }
+  } catch (err) {
+    console.warn("Using fallback active properties:", err);
+  }
+
+  return allFallbackProperties.filter((p) => p.isActive !== false);
+}
+
+/**
  * Retrieves ALL properties for the admin dashboard (both featured and standard),
  * merging Supabase entries with fallbacks.
  */

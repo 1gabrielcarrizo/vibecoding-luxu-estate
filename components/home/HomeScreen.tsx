@@ -362,10 +362,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <Navbar
         activeTab={navTab}
         onTabChange={(tab) => {
+          if (tab === "Saved Homes") {
+            router.push("/favorites");
+            return;
+          }
           setNavTab(tab);
           if (tab === "Buy") handleMarketTabChange("Buy");
           if (tab === "Rent") handleMarketTabChange("Rent");
-          if (tab === "Sell" || tab === "Saved Homes") {
+          if (tab === "Sell") {
             handleMarketTabChange("All");
           }
         }}

@@ -4,8 +4,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
+import { useFavorites } from "@/lib/favorites/FavoritesContext";
 
 interface PropertyGalleryProps {
+  propertyId?: string;
   images: string[];
   title: string;
   badges?: string[];
@@ -13,17 +15,30 @@ interface PropertyGalleryProps {
 }
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
+  propertyId,
   images,
   title,
   badges = ["Premium", "New"],
   slug,
 }) => {
   const { t, locale } = useTranslation();
+  const { isFavorite: checkIsFavorite, toggleFavorite } = useFavorites();
   const displayTitle = slug ? getLocalizedTitle(slug, locale, title) : title;
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [localFavorite, setLocalFavorite] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
+
+  const isFavorite = propertyId ? checkIsFavorite(propertyId) : localFavorite;
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (propertyId) {
+      toggleFavorite(propertyId);
+    } else {
+      setLocalFavorite((prev) => !prev);
+    }
+  };
 
   const handleShare = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -154,10 +169,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </button>
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsFavorite(!isFavorite);
-            }}
+            onClick={handleToggleFavorite}
             aria-label={t("propertyCard.favoriteAria") || "Guardar en favoritos"}
             title={t("propertyCard.favoriteAria") || "Guardar en favoritos"}
             className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 z-10 cursor-pointer shadow-sm hover:scale-105 active:scale-95 ${

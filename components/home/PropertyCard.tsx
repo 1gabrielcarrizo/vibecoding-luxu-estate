@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Property } from "@/types/property";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
+import { useFavorites } from "@/lib/favorites/FavoritesContext";
 
 interface PropertyCardProps {
   property: Property;
@@ -21,13 +22,14 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   priority = false,
 }) => {
   const { t, locale } = useTranslation();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite: checkIsFavorite, toggleFavorite } = useFavorites();
+  const isFavorite = checkIsFavorite(property.id);
   const displayTitle = getLocalizedTitle(property.slug, locale, property.title);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
+    toggleFavorite(property.id);
   };
 
   const badgeBg =

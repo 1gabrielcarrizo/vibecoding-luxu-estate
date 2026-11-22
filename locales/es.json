@@ -248,5 +248,33 @@
     "signingIn": "Iniciando sesión...",
     "waitSession": "Por favor espera mientras finalizamos tu sesión en LuxeEstate.",
     "returnToLogin": "Volver a Iniciar Sesión"
+  },
+  "favorites": {
+    "title": "Tus Favoritos",
+    "loadingSubtitle": "Cargando tus propiedades guardadas...",
+    "subtitleEmpty": "Aún no tienes propiedades guardadas.",
+    "subtitleSingular": "Tienes 1 propiedad guardada esperándote.",
+    "subtitlePlural": "Tienes {count} propiedades guardadas esperándote.",
+    "sortByPrefix": "Ordenar por:",
+    "sortDateAdded": "Fecha agregada",
+    "sortPriceLow": "Precio: menor a mayor",
+    "sortPriceHigh": "Precio: mayor a menor",
+    "sortLargest": "Mayor superficie",
+    "gridViewAria": "Vista de cuadrícula",
+    "listViewAria": "Vista de lista",
+    "removeAria": "Quitar de favoritos",
+    "bedSingular": "Hab.",
+    "bedsPlural": "Hab.",
+    "bathSingular": "Baño",
+    "bathsPlural": "Baños",
+    "bookVisit": "Agendar Visita",
+    "scheduleTour": "Programar Tour",
+    "discoverMore": "Descubre Más",
+    "discoverMoreSub": "Encuentra más propiedades que se adapten a tu estilo de vida.",
+    "browseListings": "Explorar Listados",
+    "emptyTitle": "Aún no tienes favoritos",
+    "emptyDescription": "Explora nuestra colección exclusiva y pulsa el corazón en las propiedades que te interesen para guardarlas aquí.",
+    "removedToast": "Se quitó {title} de tus favoritos.",
+    "undo": "Deshacer"
   }
 }

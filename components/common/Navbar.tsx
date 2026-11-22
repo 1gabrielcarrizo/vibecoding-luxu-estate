@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/lib/supabase/AuthContext";
+import { useFavorites } from "@/lib/favorites/FavoritesContext";
 import { LanguageSelector } from "./LanguageSelector";
 
 interface NavbarProps {
@@ -34,6 +35,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     role,
   } = useAuth();
 
+  const { favoritesCount } = useFavorites();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -61,10 +64,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     { key: "Buy", label: t("nav.buy"), href: "/?tab=Buy" },
     { key: "Rent", label: t("nav.rent"), href: "/?tab=Rent" },
     { key: "Sell", label: t("nav.sell"), href: "/?tab=Sell" },
-    { key: "Saved Homes", label: t("nav.savedHomes"), href: "/#saved" },
+    { key: "Saved Homes", label: t("nav.savedHomes"), href: "/favorites" },
   ];
 
   const handleLinkClick = (tabKey: string, href: string) => {
+    if (tabKey === "Saved Homes") {
+      router.push("/favorites");
+      return;
+    }
     if (onTabChange) {
       onTabChange(tabKey);
     } else {
@@ -117,13 +124,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                   key={link.key}
                   type="button"
                   onClick={() => handleLinkClick(link.key, link.href)}
-                  className={`relative py-2 text-sm font-semibold transition-colors cursor-pointer ${
+                  className={`relative py-2 text-sm font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
                     isActive
                       ? "text-nordic"
                       : "text-nordic/70 hover:text-mosque"
                   }`}
                 >
-                  {link.label}
+                  <span>{link.label}</span>
+                  {link.key === "Saved Homes" && favoritesCount > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[11px] font-bold rounded-full bg-hint-green text-mosque">
+                      {favoritesCount}
+                    </span>
+                  )}
                   {isActive && (
                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-mosque"></span>
                   )}
@@ -224,6 +236,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
 
                     <div className="py-1">
+                      <Link
+                        href="/favorites"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-nordic hover:bg-mosque/5 hover:text-mosque flex items-center justify-between gap-2 cursor-pointer transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-lg text-mosque">
+                            favorite
+                          </span>
+                          <span>{t("nav.savedHomes")}</span>
+                        </span>
+                        {favoritesCount > 0 && (
+                          <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[11px] font-bold rounded-full bg-hint-green text-mosque">
+                            {favoritesCount}
+                          </span>
+                        )}
+                      </Link>
                       {isAdmin && (
                         <Link
                           href="/admin"
@@ -293,13 +322,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                   handleLinkClick(link.key, link.href);
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full text-left block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                className={`w-full text-left flex items-center justify-between px-3 py-2 rounded-md text-base font-medium transition-colors ${
                   isActive
                     ? "text-mosque bg-mosque/10 font-semibold"
                     : "text-nordic hover:bg-mosque/5"
                 }`}
               >
-                {link.label}
+                <span>{link.label}</span>
+                {link.key === "Saved Homes" && favoritesCount > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold rounded-full bg-hint-green text-mosque">
+                    {favoritesCount}
+                  </span>
+                )}
               </button>
             );
           })}

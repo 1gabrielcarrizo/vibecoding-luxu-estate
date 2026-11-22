@@ -248,5 +248,33 @@
     "signingIn": "Connexion en cours...",
     "waitSession": "Veuillez patienter pendant la finalisation de votre session LuxeEstate.",
     "returnToLogin": "Retour à la connexion"
+  },
+  "favorites": {
+    "title": "Vos Favoris",
+    "loadingSubtitle": "Chargement de vos biens enregistrés...",
+    "subtitleEmpty": "Vous n'avez pas encore de biens enregistrés.",
+    "subtitleSingular": "Vous avez 1 propriété enregistrée qui vous attend.",
+    "subtitlePlural": "Vous avez {count} propriétés enregistrées qui vous attendent.",
+    "sortByPrefix": "Trier par :",
+    "sortDateAdded": "Date d'ajout",
+    "sortPriceLow": "Prix : croissant",
+    "sortPriceHigh": "Prix : décroissant",
+    "sortLargest": "Plus grande surface",
+    "gridViewAria": "Vue en grille",
+    "listViewAria": "Vue en liste",
+    "removeAria": "Retirer des favoris",
+    "bedSingular": "Ch.",
+    "bedsPlural": "Ch.",
+    "bathSingular": "SdB",
+    "bathsPlural": "SdB",
+    "bookVisit": "Réserver une Visite",
+    "scheduleTour": "Planifier un Tour",
+    "discoverMore": "Découvrir Plus",
+    "discoverMoreSub": "Trouvez d'autres propriétés qui correspondent à votre style de vie.",
+    "browseListings": "Parcourir les Biens",
+    "emptyTitle": "Aucun Bien Enregistré",
+    "emptyDescription": "Parcourez notre sélection exclusive et cliquez sur le cœur des propriétés qui vous plaisent pour les retrouver ici.",
+    "removedToast": "{title} a été retiré de vos favoris.",
+    "undo": "Annuler"
   }
 }
