@@ -348,5 +348,69 @@
     "priceDropAlerts": "Notify me on price drops for saved homes",
     "visitRemindersLabel": "Reminders",
     "tourReminders": "Upcoming scheduled tour reminders"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unread": "unread",
+    "markAllRead": "Mark all read",
+    "clearAll": "Clear",
+    "dismissAria": "Dismiss notification",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago",
+    "upcomingVisitSingle": "1 upcoming visit scheduled",
+    "upcomingVisitMultiple": "{count} upcoming visits scheduled",
+    "emptyTitle": "You're all caught up",
+    "emptyDescription": "Updates for scheduled tours, advisor inquiries, and listing requests will appear here.",
+    "viewSavedHomes": "View your {count} saved homes",
+    "configureAlerts": "Alert settings",
+    "manageProperties": "Manage properties",
+    "visitScheduledTitle": "Visit confirmed",
+    "visitScheduledMessage": "{title} on {date} at {time} with {agent}.",
+    "visitCancelledTitle": "Visit cancelled",
+    "visitCancelledMessage": "Your scheduled viewing for {title} was cancelled.",
+    "agentMessageTitle": "Message sent to advisor",
+    "agentMessageBody": "Your inquiry about {title} was delivered to {agent}.",
+    "sellRequestTitle": "Valuation request received",
+    "sellRequestMessage": "We received your {type} listing request in {location}. An advisor will contact you soon."
+  },
+  "sellModal": {
+    "title": "Sell or Lease Your Property",
+    "subtitle": "Request a private valuation with our luxury real estate advisory team.",
+    "adminShortcutText": "You have admin access. You can publish directly to the live catalog.",
+    "adminShortcutCta": "Publish now",
+    "operationSale": "For Sale",
+    "operationRent": "For Rent",
+    "estimatedPrice": "Estimated Price (USD)",
+    "locationLabel": "Property Location",
+    "locationPlaceholder": "City, neighborhood, or address...",
+    "notesLabel": "Additional Details",
+    "notesPlaceholder": "Approximate area, bedrooms, or notable features...",
+    "submitCta": "Request Private Valuation",
+    "successTitle": "Request Received!",
+    "successMessage": "A dedicated LuxeEstate advisor will review your property details and reach out within 24 hours.",
+    "whatsappMessage": "Hello LuxeEstate team, I'd like to list my {type} ({operation}) in {location} with an estimated price of {price}. My name is {name} ({email})."
+  },
+  "legal": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "p1": "At LuxeEstate we respect your privacy. We only use the information strictly required to authenticate your session (Google or GitHub via Supabase Auth), store your favorites, and coordinate private viewings.",
+      "p2": "Your saved homes, scheduled visits, notification settings, and inquiries are handled securely and are never sold or shared with third parties.",
+      "p3": "You can adjust your notification preferences at any time from My Profile or sign out whenever you wish."
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "p1": "LuxeEstate is a curated real estate discovery and advisory platform. Prices, square footage, and property availability shown in listings are for informational purposes and subject to confirmation.",
+      "p2": "When scheduling a private viewing or contacting an advisor, you agree to receive communications solely related to the property in question.",
+      "p3": "Unauthorized reproduction of photography, technical sheets, or commercial materials published on this platform is prohibited."
+    },
+    "help": {
+      "title": "Help Center",
+      "p1": "Want to save homes? Tap the heart icon on any property card to add it to Saved Homes and access it anytime from the top bar.",
+      "p2": "Ready to tour a residence? Open its detail page, click 'Schedule a Tour', and pick a date and time slot. Manage all appointments in My Profile.",
+      "p3": "If you need personalized assistance buying, renting, or selling a property, reach out directly to our concierge team.",
+      "contactTitle": "Direct Support"
+    }
   }
 }

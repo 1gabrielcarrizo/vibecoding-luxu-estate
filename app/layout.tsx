@@ -4,6 +4,7 @@ import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { AuthProvider } from "@/lib/supabase/AuthContext";
 import { FavoritesProvider } from "@/lib/favorites/FavoritesContext";
 import { VisitsProvider } from "@/lib/visits/VisitsContext";
+import { NotificationsProvider } from "@/lib/notifications/NotificationsContext";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -62,7 +63,9 @@ export default function RootLayout({
         <LanguageProvider>
           <AuthProvider>
             <FavoritesProvider>
-              <VisitsProvider>{children}</VisitsProvider>
+              <VisitsProvider>
+                <NotificationsProvider>{children}</NotificationsProvider>
+              </VisitsProvider>
             </FavoritesProvider>
           </AuthProvider>
         </LanguageProvider>

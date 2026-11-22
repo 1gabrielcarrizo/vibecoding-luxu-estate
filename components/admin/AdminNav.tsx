@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
+import { NotificationsDropdown } from "@/components/common/NotificationsDropdown";
 
 interface AdminNavProps {
   userEmail?: string | null;
@@ -131,7 +132,7 @@ export const AdminNav: React.FC<AdminNavProps> = ({
         {/* Right Nav / Notifications & Profile */}
         <div className="flex items-center gap-2 sm:gap-4">
           <Link
-            href="/#properties"
+            href="/?focus=search"
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-nordic/60 dark:text-gray-400 hover:text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             title="Search listings"
           >
@@ -140,16 +141,7 @@ export const AdminNav: React.FC<AdminNavProps> = ({
             </span>
           </Link>
 
-          <button
-            type="button"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-nordic/60 dark:text-gray-400 hover:text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors relative cursor-pointer"
-            title="Notifications"
-          >
-            <span className="material-symbols-outlined text-xl leading-none select-none flex items-center justify-center">
-              notifications
-            </span>
-            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#152e2a]" />
-          </button>
+          <NotificationsDropdown variant="admin" />
 
           {/* User Profile Button with Dropdown & Sign Out */}
           <div

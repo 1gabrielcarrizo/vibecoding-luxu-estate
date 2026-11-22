@@ -73,6 +73,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   // Track initial mount and last searched query for live search debouncing
   const isFirstRender = useRef(true);
   const lastSearchedQuery = useRef(initialQuery);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  const focusSearchInput = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 150);
+  };
+
+  // Focus search input when arriving via /?focus=search (e.g. from Navbar or AdminNav)
+  useEffect(() => {
+    if (searchParams.get("focus") === "search") {
+      focusSearchInput();
+      const cleaned = new URLSearchParams(searchParams.toString());
+      cleaned.delete("focus");
+      const qs = cleaned.toString();
+      router.replace(qs ? `/?${qs}` : "/", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   // Sync state when props change (e.g. back/forward navigation or server re-render)
   useEffect(() => {
@@ -369,13 +388,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           setNavTab(tab);
           if (tab === "Buy") handleMarketTabChange("Buy");
           if (tab === "Rent") handleMarketTabChange("Rent");
-          if (tab === "Sell") {
-            handleMarketTabChange("All");
-          }
         }}
-        onSearchClick={() => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}
+        onSearchClick={focusSearchInput}
       />
 
       {/* Main Content */}
@@ -390,6 +404,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           onToggleFilters={() => setIsFilterModalOpen(true)}
           activeFilterCount={activeFilterCount}
           isLoading={isLoading || isPending}
+          searchInputRef={searchInputRef}
         />
 
         {/* Featured Collections Section: Only shown when no search filters are applied, and strictly max 2 properties */}

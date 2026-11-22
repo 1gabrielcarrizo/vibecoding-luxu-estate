@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useMemo, useSyncExternalStore, useCallback } from "react";
+import React, { useState, useMemo, useSyncExternalStore, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Property } from "@/types/property";
 import { Navbar } from "@/components/common/Navbar";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { useAuth } from "@/lib/supabase/AuthContext";
 import { useFavorites } from "@/lib/favorites/FavoritesContext";
 import { useVisits, ScheduledVisit } from "@/lib/visits/VisitsContext";
+import { useNotifications } from "@/lib/notifications/NotificationsContext";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
 
@@ -97,6 +98,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   allProperties,
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t, locale } = useTranslation();
   const { user, avatarUrl, displayName, email, isLoading: isAuthLoading, signOut } =
     useAuth();
@@ -111,12 +113,26 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
     isHydrated: isVisitsHydrated,
     removeVisit,
   } = useVisits();
+  const { addNotification } = useNotifications();
 
-  const [activeTab, setActiveTab] = useState<ProfileTab>("saved");
+  const tabFromUrl = searchParams.get("tab");
+  const urlTab: ProfileTab =
+    tabFromUrl === "visits" || tabFromUrl === "settings" ? tabFromUrl : "saved";
+
+  const [tabOverride, setTabOverride] = useState<{
+    forUrl: string | null;
+    tab: ProfileTab;
+  } | null>(null);
+  const activeTab: ProfileTab =
+    tabOverride && tabOverride.forUrl === tabFromUrl ? tabOverride.tab : urlTab;
+  const setActiveTab = (tab: ProfileTab) => {
+    setTabOverride({ forUrl: tabFromUrl, tab });
+  };
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState("");
   const [editLocation, setEditLocation] = useState("");
   const [savedNotice, setSavedNotice] = useState(false);
+  const editFormRef = useRef<HTMLFormElement>(null);
 
   const prefsKey = useMemo(() => getPrefsKey(user?.id ?? null), [user?.id]);
 
@@ -209,6 +225,26 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
     setEditName(profileDisplayName);
     setEditLocation(prefs.location);
     setIsEditingProfile(true);
+    setTimeout(() => {
+      editFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
+  };
+
+  const handleCancelVisit = (visit: ScheduledVisit) => {
+    removeVisit(visit.id);
+    const localizedTitle = getLocalizedTitle(
+      visit.propertySlug,
+      locale,
+      visit.propertyTitle
+    );
+    addNotification({
+      type: "visit_cancelled",
+      title: t("notifications.visitCancelledTitle"),
+      message: t("notifications.visitCancelledMessage", {
+        title: localizedTitle,
+      }),
+      href: `/propiedades/${visit.propertySlug}`,
+    });
   };
 
   const handleSaveProfileEdit = (e: React.FormEvent) => {
@@ -348,6 +384,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
         {/* Inline Edit Profile Drawer */}
         {isEditingProfile && (
           <form
+            ref={editFormRef}
             onSubmit={handleSaveProfileEdit}
             className="mb-10 bg-white rounded-2xl p-6 border border-mosque/15 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
           >
@@ -715,7 +752,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                           </a>
                           <button
                             type="button"
-                            onClick={() => removeVisit(visit.id)}
+                            onClick={() => handleCancelVisit(visit)}
                             aria-label={t("profile.cancelVisitAria")}
                             title={t("profile.cancelVisitAria")}
                             className="p-2 text-nordic/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer flex-shrink-0"

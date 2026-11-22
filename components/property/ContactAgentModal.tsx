@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Property, PropertyAgent } from "@/types/property";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { useAuth } from "@/lib/supabase/AuthContext";
+import { useNotifications } from "@/lib/notifications/NotificationsContext";
 
 interface ContactAgentModalProps {
   isOpen: boolean;
@@ -19,28 +21,41 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
   agent,
 }) => {
   const { t } = useTranslation();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const { displayName, email: userEmail } = useAuth();
+  const { addNotification } = useNotifications();
+  const [nameInput, setNameInput] = useState<string | null>(null);
+  const [emailInput, setEmailInput] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
+  const [messageInput, setMessageInput] = useState<string | null>(null);
   const [isSent, setIsSent] = useState(false);
 
-  React.useEffect(() => {
-    if (isOpen) {
-      setMessage(
-        t("modals.defaultContactMessage", {
-          title: property.title,
-          location: property.location,
-        })
-      );
-      setIsSent(false);
-    }
-  }, [isOpen, property.title, property.location, t]);
+  const defaultMessage = t("modals.defaultContactMessage", {
+    title: property.title,
+    location: property.location,
+  });
+  const name = nameInput ?? displayName ?? "";
+  const email = emailInput ?? userEmail ?? "";
+  const message = messageInput ?? defaultMessage;
+
+  const handleClose = () => {
+    setIsSent(false);
+    setMessageInput(null);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    addNotification({
+      type: "agent_message",
+      title: t("notifications.agentMessageTitle"),
+      message: t("notifications.agentMessageBody", {
+        title: property.title,
+        agent: agent.name,
+      }),
+      href: `/propiedades/${property.slug}`,
+    });
     setIsSent(true);
   };
 
@@ -72,7 +87,7 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label={t("modals.close")}
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-full hover:bg-gray-100 text-nordic/40 hover:text-nordic flex items-center justify-center transition-colors cursor-pointer flex-shrink-0"
           >
@@ -107,7 +122,7 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
               </a>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 className="w-full bg-slate-100 hover:bg-slate-200 text-nordic py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer"
               >
                 {t("modals.close")}
@@ -157,7 +172,7 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
                 required
                 placeholder="John Doe"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setNameInput(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-nordic focus:outline-none focus:border-mosque"
               />
             </div>
@@ -172,7 +187,7 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
                   required
                   placeholder="john@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmailInput(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-nordic focus:outline-none focus:border-mosque"
                 />
               </div>
@@ -198,7 +213,7 @@ export const ContactAgentModal: React.FC<ContactAgentModalProps> = ({
                 rows={3}
                 required
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => setMessageInput(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-nordic focus:outline-none focus:border-mosque resize-none"
               ></textarea>
             </div>

@@ -12,6 +12,7 @@ import { ContactAgentModal } from "@/components/property/ContactAgentModal";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/lib/supabase/AuthContext";
 import { useVisits } from "@/lib/visits/VisitsContext";
+import { useNotifications } from "@/lib/notifications/NotificationsContext";
 import { getLocalizedTitle } from "@/lib/i18n/propertyTranslations";
 
 interface ScheduleVisitScreenProps {
@@ -55,6 +56,7 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
   const { t, locale } = useTranslation();
   const { displayName } = useAuth();
   const { addVisit, removeVisit } = useVisits();
+  const { addNotification } = useNotifications();
 
   const today = useMemo(() => parseIsoDate(initialTodayIso), [initialTodayIso]);
   const defaultSelected = useMemo(() => addDays(today, 1), [today]);
@@ -240,6 +242,17 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
       lng: property.coordinates?.lng,
     });
     setConfirmedVisitId(created.id);
+    addNotification({
+      type: "visit_scheduled",
+      title: t("notifications.visitScheduledTitle"),
+      message: t("notifications.visitScheduledMessage", {
+        title: displayTitle,
+        date: formattedSelectedDate,
+        time: selectedTime,
+        agent: agent.name,
+      }),
+      href: "/profile?tab=visits",
+    });
     setCancelledNotice(false);
     setIsConfirmed(true);
   };
@@ -247,6 +260,14 @@ export const ScheduleVisitScreen: React.FC<ScheduleVisitScreenProps> = ({
   const handleCancelConfirmedVisit = () => {
     if (confirmedVisitId) {
       removeVisit(confirmedVisitId);
+      addNotification({
+        type: "visit_cancelled",
+        title: t("notifications.visitCancelledTitle"),
+        message: t("notifications.visitCancelledMessage", {
+          title: displayTitle,
+        }),
+        href: `/propiedades/${property.slug}`,
+      });
     }
     setConfirmedVisitId(null);
     setIsConfirmed(false);

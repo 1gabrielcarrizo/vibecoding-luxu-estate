@@ -348,5 +348,69 @@
     "priceDropAlerts": "M'avertir en cas de baisse de prix d'un favori",
     "visitRemindersLabel": "Rappels",
     "tourReminders": "Rappels de visites programmées"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unread": "non lues",
+    "markAllRead": "Tout marquer lu",
+    "clearAll": "Effacer",
+    "dismissAria": "Supprimer la notification",
+    "justNow": "À l'instant",
+    "minutesAgo": "Il y a {count} min",
+    "hoursAgo": "Il y a {count} h",
+    "daysAgo": "Il y a {count} j",
+    "upcomingVisitSingle": "1 visite programmée à venir",
+    "upcomingVisitMultiple": "{count} visites programmées à venir",
+    "emptyTitle": "Vous êtes à jour",
+    "emptyDescription": "Retrouvez ici vos confirmations de visites, messages envoyés aux conseillers et demandes d'estimation.",
+    "viewSavedHomes": "Voir vos {count} biens enregistrés",
+    "configureAlerts": "Configurer les alertes",
+    "manageProperties": "Gérer les biens",
+    "visitScheduledTitle": "Visite confirmée",
+    "visitScheduledMessage": "{title} le {date} à {time} avec {agent}.",
+    "visitCancelledTitle": "Visite annulée",
+    "visitCancelledMessage": "Votre visite programmée pour {title} a été annulée.",
+    "agentMessageTitle": "Message envoyé au conseiller",
+    "agentMessageBody": "Votre demande concernant {title} a été transmise à {agent}.",
+    "sellRequestTitle": "Demande d'estimation envoyée",
+    "sellRequestMessage": "Nous avons bien reçu votre demande pour {type} à {location}. Un conseiller vous contactera rapidement."
+  },
+  "sellModal": {
+    "title": "Vendre ou Louer votre Bien",
+    "subtitle": "Demandez une estimation confidentielle auprès de notre équipe de conseillers dédiés.",
+    "adminShortcutText": "Vous disposez d'un accès administrateur. Vous pouvez publier directement dans le catalogue.",
+    "adminShortcutCta": "Publier maintenant",
+    "operationSale": "À Vendre",
+    "operationRent": "À Louer",
+    "estimatedPrice": "Prix Estimé (USD)",
+    "locationLabel": "Emplacement du bien",
+    "locationPlaceholder": "Ville, quartier ou adresse...",
+    "notesLabel": "Détails complémentaires",
+    "notesPlaceholder": "Surface approximative, chambres ou atouts particuliers...",
+    "submitCta": "Demander une Estimation Gratuite",
+    "successTitle": "Demande Reçue !",
+    "successMessage": "Un conseiller spécialisé LuxeEstate étudiera votre bien et vous contactera sous 24 heures.",
+    "whatsappMessage": "Bonjour l'équipe LuxeEstate, je souhaite mettre mon bien ({type}, {operation}) situé à {location} au prix estimé de {price}. Je m'appelle {name} ({email})."
+  },
+  "legal": {
+    "privacy": {
+      "title": "Politique de Confidentialité",
+      "p1": "Chez LuxeEstate, nous protégeons votre vie privée. Nous n'utilisons que les données strictement nécessaires à la gestion de votre session (Google ou GitHub via Supabase Auth), à vos favoris et à vos visites privées.",
+      "p2": "Vos préférences, biens enregistrés, visites programmées et notifications sont traités en toute sécurité et ne sont jamais vendus ni partagés à des tiers.",
+      "p3": "Vous pouvez modifier vos préférences d'alertes à tout moment depuis Mon Profil ou vous déconnecter librement."
+    },
+    "terms": {
+      "title": "Conditions d'Utilisation",
+      "p1": "LuxeEstate est une plateforme de découverte et de conseil immobilier haut de gamme. Les prix, surfaces et disponibilités affichés sont donnés à titre indicatif et sous réserve de confirmation.",
+      "p2": "En planifiant une visite privée ou en contactant un conseiller, vous acceptez de recevoir des échanges liés uniquement au bien consulté.",
+      "p3": "Toute reproduction non autorisée des photographies, fiches techniques ou contenus commerciaux de la plateforme est interdite."
+    },
+    "help": {
+      "title": "Centre d'Aide",
+      "p1": "Vous souhaitez sauvegarder un bien ? Cliquez sur l'icône cœur d'une annonce pour l'ajouter à vos Favoris et la retrouver depuis la barre de navigation.",
+      "p2": "Envie de visiter une résidence ? Ouvrez sa fiche, cliquez sur « Planifier une Visite Privée » et choisissez votre créneau. Gérez vos rendez-vous dans Mon Profil.",
+      "p3": "Pour un accompagnement personnalisé lors d'un achat, d'une location ou d'une vente, contactez directement notre conciergerie.",
+      "contactTitle": "Assistance Directe"
+    }
   }
 }

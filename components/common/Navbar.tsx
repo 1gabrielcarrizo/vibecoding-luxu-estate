@@ -7,6 +7,8 @@ import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/lib/supabase/AuthContext";
 import { useFavorites } from "@/lib/favorites/FavoritesContext";
 import { LanguageSelector } from "./LanguageSelector";
+import { NotificationsDropdown } from "./NotificationsDropdown";
+import { SellPropertyModal } from "./SellPropertyModal";
 
 interface NavbarProps {
   activeTab?: string;
@@ -39,6 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [sellModalOpen, setSellModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close profile dropdown on outside click
@@ -72,6 +75,10 @@ export const Navbar: React.FC<NavbarProps> = ({
       router.push("/favorites");
       return;
     }
+    if (tabKey === "Sell") {
+      setSellModalOpen(true);
+      return;
+    }
     if (onTabChange) {
       onTabChange(tabKey);
     } else {
@@ -95,6 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
+    <>
     <nav className="sticky top-0 z-50 bg-clear-day/95 backdrop-blur-md border-b border-mosque/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
@@ -161,15 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </button>
 
-            <button
-              aria-label={t("nav.notificationsAria")}
-              className="w-9 h-9 sm:w-10 sm:h-10 text-nordic hover:text-mosque transition-colors relative rounded-full hover:bg-mosque/5 flex items-center justify-center cursor-pointer flex-shrink-0"
-            >
-              <span className="material-symbols-outlined text-xl sm:text-2xl leading-none select-none flex items-center justify-center">
-                notifications
-              </span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-mosque rounded-full"></span>
-            </button>
+            <NotificationsDropdown variant="public" />
 
             {/* User Profile or Sign In Button */}
             {isLoading ? (
@@ -422,5 +422,12 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
     </nav>
+
+      {/* Sell / Valuation Modal rendered outside nav so fixed positioning covers full viewport */}
+      <SellPropertyModal
+        isOpen={sellModalOpen}
+        onClose={() => setSellModalOpen(false)}
+      />
+    </>
   );
 };

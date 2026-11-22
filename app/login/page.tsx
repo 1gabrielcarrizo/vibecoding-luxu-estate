@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/supabase/AuthContext";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { LanguageSelector } from "@/components/common/LanguageSelector";
+import { LegalInfoModal, LegalTopic } from "@/components/common/LegalInfoModal";
 
 function LoginContent() {
   const router = useRouter();
@@ -15,6 +16,7 @@ function LoginContent() {
   const [loadingProvider, setLoadingProvider] = useState<"google" | "github" | null>(
     null
   );
+  const [legalTopic, setLegalTopic] = useState<LegalTopic | null>(null);
 
   const nextUrl = searchParams.get("next") || "/";
   const errorParam = searchParams.get("error");
@@ -190,19 +192,21 @@ function LoginContent() {
           {/* Terms info */}
           <div className="mt-8 text-center text-xs text-nordic/40 dark:text-gray-500 leading-relaxed">
             {t("auth.termsAgreement")}{" "}
-            <Link
-              className="text-primary dark:text-accent hover:underline font-medium"
-              href="#"
+            <button
+              type="button"
+              onClick={() => setLegalTopic("terms")}
+              className="text-primary dark:text-accent hover:underline font-medium cursor-pointer"
             >
               {t("auth.termsOfService")}
-            </Link>{" "}
+            </button>{" "}
             {t("auth.and")}{" "}
-            <Link
-              className="text-primary dark:text-accent hover:underline font-medium"
-              href="#"
+            <button
+              type="button"
+              onClick={() => setLegalTopic("privacy")}
+              className="text-primary dark:text-accent hover:underline font-medium cursor-pointer"
             >
               {t("auth.privacyPolicy")}
-            </Link>
+            </button>
             .
           </div>
         </div>
@@ -212,6 +216,7 @@ function LoginContent() {
           <p className="text-sm text-nordic/60 dark:text-gray-400">
             {t("auth.noAccount")}{" "}
             <button
+              type="button"
               onClick={() => handleGoogleSignIn()}
               className="text-primary dark:text-accent font-semibold hover:underline cursor-pointer"
             >
@@ -223,27 +228,32 @@ function LoginContent() {
         {/* Footer Links */}
         <div className="mt-8 text-center">
           <nav className="flex justify-center gap-6 text-xs text-nordic/50 dark:text-gray-500">
-            <Link
-              className="hover:text-nordic dark:hover:text-gray-300 transition-colors"
-              href="#"
+            <button
+              type="button"
+              onClick={() => setLegalTopic("privacy")}
+              className="hover:text-nordic dark:hover:text-gray-300 transition-colors cursor-pointer"
             >
               {t("auth.privacyPolicy")}
-            </Link>
-            <Link
-              className="hover:text-nordic dark:hover:text-gray-300 transition-colors"
-              href="#"
+            </button>
+            <button
+              type="button"
+              onClick={() => setLegalTopic("terms")}
+              className="hover:text-nordic dark:hover:text-gray-300 transition-colors cursor-pointer"
             >
               {t("auth.termsOfService")}
-            </Link>
-            <Link
-              className="hover:text-nordic dark:hover:text-gray-300 transition-colors"
-              href="#"
+            </button>
+            <button
+              type="button"
+              onClick={() => setLegalTopic("help")}
+              className="hover:text-nordic dark:hover:text-gray-300 transition-colors cursor-pointer"
             >
               {t("auth.helpCenter")}
-            </Link>
+            </button>
           </nav>
         </div>
       </main>
+
+      <LegalInfoModal topic={legalTopic} onClose={() => setLegalTopic(null)} />
     </div>
   );
 }

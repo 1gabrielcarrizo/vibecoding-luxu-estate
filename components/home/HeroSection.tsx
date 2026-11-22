@@ -14,6 +14,7 @@ interface HeroSectionProps {
   onToggleFilters?: () => void;
   activeFilterCount?: number;
   isLoading?: boolean;
+  searchInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -25,6 +26,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onToggleFilters,
   activeFilterCount = 0,
   isLoading = false,
+  searchInputRef,
 }) => {
   const { t } = useTranslation();
 
@@ -63,6 +65,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             )}
           </div>
           <input
+            ref={searchInputRef}
+            id="hero-search-input"
             className="block w-full pl-10 sm:pl-12 pr-24 sm:pr-32 py-3.5 sm:py-4 rounded-xl border-none bg-white text-nordic-dark shadow-soft placeholder-nordic-muted/60 focus:ring-2 focus:ring-mosque focus:bg-white transition-all text-base sm:text-lg outline-none"
             placeholder={t("hero.searchPlaceholder")}
             type="text"
