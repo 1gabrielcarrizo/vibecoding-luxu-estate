@@ -8,6 +8,7 @@ import { Property } from "@/types/property";
 import { PropertyRow } from "@/types/database.types";
 import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { mapRowToProperty } from "@/lib/supabase/properties";
+import { supabase } from "@/lib/supabase/client";
 import { Navbar } from "@/components/common/Navbar";
 import { PropertyFooter } from "@/components/property/PropertyFooter";
 import { useAuth } from "@/lib/supabase/AuthContext";
@@ -294,10 +295,16 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
 
   const handleSaveProfileEdit = (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedName = editName.trim();
     updatePrefs({
-      customName: editName.trim(),
+      customName: trimmedName,
       location: editLocation.trim() || DEFAULT_PREFS.location,
     });
+    if (user && trimmedName) {
+      supabase.auth
+        .updateUser({ data: { full_name: trimmedName } })
+        .catch(() => {});
+    }
     setIsEditingProfile(false);
     setSavedNotice(true);
     setTimeout(() => setSavedNotice(false), 3000);

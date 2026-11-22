@@ -103,6 +103,8 @@ export type Database = {
         Row: {
           id: string;
           email: string | null;
+          full_name?: string | null;
+          avatar_url?: string | null;
           role: "admin" | "agent" | "user";
           created_at: string;
           updated_at: string;
@@ -110,6 +112,8 @@ export type Database = {
         Insert: {
           id: string;
           email?: string | null;
+          full_name?: string | null;
+          avatar_url?: string | null;
           role?: "admin" | "agent" | "user";
           created_at?: string;
           updated_at?: string;
@@ -117,6 +121,8 @@ export type Database = {
         Update: {
           id?: string;
           email?: string | null;
+          full_name?: string | null;
+          avatar_url?: string | null;
           role?: "admin" | "agent" | "user";
           created_at?: string;
           updated_at?: string;

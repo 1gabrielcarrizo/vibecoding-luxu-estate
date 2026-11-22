@@ -15,7 +15,7 @@ interface DirectoryUserItem {
   dbId?: string;
   name: string;
   email: string;
-  avatar: string;
+  avatar: string | null;
   role: "admin" | "broker" | "agent" | "user" | "suspended" | string;
   status: "Active" | "Away" | "Inactive";
   statusDot?: "green" | "yellow";
@@ -24,6 +24,24 @@ interface DirectoryUserItem {
   secondaryStatValue: string;
   isHighlighted?: boolean;
   isGrayscale?: boolean;
+}
+
+function getUserInitials(name: string, email: string): string {
+  const source = name.trim() || email.split("@")[0] || "U";
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  }
+  return source.slice(0, 2).toUpperCase();
+}
+
+function formatFallbackName(email: string, shortId: string): string {
+  const localPart = email.split("@")[0]?.replace(/[._-]+/g, " ").trim();
+  if (!localPart) return `User ${shortId}`;
+  return localPart
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }
 
 const TEMPLATE_USERS: DirectoryUserItem[] = [
@@ -167,6 +185,9 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   const [deletedUserIds, setDeletedUserIds] = useState<Set<string>>(
     () => new Set()
   );
+  const [brokenAvatarIds, setBrokenAvatarIds] = useState<Set<string>>(
+    () => new Set()
+  );
 
   // In-place client-side Realtime sync across admin sessions (zero page reload)
   const handleRealtimeUserRolesChange = useCallback(
@@ -183,11 +204,17 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       if (!row?.id) return;
 
       const roleVal = row.role || "user";
+      const cleanName = row.full_name?.trim() || undefined;
+      const cleanAvatar = row.avatar_url?.trim() || null;
+
       if (payload.eventType === "UPDATE") {
         setUserOverrides((prev) => ({
           ...prev,
           [row.id!]: {
             ...prev[row.id!],
+            ...(cleanName ? { name: cleanName } : {}),
+            ...(row.avatar_url !== undefined ? { avatar: cleanAvatar } : {}),
+            ...(row.email ? { email: row.email } : {}),
             role: roleVal,
             statusDot: roleVal === "admin" ? "yellow" : "green",
             propertiesCount: roleVal === "agent" ? 12 : "-",
@@ -198,18 +225,13 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       } else if (payload.eventType === "INSERT") {
         const email = row.email || "user@example.com";
         const shortId = row.id.slice(0, 4).toUpperCase();
-        const namePart = email.split("@")[0].replace(/[._-]/g, " ");
-        const capitalizedName = namePart
-          .split(" ")
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(" ");
 
         const newItem: DirectoryUserItem = {
           id: `USR-${shortId}`,
           dbId: row.id,
-          name: capitalizedName || `User ${shortId}`,
+          name: cleanName || formatFallbackName(email, shortId),
           email,
-          avatar: TEMPLATE_USERS[0].avatar,
+          avatar: cleanAvatar,
           role: roleVal,
           status: "Active",
           statusDot: roleVal === "admin" ? "yellow" : "green",
@@ -236,18 +258,15 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
     const mappedDbUsers: DirectoryUserItem[] = initialUsers.map((u, idx) => {
       const email = u.email || "user@example.com";
       const shortId = u.id.slice(0, 4).toUpperCase();
-      const name = email.split("@")[0].replace(/[._-]/g, " ");
-      const capitalizedName = name
-        .split(" ")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
+      const realFullName = u.full_name?.trim();
+      const realAvatar = u.avatar_url?.trim() || null;
 
       return {
         id: `USR-${shortId}`,
         dbId: u.id,
-        name: capitalizedName || `User ${shortId}`,
+        name: realFullName || formatFallbackName(email, shortId),
         email,
-        avatar: TEMPLATE_USERS[idx % TEMPLATE_USERS.length].avatar,
+        avatar: realAvatar,
         role: u.role,
         status: "Active",
         statusDot: u.role === "admin" ? "yellow" : "green",
@@ -261,14 +280,14 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
     const baseList =
       mappedDbUsers.length > 0
         ? [
-            ...mappedDbUsers,
-            ...TEMPLATE_USERS.filter(
-              (tmpl) =>
-                !mappedDbUsers.some(
-                  (u) => u.email.toLowerCase() === tmpl.email.toLowerCase()
-                )
-            ),
-          ]
+          ...mappedDbUsers,
+          ...TEMPLATE_USERS.filter(
+            (tmpl) =>
+              !mappedDbUsers.some(
+                (u) => u.email.toLowerCase() === tmpl.email.toLowerCase()
+              )
+          ),
+        ]
         : TEMPLATE_USERS;
 
     const existingEmails = new Set(baseList.map((u) => u.email.toLowerCase()));
@@ -406,14 +425,12 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         }
 
         const newId = `USR-${Math.floor(1000 + Math.random() * 9000)}`;
-        const namePart = newEmail.split("@")[0];
         setAddedUsers((prev) => [
           {
             id: newId,
-            name: namePart.charAt(0).toUpperCase() + namePart.slice(1),
+            name: formatFallbackName(newEmail.trim(), newId),
             email: newEmail.trim(),
-            avatar:
-              "https://lh3.googleusercontent.com/aida-public/AB6AXuBhLuM9qNltZNxgIWPtC3dVxQ_JLFKXYB9d_klGFux_2JVOGtRlbV4GvpvdT4wqpsueZnXFQhKJe9MGGvM6rXQX15iv80mbEKxjmy4X14AZRqvp573ZlKYDN9bAb0ka7B-g5mkOCP6nRuKC9QsO02JVq6gqZeAo3-7dUurVhhgPJGeuL0Gk2Cp3Wnu5mVlUtpajB2wtx8uMoytbh78i9RmHYtJg52ZELl9XdIC9f5Kix_lFMFoi6Ru61ARrEGIrvgvz4ViiKhufTns",
+            avatar: null,
             role: newRole,
             status: "Active",
             statusDot: "green",
@@ -440,11 +457,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-dropdown border text-sm font-medium animate-in fade-in slide-in-from-bottom-3 duration-200 ${
-            toast.type === "success"
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-dropdown border text-sm font-medium animate-in fade-in slide-in-from-bottom-3 duration-200 ${toast.type === "success"
               ? "bg-white text-emerald-800 border-emerald-200 dark:bg-[#152e2a] dark:text-emerald-300 dark:border-emerald-800"
               : "bg-white text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-200 dark:border-rose-800"
-          }`}
+            }`}
         >
           <span className="material-icons text-lg">
             {toast.type === "success" ? "check_circle" : "error"}
@@ -510,11 +526,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                     setActiveTab(tab);
                     setCurrentPage(1);
                   }}
-                  className={`pb-3 text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap ${
-                    isActive
+                  className={`pb-3 text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap ${isActive
                       ? "font-semibold text-primary border-b-2 border-primary"
                       : "font-medium text-nordic/60 hover:text-nordic"
-                  }`}
+                    }`}
                 >
                   {t(`admin.users.tabs.${tab}`)}
                 </button>
@@ -564,26 +579,41 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
             return (
               <div
                 key={user.id}
-                className={`user-card group relative rounded-xl p-4 sm:p-5 shadow-sm flex flex-col md:grid md:grid-cols-12 gap-3 sm:gap-4 items-stretch md:items-center ${
-                  isHighlighted
+                className={`user-card group relative rounded-xl p-4 sm:p-5 shadow-sm flex flex-col md:grid md:grid-cols-12 gap-3 sm:gap-4 items-stretch md:items-center ${isHighlighted
                     ? "bg-active-green dark:bg-primary/20 border border-transparent hover:shadow-soft"
                     : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:bg-active-green dark:hover:bg-primary/20"
-                } ${isMenuOpen ? "z-30" : "z-10"}`}
+                  } ${isMenuOpen ? "z-30" : "z-10"}`}
               >
                 {/* User Details */}
                 <div className="col-span-12 md:col-span-4 flex items-center w-full">
                   <div className="relative flex-shrink-0">
-                    <img
-                      alt={user.name}
-                      src={user.avatar}
-                      className={`h-12 w-12 rounded-full object-cover ${
-                        user.isGrayscale ? "grayscale" : ""
-                      } ${
-                        isHighlighted
-                          ? "border-2 border-white dark:border-primary"
-                          : ""
-                      }`}
-                    />
+                    {user.avatar && !brokenAvatarIds.has(user.id) ? (
+                      <img
+                        alt={user.name}
+                        src={user.avatar}
+                        referrerPolicy="no-referrer"
+                        onError={() =>
+                          setBrokenAvatarIds((prev) =>
+                            new Set(prev).add(user.id)
+                          )
+                        }
+                        className={`h-12 w-12 rounded-full object-cover ${user.isGrayscale ? "grayscale" : ""
+                          } ${isHighlighted
+                            ? "border-2 border-white dark:border-primary"
+                            : ""
+                          }`}
+                      />
+                    ) : (
+                      <div
+                        aria-label={user.name}
+                        className={`h-12 w-12 rounded-full bg-mosque/15 text-mosque font-bold text-sm flex items-center justify-center border ${isHighlighted
+                            ? "border-white dark:border-primary"
+                            : "border-mosque/20"
+                          }`}
+                      >
+                        {getUserInitials(user.name, user.email)}
+                      </div>
+                    )}
                     {user.statusDot === "green" && (
                       <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 ring-2 ring-white" />
                     )}
@@ -593,31 +623,28 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                   </div>
                   <div className="ml-4 overflow-hidden">
                     <div
-                      className={`text-sm font-bold truncate ${
-                        user.status === "Inactive"
+                      className={`text-sm font-bold truncate ${user.status === "Inactive"
                           ? "text-nordic/60 dark:text-gray-400"
                           : "text-nordic dark:text-white"
-                      }`}
+                        }`}
                     >
                       {user.name}
                     </div>
                     <div
-                      className={`text-xs truncate ${
-                        user.status === "Inactive"
+                      className={`text-xs truncate ${user.status === "Inactive"
                           ? "text-nordic/40 dark:text-gray-500"
                           : isHighlighted
                             ? "text-nordic/70 dark:text-gray-300"
                             : "text-nordic/60 dark:text-gray-400"
-                      }`}
+                        }`}
                     >
                       {user.email}
                     </div>
                     <div
-                      className={`mt-1 text-[10px] px-2 py-0.5 inline-block rounded text-nordic/60 ${
-                        isHighlighted
+                      className={`mt-1 text-[10px] px-2 py-0.5 inline-block rounded text-nordic/60 ${isHighlighted
                           ? "bg-white/50"
                           : "bg-gray-50 dark:bg-white/10 group-hover:bg-white/50 transition-colors"
-                      }`}
+                        }`}
                     >
                       ID: #{user.id}
                     </div>
@@ -646,11 +673,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
 
                   {/* Status Indicator */}
                   <div
-                    className={`flex items-center text-xs ${
-                      user.status === "Inactive"
+                    className={`flex items-center text-xs ${user.status === "Inactive"
                         ? "text-nordic/40 dark:text-gray-500"
                         : "text-nordic/60 dark:text-gray-400"
-                    }`}
+                      }`}
                   >
                     {user.status === "Active" ? (
                       <>
@@ -681,36 +707,32 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                 <div className="col-span-12 md:col-span-3 w-full grid grid-cols-2 gap-4">
                   <div>
                     <div
-                      className={`text-[10px] uppercase tracking-wider ${
-                        isHighlighted ? "text-nordic/50" : "text-nordic/40"
-                      }`}
+                      className={`text-[10px] uppercase tracking-wider ${isHighlighted ? "text-nordic/50" : "text-nordic/40"
+                        }`}
                     >
                       {t("admin.users.stats.properties")}
                     </div>
                     <div
-                      className={`text-sm font-semibold ${
-                        user.status === "Inactive"
+                      className={`text-sm font-semibold ${user.status === "Inactive"
                           ? "text-nordic/60 dark:text-gray-400"
                           : "text-nordic dark:text-white"
-                      }`}
+                        }`}
                     >
                       {user.propertiesCount}
                     </div>
                   </div>
                   <div>
                     <div
-                      className={`text-[10px] uppercase tracking-wider ${
-                        isHighlighted ? "text-nordic/50" : "text-nordic/40"
-                      }`}
+                      className={`text-[10px] uppercase tracking-wider ${isHighlighted ? "text-nordic/50" : "text-nordic/40"
+                        }`}
                     >
                       {t(`admin.users.stats.${user.secondaryStatKey}`)}
                     </div>
                     <div
-                      className={`text-sm font-semibold ${
-                        user.status === "Inactive"
+                      className={`text-sm font-semibold ${user.status === "Inactive"
                           ? "text-nordic/60 dark:text-gray-400"
                           : "text-nordic dark:text-white"
-                      }`}
+                        }`}
                     >
                       {secondaryValue}
                     </div>
@@ -727,13 +749,12 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                     onClick={() =>
                       setOpenDropdownId(isMenuOpen ? null : user.id)
                     }
-                    className={`inline-flex items-center px-4 py-2 text-xs font-medium rounded-lg focus:outline-none transition-colors w-full md:w-auto justify-center cursor-pointer ${
-                      isMenuOpen
+                    className={`inline-flex items-center px-4 py-2 text-xs font-medium rounded-lg focus:outline-none transition-colors w-full md:w-auto justify-center cursor-pointer ${isMenuOpen
                         ? "bg-primary text-white shadow-md hover:bg-primary-dark"
                         : isHighlighted
                           ? "border border-nordic/10 bg-white dark:bg-gray-800 shadow-sm text-nordic hover:bg-nordic hover:text-white"
                           : "border border-gray-200 dark:border-gray-600 bg-transparent text-nordic/70 dark:text-gray-300 hover:border-nordic hover:text-nordic dark:hover:text-white group-hover:bg-white group-hover:shadow-sm"
-                    }`}
+                      }`}
                   >
                     {t("admin.users.changeRole")}
                     <span className="material-icons text-[16px] ml-2">
@@ -751,11 +772,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRoleChange(user, "admin")}
-                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${
-                            user.role === "admin"
+                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "admin"
                               ? "bg-white/20 text-white font-medium"
                               : "text-white/70 hover:bg-white/10 hover:text-white"
-                          }`}
+                            }`}
                           role="menuitem"
                         >
                           <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
@@ -767,11 +787,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRoleChange(user, "broker")}
-                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${
-                            user.role === "broker"
+                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "broker"
                               ? "bg-white/20 text-white font-medium"
                               : "text-white/70 hover:bg-white/10 hover:text-white"
-                          }`}
+                            }`}
                           role="menuitem"
                         >
                           <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
@@ -783,11 +802,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRoleChange(user, "agent")}
-                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${
-                            user.role === "agent"
+                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "agent"
                               ? "bg-white/20 text-white font-medium"
                               : "text-white/70 hover:bg-white/10 hover:text-white"
-                          }`}
+                            }`}
                           role="menuitem"
                         >
                           <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
@@ -799,11 +817,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRoleChange(user, "user")}
-                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${
-                            user.role === "user"
+                          className={`group flex items-center w-full px-4 py-3 text-xs text-left transition-colors cursor-pointer ${user.role === "user"
                               ? "bg-white/20 text-white font-medium"
                               : "text-white/70 hover:bg-white/10 hover:text-white"
-                          }`}
+                            }`}
                           role="menuitem"
                         >
                           <span className="material-icons text-sm mr-3 text-white/50 group-hover:text-white">
@@ -880,11 +897,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                       type="button"
                       onClick={() => setCurrentPage(pNum)}
                       aria-current={isCurrent ? "page" : undefined}
-                      className={`relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md mx-1 transition-colors cursor-pointer ${
-                        isCurrent
+                      className={`relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md mx-1 transition-colors cursor-pointer ${isCurrent
                           ? "z-10 bg-primary text-white shadow-sm"
                           : "bg-transparent text-nordic/70 hover:bg-white hover:text-primary"
-                      }`}
+                        }`}
                     >
                       {pNum}
                     </button>

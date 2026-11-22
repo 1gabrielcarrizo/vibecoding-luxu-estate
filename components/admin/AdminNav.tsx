@@ -72,9 +72,6 @@ export const AdminNav: React.FC<AdminNavProps> = ({
   const isProperties =
     pathname.startsWith("/admin/properties") || pathname === "/admin";
 
-  const defaultAvatar =
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuDOGZK5Jq_Tqk2BeXWfDxdvC2hZTk8NkXNHZOtopr3wzo5wRJePwR6Et_adclI555nmrESUtcgsw4X_Ma93qr0_RpbhJZUwJoP9VlTB7WwH1rht3HXqwi_zi2VLEQKYYZaBo4jhEYrPpHFoX77JHQvI8E2FYvsCWf_zJATSQfBVzGa4e3uMQrTLGzBJZI0D3dpIcWbedg_0ArvWQZGCyPR8Xq5oTrWnb7D7Ge2geZrlnGgv7Fy_lu3486yJYbQ7Z2nt6HyEeUrDwrk";
-
   return (
     <nav className="sticky top-0 z-50 bg-card-white dark:bg-[#152e2a] border-b border-nordic/5 dark:border-primary/20 backdrop-blur-md bg-opacity-95 px-4 sm:px-6 lg:px-8 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between h-16">
@@ -160,12 +157,19 @@ export const AdminNav: React.FC<AdminNavProps> = ({
                   {t("admin.nav.premiumAdmin")}
                 </span>
               </div>
-              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-nordic/10 overflow-hidden ring-2 ring-white dark:ring-primary/20 border border-nordic/10 transition-transform group-hover:scale-105">
-                <img
-                  alt={name || t("admin.nav.premiumAdmin")}
-                  className="h-full w-full object-cover"
-                  src={avatar || defaultAvatar}
-                />
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-mosque/15 overflow-hidden ring-2 ring-white dark:ring-primary/20 border border-mosque/20 transition-transform group-hover:scale-105 flex items-center justify-center">
+                {avatar ? (
+                  <img
+                    alt={name || t("admin.nav.premiumAdmin")}
+                    className="h-full w-full object-cover"
+                    src={avatar}
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className="text-xs sm:text-sm font-bold text-mosque">
+                    {(name || "A").charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
             </button>
 

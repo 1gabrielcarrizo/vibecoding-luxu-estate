@@ -187,6 +187,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         alt={displayName || "User profile"}
                         className="w-full h-full object-cover"
                         src={avatarUrl}
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
                       <span className="text-xs sm:text-sm text-mosque font-bold">
@@ -206,6 +207,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                             alt={displayName || "User"}
                             className="w-full h-full object-cover"
                             src={avatarUrl}
+                            referrerPolicy="no-referrer"
                           />
                         ) : (
                           <span className="text-base font-bold text-mosque">
@@ -361,6 +363,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         alt={displayName || "User"}
                         className="w-full h-full object-cover"
                         src={avatarUrl}
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
                       <span className="text-sm font-bold text-mosque">
